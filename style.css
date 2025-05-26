@@ -27,9 +27,6 @@ body.dark {
   --clr-accent-rgb: 255, 127, 127; 
   --opacity-card: 1;
 }
-* {
-  scrollbar-color: none;
-}
 /* ==========   RESET + BASE   ========== */
 * {
   margin: 0;
@@ -580,7 +577,6 @@ body.dark .series-chapter-item:hover {
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch; 
 }
 .carousel-track::-webkit-scrollbar {
   display: none;
@@ -620,6 +616,10 @@ body.dark .series-chapter-item:hover {
 }
 .carousel-track.active {
   cursor: grabbing;
+}
+.carousel-track .chapter-card {
+  flex: 0 0 calc((100% - 3rem) / 4);
+  scroll-snap-align: start;
 }
 
 /* ========== PAGE DE PRÉSENTATION ========== */
