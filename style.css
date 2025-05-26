@@ -1,0 +1,1117 @@
+/* ==========   VARIABLES LIGHT / DARK   ========== */
+:root {
+  /* light */
+  --clr-bg: #f7f8fc;
+  --clr-bg-card: #ffffff;
+  --clr-text: #222831;
+  --clr-text-sub: #69707d;
+  --clr-primary: #0095AD;
+  --clr-primary-rgb: 0, 149, 173;
+  --clr-accent: #ff6b6b;
+  --clr-accent-rgb: 255, 107, 107; 
+  --opacity-card: 0.85;
+
+  /* Global Aspect Ratios & Sizes */
+  --series-cover-aspect-ratio: calc(4063 / 2717); /* Hauteur / Largeur (~1.495) */
+  --series-fixed-cover-width-desktop: 180px; /* Largeur fixe de la couverture pour desktop dans series-card */
+  --series-fixed-cover-width-mobile: 140px; /* Largeur fixe de la couverture pour mobile dans series-card */
+}
+body.dark {
+  --clr-bg: #15171a;
+  --clr-bg-card: #1e2024;
+  --clr-text: #eceff4;
+  --clr-text-sub: #cad0da;
+  --clr-primary: #1ab6b9;
+  --clr-primary-rgb: 26, 182, 185; 
+  --clr-accent: #ff7f7f;
+  --clr-accent-rgb: 255, 127, 127; 
+  --opacity-card: 1;
+}
+
+/* ==========   RESET + BASE   ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+}
+body {
+  font-family: "Urbanist", system-ui, sans-serif;
+  background: var(--clr-bg);
+  color: var(--clr-text);
+  overflow-x: hidden; 
+  line-height: 1.55;
+}
+img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ==========   HEADER   ========== */
+header {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.55);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 500;
+}
+body.dark header {
+  background: rgba(21, 23, 26, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.header-container {
+  padding: 1rem 5%;
+  display: flex;
+  align-items: center;
+}
+
+.header-left-group {
+    display: flex;
+    align-items: center;
+    gap: 5rem; 
+}
+
+/* ==========   SOCIAL ICONS + THEME TOGGLE   ========== */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto; 
+}
+.social-icons {
+  display: flex;
+  gap: 1rem;
+}
+.social-icons a {
+  color: var(--clr-text);
+  font-size: 1.25rem;
+  transition: color 0.3s ease;
+}
+.social-icons a:hover {
+  color: var(--clr-primary);
+}
+.theme-toggle {
+  background: none;
+  border: 2px solid var(--clr-primary);
+  color: var(--clr-primary);
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+.theme-toggle:hover {
+  background: var(--clr-primary);
+  color: #fff;
+}
+
+.site-title-link {
+  text-decoration: none;
+  color: var(--clr-text);
+  font-weight: 700;
+  font-size: 2.2rem;
+  position: relative;
+  transition: color 0.3s ease;
+  line-height: 1;
+}
+.site-title-link:hover {
+  color: var(--clr-primary);
+}
+.site-title-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 0;
+  height: 2px;
+  background: var(--clr-primary);
+  transition: width 0.3s ease;
+}
+.site-title-link:hover::after {
+  width: 100%;
+}
+
+/* ==========   NAVIGATION   ========== */
+nav ul {
+  display: flex;
+  flex-direction: row; 
+  gap: 2rem;
+  list-style: none;
+}
+nav a {
+  text-decoration: none;
+  color: var(--clr-text);
+  font-weight: 600;
+  position: relative;
+  transition: color 0.3s ease;
+}
+nav a:hover {
+  color: var(--clr-primary);
+}
+nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 0;
+  height: 2px;
+  background: var(--clr-primary);
+  transition: width 0.3s ease;
+}
+nav a:hover::after {
+  width: 100%;
+}
+nav a i {
+  margin-right: 0.5rem; 
+}
+
+/* ==========   MAIN   ========== */
+main {
+  padding: 3rem 5%;
+}
+section {
+  margin-bottom: 4rem;
+}
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  display: inline-block;
+  position: relative;
+  color: var(--clr-text);
+}
+.section-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -8px;
+  width: 80px;
+  height: 4px;
+  background: var(--clr-primary);
+}
+
+/* ==========   LAST CHAPTERS (Carousel)   ========== */
+.latest-chapters {
+  /* Ces propriétés sont gérées par .carousel-track qui est le même élément et utilise flex */
+}
+.chapter-card {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--clr-bg-card);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.07);
+  transition: transform 0.4s cubic-bezier(0.2, 0.6, 0.2, 1), box-shadow 0.4s;
+  
+  aspect-ratio: 2717 / 4063; 
+  width: 300px; 
+  flex-shrink: 0; 
+}
+.chapter-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+.chapter-cover {
+  height: 100%; 
+  overflow: hidden;
+}
+.chapter-cover img {
+  height: 100%; 
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.chapter-card:hover .chapter-cover img {
+  transform: scale(1.07);
+}
+.chapter-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  padding: 1rem;
+  color: #fff;
+  transition: background 0.35s ease;
+}
+.chapter-time {
+  position: absolute;
+  bottom: 1.1rem;
+  right: 1rem;
+  font-size: 0.85rem;
+  color: #ddd;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.chapter-time i {
+  font-size: 1rem;
+}
+.manga-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+.chapter-number {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--clr-accent);
+}
+.chapter-title {
+  font-size: 0.85rem;
+  color: #ddd;
+  margin-bottom: 0.2rem;
+}
+
+/* NEW badge */
+.new-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px; 
+  background: rgba(var(--clr-accent-rgb), 0.7); 
+  backdrop-filter: blur(4px); 
+  -webkit-backdrop-filter: blur(4px); 
+  color: #fff;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 999px;
+  /* animation supprimée */
+}
+
+/* ==========   SÉRIES (et One-shot)   ========== */
+.series-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(550px, 1fr));
+  gap: 2rem;
+}
+.series-card {
+  display: flex;
+  align-items: stretch; 
+  gap: 0.5rem;
+  background: var(--clr-bg-card);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.07);
+  cursor: pointer;
+  transition: transform 0.35s cubic-bezier(0.2, 0.6, 0.2, 1), box-shadow 0.35s;
+}
+.series-card:hover {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.1);
+}
+.series-cover {
+  flex: 0 0 var(--series-fixed-cover-width-desktop); 
+  width: var(--series-fixed-cover-width-desktop); 
+  height: auto; 
+  position: relative;
+  overflow: hidden;
+}
+.series-cover img {
+  width: 100%;
+  height: 100%; 
+  object-fit: cover; 
+  transition: transform 0.35s ease;
+}
+.series-card:hover .series-cover img {
+  transform: scale(1.07);
+}
+.series-info {
+  flex: 1; 
+  padding: 1.2rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  height: auto; 
+}
+.series-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+  color: var(--clr-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: unset; 
+  -webkit-box-orient: vertical;
+  white-space: normal; 
+}
+.meta { /* Auteur / Dessinateur */
+  font-size: 0.9rem;
+  color: var(--clr-text-sub);
+  margin-bottom: 0.25rem; 
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0; 
+  margin-bottom: 0.6rem; 
+}
+.tag {
+  background: rgba(var(--clr-primary-rgb), 0.15);
+  color: var(--clr-primary);
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Description styles */
+.series-description {
+  font-size: 0.9rem;
+  color: var(--clr-text-sub);
+  margin-top: 0; 
+  margin-bottom: 0.5rem; 
+  max-height: 4.65em; 
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3; 
+  -webkit-box-orient: vertical;
+  flex-grow: 1; 
+}
+
+/* Container for latest chapters (at the bottom of .series-info) */
+.series-latest-chapters-container {
+  padding-top: 0.3rem; 
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem; 
+  color: var(--clr-text);
+}
+body.dark .series-latest-chapters-container {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Individual chapter item */
+.series-chapter-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0.2rem 0; 
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+.series-chapter-item:hover {
+  background: rgba(var(--clr-primary-rgb), 0.1);
+}
+body.dark .series-chapter-item:hover {
+  background: rgba(var(--clr-primary-rgb), 0.1);
+}
+
+/* Specific styles for elements within chapter item */
+.chapter-number-small {
+  font-weight: 600;
+  color: var(--clr-primary);
+  flex-shrink: 0;
+}
+.chapter-title-small {
+  flex-grow: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0 0.5rem;
+  color: var(--clr-text);
+}
+.chapter-date-small {
+  color: var(--clr-text-sub);
+  font-size: 0.75rem;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+/* ==========   ANIMATIONS ENTREES   ========== */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.section-title,
+.chapter-card,
+.series-card {
+  opacity: 0;
+  animation: fade-up 0.6s ease forwards;
+}
+
+/* Responsive tweaks */
+@media (max-width: 1400px) {
+  /* Pas de changement spécifique pour le carousel */
+}
+@media (max-width: 1024px) {
+  .series-grid {
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); 
+  }
+}
+@media (max-width: 768px) {
+  nav ul {
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Réorganisation du header sur mobile */
+  .header-container {
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 1rem; 
+  }
+
+  .header-left-group {
+    width: 100%; 
+    justify-content: center; 
+    flex-wrap: wrap; 
+  }
+  
+  .header-actions {
+    margin-left: unset; 
+    width: 100%; 
+    justify-content: center; 
+  }
+
+  .section-title {
+    font-size: 1.7rem;
+  }
+  .series-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); 
+  }
+
+  /* Responsive adjustments for series card (stacked vertically) */
+  .series-card {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .series-cover {
+    flex: none;
+    width: var(--series-fixed-cover-width-mobile);
+    height: calc(var(--series-fixed-cover-width-mobile) * var(--series-cover-aspect-ratio)); 
+    margin-bottom: 0.5rem;
+  }
+  .series-info {
+    padding: 1rem;
+    height: auto; 
+    align-items: flex-start;
+    text-align: left;
+  }
+  .series-title, .meta, .series-description, .tags {
+    text-align: left;
+    width: 100%;
+  }
+  .tags {
+    justify-content: flex-start;
+  }
+  .series-latest-chapters-container {
+    align-items: flex-start;
+    text-align: left;
+  }
+  .series-chapter-item {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    width: 100%;
+    text-align: left;
+  }
+  .chapter-number-small, .chapter-title-small, .chapter-date-small {
+    width: auto;
+    text-align: left;
+    margin: 0;
+  }
+}
+@media (max-width: 500px) { 
+  .carousel-track .chapter-card {
+    width: 100%; 
+  }
+}
+
+/* ========== TRUNCATE TEXT ========== */
+.manga-title,
+.chapter-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chapter-number-stylish {
+  display: inline-block;
+  margin-top: 0.4rem;
+  padding: 0.2rem 0.6rem;
+  background: #373737;
+  color: #fff;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+.chapter-number-stylish:hover {
+  background: #242424;
+}
+
+/* ========== CAROUSEL LATEST CHAPTERS ========== */
+.carousel-container {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+.carousel-track {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; 
+}
+.carousel-track::-webkit-scrollbar {
+  display: none;
+}
+.carousel-prev,
+.carousel-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+  z-index: 10;
+}
+.carousel-prev:hover,
+.carousel-next:hover {
+  background: rgba(0, 0, 0, 0.7);
+  transform: translateY(-50%) scale(1.1);
+}
+.carousel-prev {
+  left: 0.75rem; 
+}
+.carousel-next {
+  right: 0.75rem; 
+}
+.carousel-track {
+  cursor: grab;
+}
+.carousel-track.active {
+  cursor: grabbing;
+}
+
+/* ========== PAGE DE PRÉSENTATION ========== */
+.presentation-section {
+    padding: 3rem 5%; 
+}
+
+.profile-pic {
+    width: 100px; 
+    height: 100px; 
+    border-radius: 50%; 
+    object-fit: cover; 
+    float: left; 
+    margin-right: 2rem; 
+    margin-bottom: 0.5rem; 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+    border: 3px solid var(--clr-primary); 
+}
+
+.presentation-content {
+    margin: 0; 
+    padding: 2rem;
+    background: var(--clr-bg-card); 
+    border-radius: 14px; 
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.07); 
+    color: var(--clr-text);
+    line-height: 1.8; 
+    text-align: left; 
+    overflow: hidden; 
+}
+
+.presentation-content p {
+    margin-bottom: 1rem; 
+    font-size: 1.1rem;
+    color: var(--clr-text-sub); 
+}
+
+.presentation-content p:last-child {
+    margin-bottom: 0; 
+}
+
+/* Ajustements responsives pour la page de présentation */
+@media (max-width: 768px) {
+    .presentation-content {
+        padding: 1.5rem;
+        margin: 0 auto; 
+    }
+    .presentation-content p {
+        font-size: 1rem;
+    }
+    .profile-pic {
+        float: none; 
+        display: block; 
+        margin: 0 auto 1rem auto; 
+    }
+}
+
+/* ========================= SERIES DETAIL PAGE ========================= */
+
+.series-detail-page {
+    padding: 2rem 5%; 
+    text-align: left; 
+}
+
+/* Nouveau conteneur pour le titre et le bouton de tri */
+.chapters-main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem; 
+    margin-top: 3rem; 
+}
+
+.chapters-main-header .section-title {
+    margin-left: 0; 
+    margin-bottom: 0; 
+    display: block; 
+}
+.chapters-main-header .section-title::after {
+    left: 0; 
+}
+
+.series-detail-container {
+    background: var(--clr-bg-card);
+    border-radius: 14px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.07);
+    padding: 2rem;
+}
+
+.detail-top-section { /* Nouveau conteneur pour image + infos */
+    display: flex;
+    gap: 1.5rem; 
+    margin-bottom: 1.5rem; 
+    align-items: flex-start; 
+    flex-wrap: nowrap;
+    flex-direction: row-reverse; /* Pour que l'image soit à gauche */
+}
+
+.detail-cover {
+    width: 200px; 
+    height: auto;
+    aspect-ratio: 2717 / 4063; 
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    flex-shrink: 0; 
+}
+
+.detail-info {
+    flex-grow: 1; 
+}
+
+.detail-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--clr-text);
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+}
+
+.detail-meta { /* Auteur / Dessinateur */
+    font-size: 1rem;
+    color: var(--clr-text-sub);
+    margin-top: 0.5rem; 
+    margin-bottom: 0.75rem; 
+}
+
+/* Style pour l'espacement entre "Auteur" et "Dessinateur" */
+.detail-artist-spacing {
+    margin-left: 2rem; 
+}
+
+/* Description passe en dessous de detail-top-section */
+p.detail-description { /* Cible spécifiquement le paragraphe de description */
+    font-size: 1rem;
+    color: var(--clr-text-sub);
+    line-height: 1.6;
+    margin-top: 0; 
+    margin-bottom: 1.5rem; 
+}
+
+
+.detail-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem; 
+}
+
+.detail-tag {
+    background: rgba(var(--clr-primary-rgb), 0.15);
+    color: var(--clr-primary);
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.detail-additional-metadata {
+    margin-top: 1.5rem; 
+    margin-bottom: 0; 
+    line-height: 1.6;
+    color: var(--clr-text-sub);
+    font-size: 0.95rem;
+}
+
+.detail-additional-metadata p {
+    margin-bottom: 0.4rem; 
+}
+
+.detail-additional-metadata p:last-child {
+    margin-bottom: 0;
+}
+
+/* Le bouton "Lire sur Cubari" a été retiré du JS, donc son style n'est plus pertinent ici */
+
+/* Styles pour les chapitres, maintenant dans l'accordéon */
+.detail-chapter-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.7rem 1rem;
+    /* Background et border gérés par .volume-chapters-list et ses enfants */
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+/* Nouveau style pour les chapitres licenciés (flou et non cliquable) */
+.licensed-chapter-item {
+    filter: blur(1.5px); /* Ajustez la valeur du flou si nécessaire */
+    pointer-events: none; /* Rendre le bloc non cliquable */
+    opacity: 0.7; /* Légèrement estompé pour indiquer qu'il est bloqué */
+}
+
+
+.detail-chapter-item:hover {
+    background: rgba(var(--clr-primary-rgb), 0.08); 
+    transform: translateX(5px);
+}
+body.dark .detail-chapter-item:hover {
+  background: rgba(var(--clr-primary-rgb), 0.08);
+}
+
+
+.detail-chapter-number {
+    font-weight: 600;
+    color: var(--clr-primary);
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.detail-chapter-title {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0 1rem;
+    color: var(--clr-text);
+}
+
+.detail-chapter-date {
+    color: var(--clr-text-sub);
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    white-space: nowrap;
+    text-align: right;
+}
+
+/* NOUVEAU: Style pour le texte de collaborateur */
+.detail-chapter-collab {
+    font-size: 0.8rem; /* Plus petit, similaire à la date */
+    color: var(--clr-text-sub); /* Couleur plus subtile */
+    margin-right: 0.5rem; /* Espace entre le collab et la date */
+    white-space: nowrap; /* Maintient sur une ligne */
+    flex-shrink: 0; /* Empêche le rétrécissement */
+}
+
+
+/* NOUVEAUX STYLES POUR LE TRI ET L'ACCORDÉON DE VOLUME */
+
+.chapter-sort-filter {
+    /* Styles gérés par .chapters-main-header */
+}
+
+.sort-button {
+    background: var(--clr-primary);
+    color: #fff;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: background 0.3s ease, transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sort-button:hover {
+    background: rgba(var(--clr-primary-rgb), 0.9);
+    transform: translateY(-2px);
+}
+/* Flèche: transition sur 'transform' sur l'icône directement */
+.sort-button i {
+    transition: transform 0.2s ease;
+}
+
+
+.chapters-accordion-container {
+    border: 1px solid rgba(0, 0, 0, 0.05); 
+    border-radius: 10px;
+    overflow: hidden; 
+}
+body.dark .chapters-accordion-container {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.volume-group {
+    /* Chaque groupe volume/chapitres */
+}
+
+.volume-header {
+    background: var(--clr-bg); 
+    padding: 0.8rem 1.2rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between; /* Pour étaler le titre et la flèche */
+    align-items: center;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--clr-text);
+    transition: background 0.2s ease;
+}
+.volume-group:last-child .volume-header { 
+    border-bottom: none;
+}
+body.dark .volume-header {
+    background: #191b1e;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.volume-header:hover {
+    background: rgba(var(--clr-primary-rgb), 0.05);
+}
+body.dark .volume-header:hover {
+    background: rgba(var(--clr-primary-rgb), 0.05);
+}
+
+.volume-header h4 { /* Pour le titre principal du volume (ex: Volume 16) */
+    margin: 0; /* Supprime la marge par défaut des titres */
+    flex-shrink: 0; /* Ne se réduit pas */
+    /* margin-right est géré par la flexibilité du .volume-license-details */
+}
+.volume-title-main {
+    /* Styles spécifiques si nécessaire, mais h4 suffit souvent */
+}
+
+.volume-license-details {
+    display: flex; /* Utilise flexbox pour aligner le texte et la date */
+    align-items: center;
+    flex-grow: 1; /* Prend l'espace restant pour pousser la flèche à droite */
+    font-size: 0.9em; /* Texte plus petit pour les détails */
+    color: var(--clr-text-sub);
+    gap: 0.5em; /* Espace entre les éléments à l'intérieur */
+    margin-left: 1em; /* Un peu d'espace entre le titre du volume et le début de cette info */
+    white-space: nowrap; /* Empêche le contenu de déborder */
+}
+
+.volume-license-text {
+    /* white-space: nowrap; */ /* Ne pas forcer ici, car il y a déjà un nowrap sur le parent */
+}
+
+.volume-license-link {
+    color: var(--clr-primary); /* Lien en couleur primaire */
+    text-decoration: none; /* Pas de soulignement par défaut */
+    white-space: nowrap; /* Empêche le lien de se couper */
+    font-weight: 600; /* Le lien "juste ici" est en gras */
+    /* margin: 0 0.2em; */ /* Supprimé car gap du parent gère l'espace */
+}
+.volume-license-link:hover {
+    text-decoration: underline; /* Souligne au survol */
+    color: rgba(var(--clr-primary-rgb), 0.8);
+}
+
+.volume-release-date {
+    margin-left: auto; /* Pousse la date tout à droite du volume-license-details */
+    white-space: nowrap; /* Empêche la date de se couper */
+}
+
+.volume-arrow {
+    transition: transform 0.3s ease; /* Animation de la flèche */
+    font-size: 0.9em;
+    flex-shrink: 0; /* Empêche la flèche de se réduire */
+    margin-left: 1rem; /* Marge fixe à gauche de la flèche */
+}
+/* La flèche est fa-chevron-down par défaut, et 'rotated' en JS si ouvert (donc up) */
+.volume-arrow.rotated {
+    transform: rotate(180deg); /* Fait pointer la flèche vers le haut */
+}
+
+
+.volume-chapters-list {
+    background: var(--clr-bg-card); 
+    max-height: 0; /* Initialement fermé, JS override pour ouvrir */
+    overflow: hidden;
+    transition: max-height 0.4s ease-out; /* Animation de déploiement */
+    padding: 0 1rem; 
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.volume-chapters-list .detail-chapter-item {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03); 
+    background: transparent; 
+    padding: 0.7rem 0; 
+}
+.volume-chapters-list .detail-chapter-item:last-child {
+    border-bottom: none; 
+    padding-bottom: 1rem; 
+}
+.volume-chapters-list .detail-chapter-item:first-child {
+    padding-top: 1rem; 
+}
+
+/* Responsive pour la page de détail */
+@media (max-width: 768px) {
+    .detail-top-section {
+        flex-direction: column-reverse; 
+        align-items: center;
+        text-align: center;
+        gap: 1.5rem;
+    }
+    .detail-cover {
+        width: 180px; 
+        margin-bottom: 0.5rem;
+    }
+    .detail-title {
+        font-size: 2rem;
+    }
+    .detail-tags {
+        justify-content: center; 
+    }
+    .detail-additional-metadata {
+        text-align: center; 
+    }
+    .detail-additional-metadata p {
+        text-align: center;
+    }
+    
+    /* Réglages pour l'en-tête des chapitres sur mobile */
+    .chapters-main-header {
+        flex-direction: column; 
+        align-items: center;
+        gap: 1rem; 
+        margin-top: 2rem; 
+        margin-bottom: 1rem; 
+    }
+    .chapters-main-header .section-title {
+        text-align: center; 
+    }
+    .chapters-main-header .section-title::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    .sort-button {
+        width: 100%; 
+    }
+
+    /* Styles pour l'en-tête de volume sur mobile */
+    .volume-header {
+        flex-direction: column; /* Empile titre principal et détails de licence */
+        align-items: flex-start; /* Aligne le contenu à gauche dans le header */
+        gap: 0.5rem; /* Espace entre les lignes */
+        padding: 0.8rem; /* Ajuste le padding */
+    }
+    .volume-header h4 {
+        margin-right: 0; /* Annule la marge pour l'empilement */
+    }
+    .volume-header .volume-arrow {
+        position: absolute; /* Positionne la flèche de manière absolue */
+        top: 50%;
+        right: 1rem;
+        transform: translateY(-50%);
+    }
+    .volume-arrow.rotated { /* Assure que la flèche tournée est bien positionnée */
+        transform: translateY(-50%) rotate(180deg);
+    }
+    .volume-title-main {
+        width: 100%; /* Le titre prend toute la largeur */
+        text-align: left; /* Aligne le titre à gauche */
+    }
+    .volume-license-details {
+        flex-direction: column; /* Empile les éléments de licence */
+        align-items: flex-start;
+        text-align: left;
+        width: 100%; /* Prend toute la largeur */
+        margin-left: 0; /* Annule la marge si flex-wrap */
+        gap: 0.2rem; /* Réduit le gap sur mobile */
+    }
+    .volume-license-details > * { /* S'assure que chaque élément de licence est aligné à gauche */
+        text-align: left; 
+        width: 100%;
+    }
+    .volume-release-date { /* La date s'aligne à gauche comme le reste sur mobile */
+        margin-left: 0;
+    }
+
+
+    .detail-chapter-item {
+        flex-wrap: wrap; 
+        justify-content: center;
+        text-align: center;
+        padding: 0.5rem 0.8rem;
+    }
+    .detail-chapter-number, .detail-chapter-title, .detail-chapter-date {
+        margin: 0;
+        width: 100%; 
+    }
+    .detail-chapter-title {
+        font-size: 0.95rem;
+        margin-top: 0.2rem;
+        margin-bottom: 0.2rem;
+    }
+    .detail-chapter-date {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 500px) { 
+    .series-detail-page {
+        padding: 1rem 5%;
+    }
+    .series-detail-container {
+        padding: 1.5rem;
+    }
+}

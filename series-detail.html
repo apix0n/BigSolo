@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta property="og:title" content="BigSolo – Détails Série" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/img/banniere.webp" />
+    <meta property="og:url" content="https://bigsolo.fr/series-detail.html" />
+    <meta
+      property="og:description"
+      content="Découvrez les détails de votre série préférée sur BigSolo !"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BigSolo – Détails Série</title>
+
+    <!-- Urbanist -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="img/icon.png" />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      integrity="sha512-…"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="header-container">
+        <div class="header-left-group">
+            <div class="logo">
+                <a href="index.html" class="site-title-link">BigSolo</a> 
+            </div>
+            <nav>
+              <ul>
+                <li>
+                  <a href="index.html"><i class="fas fa-home"></i> Accueil</a> 
+                </li>
+                <li>
+                  <a href="index.html#on-going-section"
+                    ><i class="fa-solid fa-book-open"></i> Séries</a
+                  >
+                </li>
+                <li>
+                  <a href="index.html#one-shot-section"
+                    ><i class="fa-solid fa-scroll"></i> One-shot</a
+                  >
+                </li>
+              </ul>
+            </nav>
+        </div>
+
+        <div class="header-actions">
+          <div class="social-icons">
+            <a
+              href="https://discord.com/invite/wGTmFarxNY"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Discord"
+            >
+              <i class="fab fa-discord"></i>
+            </a>
+            <a
+              href="https://x.com/BHerooooo"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="X"
+            >
+              <i class="fab fa-twitter"></i>
+            </a>
+          </div>
+          <button
+            id="theme-toggle"
+            class="theme-toggle"
+            aria-label="Changer de thème"
+          >
+            <i class="fas fa-moon"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- Le contenu de la série sera injecté ici par index.js -->
+      <section id="series-detail-section" class="series-detail-page">
+        <!-- Titre, cover, description, chapitres etc. seront injectés ici -->
+      </section>
+    </main>
+    <script src="index.js" type="module"></script>
+  </body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "ENV": "LOCAL_DEV",
+  "URL_GIT_CUBARI": "https://api.github.com/repos/Bigherooooo/Cubari/contents",
+  "URL_RAW_JSON_GITHUB": "raw/Bigherooooo/Cubari/refs/heads/main/",
+  "LOCAL_SERIES_FILES": [
+    "Kaoru_Hana_wa_Rin_to_Saku.json", "Wakaba-sanchi_no_Aoi_Koi.json", "Uturu.json", "Alice_no_Gomi_Yashiki.json", "Asayake_no_Iro.json", "Hoshi_Furu_Yoru_ni.json", "Usemono_Sagashi.json", "Bus_Romance.json", "Kurage_no_Uta.json", "Kiraboshi_no_Meryl.json", "Koyori_no_Kaerimichi.json", "Futari.json", "Toumei_to_Zanzou.json", "Takaki_Tsuyoshi_OS.json"
+  ]
+}

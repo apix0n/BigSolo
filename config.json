@@ -1,0 +1,5 @@
+{
+  "ENV": "PROD",
+  "URL_GIT_CUBARI": "https://api.github.com/repos/Bigherooooo/Cubari/contents",
+  "URL_RAW_JSON_GITHUB": "raw/Bigherooooo/Cubari/refs/heads/main/"
+}
