@@ -27,7 +27,9 @@ body.dark {
   --clr-accent-rgb: 255, 127, 127; 
   --opacity-card: 1;
 }
-
+* {
+  scrollbar-color: none;
+}
 /* ==========   RESET + BASE   ========== */
 * {
   margin: 0;
