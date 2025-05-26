@@ -617,11 +617,6 @@ body.dark .series-chapter-item:hover {
 .carousel-track.active {
   cursor: grabbing;
 }
-.carousel-track .chapter-card {
-  flex: 0 0 calc((100% - 3rem) / 4);
-  scroll-snap-align: start;
-}
-
 /* ========== PAGE DE PRÉSENTATION ========== */
 .presentation-section {
     padding: 3rem 5%; 
