@@ -1,3 +1,3 @@
-# ScanR-Site
+# BigSolo - Site
 
-Le site de ScanR
+Le site de BigHerooooo
