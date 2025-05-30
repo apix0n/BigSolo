@@ -1,179 +1,144 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta property="og:title" content="BigSolo" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="/img/banner.jpg" />
-    <meta property="og:url" content="https://bigsolo.fr" />
-    <meta
-      property="og:description"
-      content="Retrouvez toutes les sorties de Big_herooooo en un seul et unique endroit !"
-    />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BigSolo – Accueil</title>
 
-    <!-- Urbanist -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap"
-      rel="stylesheet"
-    />
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="img/icon.png" />
-    <!-- Font Awesome -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-      integrity="sha512-..."
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <header>
-      <div class="header-container">
-        <!-- Section pour le menu hamburger et le titre sur mobile, et nav desktop -->
-         <div class="header-left-group">
-            <button class="hamburger-menu-btn" aria-label="Ouvrir le menu">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="logo">
-                <!-- Modifié pour index.html: href="index.html" -->
-                <!-- Pour presentation.html et series-detail.html, laissez href="index.html" -->
-                <a href="presentation.html" class="site-title-link">BigSolo</a>
-            </div>
-            <!-- Navigation (Desktop Only) -->
-            <nav class="desktop-nav">
-              <ul>
-                <li>
-                  <a href="index.html"><i class="fas fa-home"></i> Accueil</a>
-                </li>
-                <li>
-                  <!-- Pour index.html et series-detail.html -->
-                  <a href="index.html#on-going-section"
-                    ><i class="fa-solid fa-solid fa-book"></i> Séries</a
-                  >
-                  <!-- Pour presentation.html (si vous voulez pointer vers index.html puis la section) -->
-                  <!-- <a href="index.html#on-going-section"><i class="fa-solid fa-book-open"></i> Séries</a> -->
-                </li>
-                <li>
-                  <!-- Pour index.html et series-detail.html -->
-                  <a href="index.html#one-shot-section"
-                    ><i class="fa-solid fa-scroll"></i> One-shot</a
-                  >
-                  <!-- Pour presentation.html (si vous voulez pointer vers index.html puis la section) -->
-                  <!-- <a href="index.html#one-shot-section"><i class="fa-solid fa-scroll"></i> One-shot</a> -->
-                </li>
-              </ul>
-            </nav>
-        </div>
+<head>
+  <script>
+    (function () {
+      try {
+        var theme = localStorage.getItem('mv-theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var htmlEl = document.documentElement;
+        if (theme === 'dark' || (!theme && prefersDark)) {
+          htmlEl.classList.add('dark');
+          htmlEl.style.backgroundColor = '#15171a'; // Applique directement la couleur de fond
+          htmlEl.style.color = '#eceff4';
+        } else {
+          htmlEl.classList.remove('dark');
+          htmlEl.style.backgroundColor = '#f7f8fc'; // Fond clair
+          htmlEl.style.color = '#222831';
+        }
+      } catch (e) { }
+    })();
+  </script>
+  <meta charset="UTF-8" />
+  <meta property="og:title" content="BigSolo" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="/img/banner.jpg" />
+  <meta property="og:url" content="https://bigsolo.fr" />
+  <meta property="og:description"
+    content="Retrouvez toutes les sorties de Big_herooooo en un seul et unique endroit !" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BigSolo – Accueil</title>
 
-        <div class="header-actions">
-          <div class="social-icons desktop-social-icons">
-            <a
-              href="https://discord.com/invite/wGTmFarxNY"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Discord"
-            >
-              <i class="fab fa-discord"></i>
-            </a>
-            <a
-              href="https://x.com/BHerooooo"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="X"
-            >
-              <i class="fab fa-twitter"></i>
-            </a>
-          </div>
-          <button
-            id="theme-toggle"
-            class="theme-toggle"
-            aria-label="Changer de thème"
-          >
-            <i class="fas fa-moon"></i>
-          </button>
-        </div>
-      </div>
-    </header>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet" />
+  <link rel="icon" type="image/png" href="img/icon.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="style.css" />
+</head>
 
-    <!-- MOBILE MENU -->
-    <div class="mobile-menu-overlay">
-      <div class="mobile-menu-content">
-        <button class="close-mobile-menu-btn" aria-label="Fermer le menu">
-          <i class="fas fa-times"></i>
+<body>
+  <header>
+    <div class="header-container">
+      <div class="header-left-group">
+        <button class="hamburger-menu-btn" aria-label="Ouvrir le menu">
+          <i class="fas fa-bars"></i>
         </button>
-        <h3>Menu</h3>
-        <ul class="mobile-nav-links">
-          <li><a href="index.html"><i class="fas fa-home"></i> Accueil</a></li>
-          <li><a href="index.html#on-going-section"><i class="fa-solid fa-book-open"></i> Séries</a></li>
-          <li><a href="index.html#one-shot-section"><i class="fa-solid fa-scroll"></i> One-shot</a></li>
-        </ul>
-        <h3>Réseaux</h3>
-        <ul class="mobile-social-links-menu"> <!-- Classe renommée pour clarté -->
-          <li>
-            <a
-              href="https://discord.com/invite/wGTmFarxNY"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Discord"
-            >
-              <i class="fab fa-discord"></i> Discord
-            </a>
-          </li>
-          <li>
-            <a
-              href="https://x.com/BHerooooo"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="X"
-            >
-              <i class="fab fa-twitter"></i> Twitter
-            </a>
-          </li>
-        </ul>
+        <div class="logo">
+          <a href="presentation.html" class="site-title-link">BigSolo</a>
+        </div>
+        <nav class="desktop-nav">
+          <ul>
+            <li>
+              <a href="index.html"><i class="fas fa-home"></i> Accueil</a>
+            </li>
+            <li>
+              <a href="index.html#on-going-section"><i class="fa-solid fa-solid fa-book"></i> Séries</a>
+            </li>
+            <li>
+              <a href="index.html#one-shot-section"><i class="fa-solid fa-scroll"></i> One-shot</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="header-actions">
+        <div class="social-icons desktop-social-icons">
+          <a href="https://discord.com/invite/wGTmFarxNY" target="_blank" rel="noopener noreferrer"
+            aria-label="Discord">
+            <i class="fab fa-discord"></i>
+          </a>
+          <a href="https://x.com/BHerooooo" target="_blank" rel="noopener noreferrer" aria-label="X">
+            <i class="fab fa-twitter"></i>
+          </a>
+        </div>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Changer de thème">
+          <i class="fas fa-moon"></i>
+        </button>
       </div>
     </div>
-    <!-- FIN MOBILE MENU -->
+  </header>
 
-    <main>
-      <!-- =========================   DERNIÈRES SORTIES   ========================= -->
-      <section>
-        <h2 class="section-title">Dernières sorties</h2>
-        <div class="carousel-container">
-          <button class="carousel-prev" aria-label="Chapitre précédent">
-            <i class="fas fa-chevron-left"></i>
-          </button>
-          <div class="carousel-track latest-chapters">
-            <!-- Les cartes y seront injectées par index.js -->
-          </div>
-          <button class="carousel-next" aria-label="Chapitre suivant">
-            <i class="fas fa-chevron-right"></i>
-          </button>
-        </div>
-      </section>
+  <div class="mobile-menu-overlay">
+    <div class="mobile-menu-content">
+      <button class="close-mobile-menu-btn" aria-label="Fermer le menu">
+        <i class="fas fa-times"></i>
+      </button>
+      <h3>Menu</h3>
+      <ul class="mobile-nav-links">
+        <li><a href="index.html"><i class="fas fa-home"></i> Accueil</a></li>
+        <li><a href="index.html#on-going-section"><i class="fa-solid fa-solid fa-book"></i> Séries</a></li>
+        <li><a href="index.html#one-shot-section"><i class="fa-solid fa-scroll"></i> One-shot</a></li>
+      </ul>
+      <h3>Réseaux</h3>
+      <ul class="mobile-social-links-menu">
+        <li>
+          <a href="https://discord.com/invite/wGTmFarxNY" target="_blank" rel="noopener noreferrer"
+            aria-label="Discord">
+            <i class="fab fa-discord"></i> Discord
+          </a>
+        </li>
+        <li>
+          <a href="https://x.com/BHerooooo" target="_blank" rel="noopener noreferrer" aria-label="X">
+            <i class="fab fa-twitter"></i> Twitter
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
 
-      <!-- =========================   SÉRIES   ========================= -->
-      <section id="on-going-section">
-        <h2 class="section-title">Séries</h2>
-        <div class="series-grid on-going">
-          <!-- Les cartes de séries seront injectées ici par app.js -->
+  <main>
+    <section>
+      <h2 class="section-title">Dernières sorties</h2>
+      <div class="carousel-container">
+        <button class="carousel-prev" aria-label="Chapitre précédent">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="carousel-track latest-chapters">
         </div>
-      </section>
+        <button class="carousel-next" aria-label="Chapitre suivant">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </section>
 
-      <!-- =========================   ONE SHOT   ========================= -->
-      <section id="one-shot-section">
-        <h2 class="section-title">One-shot</h2>
-        <div class="series-grid one-shot">
-          <!-- Les cartes de séries seront injectées ici par app.js -->
-        </div>
-      </section>
-    </main>
-    <script src="index.js" type="module"></script>
-  </body>
+    <section id="on-going-section">
+      <h2 class="section-title">Séries</h2>
+      <div class="series-grid on-going">
+      </div>
+    </section>
+
+    <section id="one-shot-section">
+      <h2 class="section-title">One-shot</h2>
+      <div class="series-grid one-shot">
+      </div>
+    </section>
+  </main>
+  <script src="index.js" type="module"></script>
+</body>
+
 </html>

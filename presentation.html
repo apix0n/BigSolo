@@ -1,159 +1,139 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta property="og:title" content="BigSolo – À propos" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="/img/banniere.webp" />
-    <meta property="og:url" content="https://bigsolo.fr/presentation.html" />
-    <meta
-      property="og:description"
-      content="Découvrez l'histoire derrière BigSolo : un passionné de scantrad depuis 2021 !"
-    />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BigSolo – À propos</title>
 
-    <!-- Urbanist -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap"
-      rel="stylesheet"
-    />
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="img/icon.png" />
-    <!-- Font Awesome -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-      integrity="sha512-..."
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <header>
-      <div class="header-container">
-        <!-- Section pour le menu hamburger et le titre sur mobile, et nav desktop -->
-         <div class="header-left-group">
-            <button class="hamburger-menu-btn" aria-label="Ouvrir le menu">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="logo">
-                <!-- Modifié pour index.html: href="index.html" -->
-                <!-- Pour presentation.html et series-detail.html, laissez href="index.html" -->
-                <a href="index.html" class="site-title-link">BigSolo</a>
-            </div>
-            <!-- Navigation (Desktop Only) -->
-            <nav class="desktop-nav">
-              <ul>
-                <li>
-                  <a href="index.html"><i class="fas fa-home"></i> Accueil</a>
-                </li>
-                <li>
-                  <!-- Pour index.html et series-detail.html -->
-                  <a href="index.html#on-going-section"
-                    ><i class="fa-solid fa-book-open"></i> Séries</a
-                  >
-                  <!-- Pour presentation.html (si vous voulez pointer vers index.html puis la section) -->
-                  <!-- <a href="index.html#on-going-section"><i class="fa-solid fa-book-open"></i> Séries</a> -->
-                </li>
-                <li>
-                  <!-- Pour index.html et series-detail.html -->
-                  <a href="index.html#one-shot-section"
-                    ><i class="fa-solid fa-scroll"></i> One-shot</a
-                  >
-                  <!-- Pour presentation.html (si vous voulez pointer vers index.html puis la section) -->
-                  <!-- <a href="index.html#one-shot-section"><i class="fa-solid fa-scroll"></i> One-shot</a> -->
-                </li>
-              </ul>
-            </nav>
-        </div>
+<head>
+  <script>
+    (function () {
+      try {
+        var theme = localStorage.getItem('mv-theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var htmlEl = document.documentElement;
+        if (theme === 'dark' || (!theme && prefersDark)) {
+          htmlEl.classList.add('dark');
+          htmlEl.style.backgroundColor = '#15171a'; // Applique directement la couleur de fond
+          htmlEl.style.color = '#eceff4';
+        } else {
+          htmlEl.classList.remove('dark');
+          htmlEl.style.backgroundColor = '#f7f8fc'; // Fond clair
+          htmlEl.style.color = '#222831';
+        }
+      } catch (e) { }
+    })();
+  </script>
+  <meta charset="UTF-8" />
+  <meta property="og:title" content="BigSolo – À propos" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="/img/banniere.webp" />
+  <meta property="og:url" content="https://bigsolo.fr/presentation.html" />
+  <meta property="og:description"
+    content="Découvrez l'histoire derrière BigSolo : un passionné de scantrad depuis 2021 !" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BigSolo – À propos</title>
 
-        <div class="header-actions">
-          <div class="social-icons desktop-social-icons">
-            <a
-              href="https://discord.com/invite/wGTmFarxNY"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Discord"
-            >
-              <i class="fab fa-discord"></i>
-            </a>
-            <a
-              href="https://x.com/BHerooooo"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="X"
-            >
-              <i class="fab fa-twitter"></i>
-            </a>
-          </div>
-          <button
-            id="theme-toggle"
-            class="theme-toggle"
-            aria-label="Changer de thème"
-          >
-            <i class="fas fa-moon"></i>
-          </button>
-        </div>
-      </div>
-    </header>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet" />
+  <link rel="icon" type="image/png" href="img/icon.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="style.css" />
+</head>
 
-    <!-- MOBILE MENU -->
-    <div class="mobile-menu-overlay">
-      <div class="mobile-menu-content">
-        <button class="close-mobile-menu-btn" aria-label="Fermer le menu">
-          <i class="fas fa-times"></i>
+<body>
+  <header>
+    <div class="header-container">
+      <div class="header-left-group">
+        <button class="hamburger-menu-btn" aria-label="Ouvrir le menu">
+          <i class="fas fa-bars"></i>
         </button>
-        <h3>Menu</h3>
-        <ul class="mobile-nav-links">
-          <li><a href="index.html"><i class="fas fa-home"></i> Accueil</a></li>
-          <li><a href="index.html#on-going-section"><i class="fa-solid fa-book-open"></i> Séries</a></li>
-          <li><a href="index.html#one-shot-section"><i class="fa-solid fa-scroll"></i> One-shot</a></li>
-        </ul>
-        <h3>Réseaux</h3>
-        <ul class="mobile-social-links-menu"> <!-- Classe renommée pour clarté -->
-          <li>
-            <a
-              href="https://discord.com/invite/wGTmFarxNY"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Discord"
-            >
-              <i class="fab fa-discord"></i> Discord
-            </a>
-          </li>
-          <li>
-            <a
-              href="https://x.com/BHerooooo"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="X"
-            >
-              <i class="fab fa-twitter"></i> Twitter
-            </a>
-          </li>
-        </ul>
+        <div class="logo">
+          <a href="index.html" class="site-title-link">BigSolo</a>
+        </div>
+        <nav class="desktop-nav">
+          <ul>
+            <li>
+              <a href="index.html"><i class="fas fa-home"></i> Accueil</a>
+            </li>
+            <li>
+              <a href="index.html#on-going-section"><i class="fa-solid fa-solid fa-book"></i> Séries</a>
+            </li>
+            <li>
+              <a href="index.html#one-shot-section"><i class="fa-solid fa-scroll"></i> One-shot</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="header-actions">
+        <div class="social-icons desktop-social-icons">
+          <a href="https://discord.com/invite/wGTmFarxNY" target="_blank" rel="noopener noreferrer"
+            aria-label="Discord">
+            <i class="fab fa-discord"></i>
+          </a>
+          <a href="https://x.com/BHerooooo" target="_blank" rel="noopener noreferrer" aria-label="X">
+            <i class="fab fa-twitter"></i>
+          </a>
+        </div>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Changer de thème">
+          <i class="fas fa-moon"></i>
+        </button>
       </div>
     </div>
-    <!-- FIN MOBILE MENU -->
+  </header>
 
-    <main>
-        <section class="presentation-section">
-            <h2 class="section-title">Petit mot sur moi !</h2>
-            <div class="presentation-content">
-                <img src="img/profil.png" alt="Photo de profil de BigSolo" class="profile-pic">
-                <p>Je me présente. Depuis 2016, je voyage à travers Discord à la recherche de projets à accomplir et de nouveaux objectifs à atteindre.</p>
-                <p>C’est en 2021 que j’ai découvert le monde du scantrad, où j’ai fait mes débuts en tant que lettreur. Par la suite, j’ai décidé de me lancer seul dans la réalisation de la série Kaoru Hana wa Rin to Saku. Mon nouvel objectif était alors de devenir plus polyvalent, animé par une soif constante d’apprendre, même si je n’étais au départ “que” lettreur. Les débuts furent difficiles — catastrophiques même — au point que mon ancienne team m’a aidé à remettre en ordre les chapitres 27 à 92. Ce n’est qu’à partir de ce dernier chapitre que j’ai véritablement repris les rênes en solo.</p>
-                <p>Enfin... pas tout à fait, haha. Je profite de cette occasion pour remercier deux personnes en particulier. Malgré mon départ et quelques tensions, elles ont continué à m’accompagner, me formant de A à Z à la traduction et à la relecture. Sans elles, je n’y serais jamais arrivé, et les chapitres n’auraient sûrement pas été aussi agréables à lire. Un immense merci à vous deux.</p>
-                <p>N’hésitez pas à me suivre sur mes réseaux ou à rejoindre le Discord si vous avez des questions ou si vous voulez simplement discuter !</p>
-                <p>Nombre de chapitres édit car j'ai un minimum d'égo avant de partir du Scantrad : 367</p>
-            </div>
-        </section>
-    </main>
-    <script src="index.js" type="module"></script>
-  </body>
+  <div class="mobile-menu-overlay">
+    <div class="mobile-menu-content">
+      <button class="close-mobile-menu-btn" aria-label="Fermer le menu">
+        <i class="fas fa-times"></i>
+      </button>
+      <h3>Menu</h3>
+      <ul class="mobile-nav-links">
+        <li><a href="index.html"><i class="fas fa-home"></i> Accueil</a></li>
+        <li><a href="index.html#on-going-section"><i class="fa-solid fa-solid fa-book"></i> Séries</a></li>
+        <li><a href="index.html#one-shot-section"><i class="fa-solid fa-scroll"></i> One-shot</a></li>
+      </ul>
+      <h3>Réseaux</h3>
+      <ul class="mobile-social-links-menu">
+        <li>
+          <a href="https://discord.com/invite/wGTmFarxNY" target="_blank" rel="noopener noreferrer"
+            aria-label="Discord">
+            <i class="fab fa-discord"></i> Discord
+          </a>
+        </li>
+        <li>
+          <a href="https://x.com/BHerooooo" target="_blank" rel="noopener noreferrer" aria-label="X">
+            <i class="fab fa-twitter"></i> Twitter
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <main>
+    <section class="presentation-section">
+      <h2 class="section-title">Petit mot sur moi !</h2>
+      <div class="presentation-content">
+        <img src="img/profil.png" alt="Photo de profil de BigSolo" class="profile-pic">
+        <p>Je me présente. Depuis 2016, je voyage à travers Discord à la recherche de projets à accomplir et de nouveaux
+          objectifs à atteindre.</p>
+        <p>C’est en 2021 que j’ai découvert le monde du scantrad, où j’ai fait mes débuts en tant que lettreur. Par la
+          suite, j’ai décidé de me lancer seul dans la réalisation de la série Kaoru Hana wa Rin to Saku. Mon nouvel
+          objectif était alors de devenir plus polyvalent, animé par une soif constante d’apprendre, même si je n’étais
+          au départ “que” lettreur. Les débuts furent difficiles — catastrophiques même — au point que mon ancienne team
+          m’a aidé à remettre en ordre les chapitres 27 à 92. Ce n’est qu’à partir de ce dernier chapitre que j’ai
+          véritablement repris les rênes en solo.</p>
+        <p>Enfin... pas tout à fait, haha. Je profite de cette occasion pour remercier deux personnes en particulier.
+          Malgré mon départ et quelques tensions, elles ont continué à m’accompagner, me formant de A à Z à la
+          traduction et à la relecture. Sans elles, je n’y serais jamais arrivé, et les chapitres n’auraient sûrement
+          pas été aussi agréables à lire. Un immense merci à vous deux.</p>
+        <p>N’hésitez pas à me suivre sur mes réseaux ou à rejoindre le Discord si vous avez des questions ou si vous
+          voulez simplement discuter !</p>
+        <p>Nombre de chapitres édit car j'ai un minimum d'égo avant de partir du Scantrad : 367</p>
+      </div>
+    </section>
+  </main>
+  <script src="index.js" type="module"></script>
+</body>
+
 </html>

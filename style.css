@@ -1,3 +1,13 @@
+html {
+  background-color: var(--clr-bg-light) !important;
+  color: #222831 !important;
+}
+
+html.dark {
+  background-color: var(--clr-bg-dark) !important;
+  color: #eceff4 !important;
+}
+
 :root {
   --clr-bg: #f7f8fc;
   --clr-bg-card: #ffffff;
@@ -12,6 +22,19 @@
   --series-fixed-cover-width-desktop: 180px;
   --series-fixed-cover-width-mobile: 120px;
   --mobile-carousel-card-aspect-ratio: 1.8;
+}
+
+html.dark:root { /* Ou simplement html.dark si vous n'utilisez pas :root pour ça */
+  --clr-bg: var(--clr-bg-dark);
+  --clr-text: var(--clr-text-dark); 
+}
+
+body {
+  font-family: "Urbanist", system-ui, sans-serif;
+  background: var(--clr-bg);
+  color: var(--clr-text);
+  overflow-x: hidden;
+  line-height: 1.55;
 }
 
 body.dark {
@@ -31,18 +54,6 @@ body.dark {
   padding: 0;
   box-sizing: border-box;
   transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: "Urbanist", system-ui, sans-serif;
-  background: var(--clr-bg);
-  color: var(--clr-text);
-  overflow-x: hidden;
-  line-height: 1.55;
 }
 
 img {
