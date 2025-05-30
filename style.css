@@ -1481,3 +1481,74 @@ body.dark .volume-chapters-list .detail-chapter-item {
     font-size: 0.75rem;
   }
 }
+
+/* GALERIE */
+
+.galerie-page {
+  display: flex;
+  flex-wrap: wrap; /* Permet aux images de passer à la ligne */
+  gap: 10px; /* Espace entre les images */
+  justify-content: center;
+}
+
+.galerie-page img {
+  height: 30vh; /* Hauteur fixe pour toutes les images */
+  width: auto; /* Largeur automatique pour conserver le ratio d'aspect */
+  max-width: 100%; /* Assure que l'image ne dépasse pas la largeur de son conteneur */
+  object-fit: contain; /* Conserve le ratio d'aspect sans recadrer l'image */
+  border-radius: 8px; /* Coins arrondis */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Ombre pour un effet de profondeur */
+}
+
+.modal {
+  display: none; /* Masque la modale par défaut */
+  /*display: flex;*/
+  position: fixed; /* Positionne la modale par rapport à la fenêtre */
+  z-index: 1000; /* Assure que la modale est au-dessus des autres éléments */
+  left: 0;
+  top: 0;
+  width: 100%; /* Prend toute la largeur */
+  height: 100%; /* Prend toute la hauteur */
+  background-color: rgba(0, 0, 0, 0.8); /* Fond sombre avec transparence */
+  justify-content: center; /* Centre le contenu horizontalement */
+  align-items: center; /* Centre le contenu verticalement */
+  flex-direction: column;
+}
+
+.modal-content {
+  max-width: 90%; /* Limite la largeur de l'image dans la modale */
+  max-height: 80%; /* Limite la hauteur de l'image dans la modale */
+}
+
+.modal-content > img {
+  max-width: 100%;
+  max-height: 90%;
+  object-fit: contain;
+  border-radius: 8px 8px 0 0;
+}
+
+.banner {
+  display: flex;
+  background-color: var(--clr-bg-card); /* Fond blanc avec transparence */
+  color: var(--clr-text);
+  padding: 10px; /* Espacement interne */
+  border-radius: 0 0 8px 8px; /* Coins arrondis en bas */
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2); /* Ombre pour un effet de profondeur */
+  width: 100%; /* Prend toute la largeur de la modale */
+  height: fit-content;
+}
+.banner .right {
+  flex: 1;
+  display: flex;
+  justify-content: end;
+  gap: 10px;
+}
+.banner .right svg {
+  height: 100%;
+  aspect-ratio: 1/1;
+}
+
+.svg-fill {
+  fill: var(--clr-text); /* Utilise une variable CSS avec une valeur par défaut */
+
+}

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta property="og:title" content="BigSolo – Galerie" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/img/banniere.webp" />
+    <meta property="og:url" content="https://bigsolo.fr/series-detail.html" />
+    <meta
+      property="og:description"
+      content="Découvrez les pages couleurs des fans pour votre série préférée sur BigSolo !"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BigSolo – Galerie</title>
+
+    <!-- Urbanist -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="img/icon.png" />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      integrity="sha512-…"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="header-container">
+        <!-- Section pour le menu hamburger et le titre sur mobile, et nav desktop -->
+         <div class="header-left-group">
+            <button class="hamburger-menu-btn" aria-label="Ouvrir le menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">
+                <!-- Modifié pour index.html: href="index.html" -->
+                <!-- Pour presentation.html et series-detail.html, laissez href="index.html" -->
+                <a href="presentation.html" class="site-title-link">BigSolo</a>
+            </div>
+            <!-- Navigation (Desktop Only) -->
+            <nav class="desktop-nav">
+              <ul>
+                <li>
+                  <a href="index.html"><i class="fas fa-home"></i> Accueil</a>
+                </li>
+                <li>
+                  <!-- Pour index.html et series-detail.html -->
+                  <a href="index.html#on-going-section"
+                    ><i class="fa-solid fa-solid fa-book"></i> Séries</a
+                  >
+                  <!-- Pour presentation.html (si vous voulez pointer vers index.html puis la section) -->
+                  <!-- <a href="index.html#on-going-section"><i class="fa-solid fa-book-open"></i> Séries</a> -->
+                </li>
+                <li>
+                  <!-- Pour index.html et series-detail.html -->
+                  <a href="index.html#one-shot-section"
+                    ><i class="fa-solid fa-scroll"></i> One-shot</a
+                  >
+                  <!-- Pour presentation.html (si vous voulez pointer vers index.html puis la section) -->
+                  <!-- <a href="index.html#one-shot-section"><i class="fa-solid fa-scroll"></i> One-shot</a> -->
+                </li>
+              </ul>
+            </nav>
+        </div>
+
+        <div class="header-actions">
+          <div class="social-icons desktop-social-icons">
+            <a
+              href="https://discord.com/invite/wGTmFarxNY"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Discord"
+            >
+              <i class="fab fa-discord"></i>
+            </a>
+            <a
+              href="https://x.com/BHerooooo"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="X"
+            >
+              <i class="fab fa-twitter"></i>
+            </a>
+          </div>
+          <button
+            id="theme-toggle"
+            class="theme-toggle"
+            aria-label="Changer de thème"
+          >
+            <i class="fas fa-moon"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- MOBILE MENU -->
+    <div class="mobile-menu-overlay">
+      <div class="mobile-menu-content">
+        <button class="close-mobile-menu-btn" aria-label="Fermer le menu">
+          <i class="fas fa-times"></i>
+        </button>
+        <h3>Menu</h3>
+        <ul class="mobile-nav-links">
+          <li><a href="index.html"><i class="fas fa-home"></i> Accueil</a></li>
+          <li><a href="index.html#on-going-section"><i class="fa-solid fa-book-open"></i> Séries</a></li>
+          <li><a href="index.html#one-shot-section"><i class="fa-solid fa-scroll"></i> One-shot</a></li>
+        </ul>
+        <h3>Réseaux</h3>
+        <ul class="mobile-social-links-menu"> <!-- Classe renommée pour clarté -->
+          <li>
+            <a
+              href="https://discord.com/invite/wGTmFarxNY"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Discord"
+            >
+              <i class="fab fa-discord"></i> Discord
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://x.com/BHerooooo"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="X"
+            >
+              <i class="fab fa-twitter"></i> Twitter
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <!-- FIN MOBILE MENU -->
+
+    <main>
+      <section id="galerie-section" class="galerie-page"></section>
+      <div id="modal" class="modal">
+        <div class="modal-content">
+          <img class="" id="modalImage" />
+          <div class="banner" id="banner">
+            <div class="left" id="author">Autrice / Auteur :</div>
+            <div class="right">
+              <a href="" target="_blank" id="instagram">
+                <svg class="svg-fill" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="--darkreader-inline-fill: var(--darkreader-background-000000, #000000);" data-darkreader-inline-fill="" viewBox="4 4 24 24"> <g> <path d="M22.3,8.4c-0.8,0-1.4,0.6-1.4,1.4c0,0.8,0.6,1.4,1.4,1.4c0.8,0,1.4-0.6,1.4-1.4C23.7,9,23.1,8.4,22.3,8.4z"/> <path d="M16,10.2c-3.3,0-5.9,2.7-5.9,5.9s2.7,5.9,5.9,5.9s5.9-2.7,5.9-5.9S19.3,10.2,16,10.2z M16,19.9c-2.1,0-3.8-1.7-3.8-3.8 c0-2.1,1.7-3.8,3.8-3.8c2.1,0,3.8,1.7,3.8,3.8C19.8,18.2,18.1,19.9,16,19.9z"/> <path d="M20.8,4h-9.5C7.2,4,4,7.2,4,11.2v9.5c0,4,3.2,7.2,7.2,7.2h9.5c4,0,7.2-3.2,7.2-7.2v-9.5C28,7.2,24.8,4,20.8,4z M25.7,20.8 c0,2.7-2.2,5-5,5h-9.5c-2.7,0-5-2.2-5-5v-9.5c0-2.7,2.2-5,5-5h9.5c2.7,0,5,2.2,5,5V20.8z"/> </g>
+                </svg>
+              </a>
+              <a href="" target="_blank" id="twitter">
+                <svg
+                  viewBox="0 0 1200 1227"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z"
+                    class="svg-fill"
+                  />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="index.js" type="module"></script>
+  </body>
+</html>

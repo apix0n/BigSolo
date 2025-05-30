@@ -105,6 +105,7 @@ const latestContainer = document.querySelector(".latest-chapters");
 const seriesGridOngoing = document.querySelector(".series-grid.on-going");
 const seriesGridOneShot = document.querySelector(".series-grid.one-shot");
 const seriesDetailSection = document.getElementById("series-detail-section");
+const galerieSection = document.getElementById("galerie-section");
 
 let volumeSortOrder = 'desc';
 
@@ -506,6 +507,25 @@ function renderSeriesDetailPage(s) {
   }
 }
 
+async function renderGalerie(){
+  const colos = await(await fetch("/colos.json")).json();
+  colos.sort((a, b) => new Date(b.date) - new Date(a.date));
+  for(const colo of colos){
+    const img = document.createElement("img")
+    img.src = colo.url_preview;
+    img.addEventListener("click", function() {
+      modal.style.display = "flex"; // Afficher la modale
+      modalImage.src = colo.url; // Définir la source de l'image dans la modale
+      author.innerText = "Autrice / Auteur : " + colo.author_id;
+      twitter.style.display = colo["twitter"] == null ? "none" : "block";
+      twitter.href = colo["twitter"]
+      instagram.style.display = colo["instagram"] == null ? "none" : "block";
+      instagram.href = colo["instagram"]
+    });
+    galerieSection.appendChild(img)
+  }
+}
+
 async function fetchAllSeries() {
   const dev = await fetch("./config-dev.json");
   if (dev.status === 404) CONFIG = await fetch("./config.json").then((res) => res.json());
@@ -620,6 +640,15 @@ async function bootstrap() {
       initializeScrollObserver();
     } else if (document.querySelector(".section-title")) {
       initializeScrollObserver();
+    }
+
+    if(galerieSection){
+      modal.addEventListener("click", function(event) {
+        if (event.target === modal) {
+            modal.style.display = "none"; // Masquer la modale
+        }
+      });
+      await renderGalerie();
     }
 
   } catch (err) {
