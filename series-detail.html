@@ -27,7 +27,7 @@
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-      integrity="sha512-…"
+      integrity="sha512-..."
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
@@ -36,31 +36,44 @@
   <body>
     <header>
       <div class="header-container">
-        <div class="header-left-group">
+        <!-- Section pour le menu hamburger et le titre sur mobile, et nav desktop -->
+         <div class="header-left-group">
+            <button class="hamburger-menu-btn" aria-label="Ouvrir le menu">
+                <i class="fas fa-bars"></i>
+            </button>
             <div class="logo">
-                <a href="index.html" class="site-title-link">BigSolo</a> 
+                <!-- Modifié pour index.html: href="index.html" -->
+                <!-- Pour presentation.html et series-detail.html, laissez href="index.html" -->
+                <a href="index.html" class="site-title-link">BigSolo</a>
             </div>
-            <nav>
+            <!-- Navigation (Desktop Only) -->
+            <nav class="desktop-nav">
               <ul>
                 <li>
-                  <a href="index.html"><i class="fas fa-home"></i> Accueil</a> 
+                  <a href="index.html"><i class="fas fa-home"></i> Accueil</a>
                 </li>
                 <li>
+                  <!-- Pour index.html et series-detail.html -->
                   <a href="index.html#on-going-section"
                     ><i class="fa-solid fa-book-open"></i> Séries</a
                   >
+                  <!-- Pour presentation.html (si vous voulez pointer vers index.html puis la section) -->
+                  <!-- <a href="index.html#on-going-section"><i class="fa-solid fa-book-open"></i> Séries</a> -->
                 </li>
                 <li>
+                  <!-- Pour index.html et series-detail.html -->
                   <a href="index.html#one-shot-section"
                     ><i class="fa-solid fa-scroll"></i> One-shot</a
                   >
+                  <!-- Pour presentation.html (si vous voulez pointer vers index.html puis la section) -->
+                  <!-- <a href="index.html#one-shot-section"><i class="fa-solid fa-scroll"></i> One-shot</a> -->
                 </li>
               </ul>
             </nav>
         </div>
 
         <div class="header-actions">
-          <div class="social-icons">
+          <div class="social-icons desktop-social-icons">
             <a
               href="https://discord.com/invite/wGTmFarxNY"
               target="_blank"
@@ -88,6 +101,45 @@
         </div>
       </div>
     </header>
+
+    <!-- MOBILE MENU -->
+    <div class="mobile-menu-overlay">
+      <div class="mobile-menu-content">
+        <button class="close-mobile-menu-btn" aria-label="Fermer le menu">
+          <i class="fas fa-times"></i>
+        </button>
+        <h3>Menu</h3>
+        <ul class="mobile-nav-links">
+          <li><a href="index.html"><i class="fas fa-home"></i> Accueil</a></li>
+          <li><a href="index.html#on-going-section"><i class="fa-solid fa-book-open"></i> Séries</a></li>
+          <li><a href="index.html#one-shot-section"><i class="fa-solid fa-scroll"></i> One-shot</a></li>
+        </ul>
+        <h3>Réseaux</h3>
+        <ul class="mobile-social-links-menu"> <!-- Classe renommée pour clarté -->
+          <li>
+            <a
+              href="https://discord.com/invite/wGTmFarxNY"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Discord"
+            >
+              <i class="fab fa-discord"></i> Discord
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://x.com/BHerooooo"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="X"
+            >
+              <i class="fab fa-twitter"></i> Twitter
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <!-- FIN MOBILE MENU -->
 
     <main>
       <!-- Le contenu de la série sera injecté ici par index.js -->

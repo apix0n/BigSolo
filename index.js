@@ -1,36 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const toggleBtn = document.getElementById("theme-toggle");
-  
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const savedTheme = localStorage.getItem("mv-theme");
-
-  // 1. Initialisation du thème au chargement
-  if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
-    document.body.classList.add("dark");
-  } else {
-    document.body.classList.remove("dark");
-  }
-
-  const updateIcon = () => {
-    const icon = toggleBtn.querySelector("i");
-    icon.className = document.body.classList.contains("dark")
-      ? "fas fa-sun"
-      : "fas fa-moon";
-  };
-
-  // applique tout de suite
-  updateIcon();
-
-  // 2. Au clic, on bascule thème + icône + stockage
-  toggleBtn.addEventListener("click", () => {
-    const isDark = document.body.classList.toggle("dark");
-    localStorage.setItem("mv-theme", isDark ? "dark" : "light");
-    updateIcon();
-  });
-});
-
-// ========== ANIMATION ON SCROLL ==========
-document.addEventListener("DOMContentLoaded", () => {
+function initializeScrollObserver() {
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
@@ -46,9 +14,91 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .querySelectorAll(".chapter-card, .series-card, .section-title")
     .forEach((el) => observer.observe(el));
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const toggleBtn = document.getElementById("theme-toggle");
+
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const savedTheme = localStorage.getItem("mv-theme");
+
+  if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+    document.body.classList.add("dark");
+  } else {
+    document.body.classList.remove("dark");
+  }
+
+  const updateIcon = () => {
+    if (toggleBtn) { 
+      const icon = toggleBtn.querySelector("i");
+      if (icon) { 
+        icon.className = document.body.classList.contains("dark")
+          ? "fas fa-sun"
+          : "fas fa-moon";
+      }
+    }
+  };
+
+  updateIcon();
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      const isDark = document.body.classList.toggle("dark");
+      localStorage.setItem("mv-theme", isDark ? "dark" : "light");
+      updateIcon();
+    });
+  }
+
+  const hamburgerBtn = document.querySelector(".hamburger-menu-btn");
+  const mobileMenuOverlay = document.querySelector(".mobile-menu-overlay");
+  const closeMenuBtn = document.querySelector(".close-mobile-menu-btn");
+  const mobileNavLinks = document.querySelectorAll(".mobile-menu-content a");
+
+  function openMobileMenu() {
+    if (mobileMenuOverlay) mobileMenuOverlay.classList.add("open");
+    if (hamburgerBtn) hamburgerBtn.setAttribute("aria-expanded", "true");
+  }
+
+  function closeMobileMenu() {
+    if (mobileMenuOverlay) mobileMenuOverlay.classList.remove("open");
+    if (hamburgerBtn) hamburgerBtn.setAttribute("aria-expanded", "false");
+  }
+
+  if (hamburgerBtn && mobileMenuOverlay && closeMenuBtn) {
+    hamburgerBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (mobileMenuOverlay.classList.contains("open")) {
+        closeMobileMenu();
+      } else {
+        openMobileMenu();
+      }
+    });
+
+    closeMenuBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      closeMobileMenu();
+    });
+
+    mobileMenuOverlay.addEventListener("click", (e) => {
+      if (e.target === mobileMenuOverlay) {
+        closeMobileMenu();
+      }
+    });
+
+    mobileNavLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        if (link.getAttribute('href').startsWith('#') || (link.getAttribute('href').startsWith('index.html#') && window.location.pathname.endsWith('index.html'))) {
+          setTimeout(() => {
+            closeMobileMenu();
+          }, 150);
+        }
+      });
+    });
+  }
 });
 
-// ─────────────────────────────────  APP LOGIC ─────────────────────────────────────
+
 let CONFIG;
 
 const latestContainer = document.querySelector(".latest-chapters");
@@ -56,14 +106,11 @@ const seriesGridOngoing = document.querySelector(".series-grid.on-going");
 const seriesGridOneShot = document.querySelector(".series-grid.one-shot");
 const seriesDetailSection = document.getElementById("series-detail-section");
 
-// Global variable to control volume sorting order on detail page
-let volumeSortOrder = 'desc'; // 'desc' for highest volume first (default), 'asc' for lowest volume first
+let volumeSortOrder = 'desc';
 
-// Helpers pour ajuster les URLs de cover
 const appendSeriesCover = (url) => `${url.slice(0, -4)}-s.jpg`;
 const appendChapterCover = (url) => `${url.slice(0, -4)}-m.jpg`;
 
-// Helper pour formater les dates
 function timeAgo(ms) {
   const diff = Date.now() - ms;
   const min = 60 * 1000,
@@ -77,13 +124,11 @@ function timeAgo(ms) {
   return new Date(ms).toLocaleDateString("fr-FR");
 }
 
-// Helper pour afficher le badge "NOUVEAU"
 const maybeNewBadge = (lastUpdated) =>
   Date.now() - lastUpdated < 3 * 24 * 60 * 60 * 1000
     ? '<span class="new-badge">NOUVEAU</span>'
     : "";
 
-// Helper pour convertir un titre en slug URL-friendly
 function slugify(text) {
   return text
     .toString()
@@ -97,7 +142,6 @@ function slugify(text) {
 }
 
 
-// Rendus HTML pour les cartes de chapitre (carousel)
 function renderChapter(c) {
   return `
   <div class="chapter-card" onclick="window.open('${c.url}', '_blank')">
@@ -114,7 +158,6 @@ function renderChapter(c) {
   </div>`;
 }
 
-// Rendus HTML pour les cartes de série (grilles)
 function renderSeries(s) {
   const chaptersArray = Object.entries(s.chapters)
     .map(([chapNum, chapData]) => ({
@@ -124,30 +167,77 @@ function renderSeries(s) {
       last_updated: chapData.last_updated * 1000,
       url: `https://cubari.moe/read/gist/${s.base64Url}/${chapNum.replaceAll(".", "-")}/1/`
     }))
-    .sort((a, b) => b.last_updated - a.last_updated)
-    .slice(0, 3);
+    .sort((a, b) => b.last_updated - a.last_updated);
 
-  const lastThreeChaptersHtml = chaptersArray.map(c => `
-    <div class="series-chapter-item" onclick="event.stopPropagation(); window.open('${c.url}', '_blank')">
-      <span class="chapter-number-small">Ch. ${c.chapter}</span>
-      <span class="chapter-title-small">${c.title}</span>
-      <span class="chapter-date-small">${timeAgo(c.last_updated)}</span>
+  let latestChapterAsButton = '';
+  if (chaptersArray.length > 0) {
+    const latestChap = chaptersArray[0];
+    latestChapterAsButton = `
+    <div class="series-latest-chapters-container-mobile">
+        <div class="series-chapter-item" onclick="event.stopPropagation(); window.open('${latestChap.url}', '_blank')">
+            <div class="series-chapter-item-main-info-mobile">
+                <span class="chapter-number-small">Ch. ${latestChap.chapter}</span>
+                <span class="chapter-title-small">${latestChap.title}</span>
+            </div>
+            <span class="chapter-date-small-mobile">${timeAgo(latestChap.last_updated)}</span>
+        </div>
     </div>
-  `).join('');
+    `;
+  }
+
+  let latestThreeChaptersHtml = '';
+  if (chaptersArray.length > 0) {
+    latestThreeChaptersHtml = `
+      <div class="series-latest-chapters-container-desktop">
+        ${chaptersArray.slice(0, 3).map(chap => `
+          <div class="series-chapter-item-desktop" onclick="event.stopPropagation(); window.open('${chap.url}', '_blank')">
+            <span class="chapter-number-desktop">Ch. ${chap.chapter}</span>
+            <span class="chapter-title-desktop">${chap.title}</span>
+            <span class="chapter-date-desktop">${timeAgo(chap.last_updated)}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
 
   const descriptionHtml = s.description
-    ? `<div class="series-description">${s.description.length > 200 ? s.description.substring(0, 200) + '...' : s.description}</div>`
+    ? `<div class="series-description">${s.description}</div>`
     : '';
 
-  let authorArtistLine = '';
+  let authorString = '';
   if (s.author && s.artist && s.author !== s.artist) {
-    authorArtistLine = `<div class="meta"><strong>Auteur :</strong> ${s.author} / <strong>Dessinateur :</strong> ${s.artist}</div>`;
+    authorString = `<strong>Auteur :</strong> ${s.author} / <strong>Dess. :</strong> ${s.artist}`;
   } else if (s.author) {
-    authorArtistLine = `<div class="meta"><strong>Auteur :</strong> ${s.author}</div>`;
+    authorString = `<strong>Auteur :</strong> ${s.author}`;
   } else if (s.artist) {
-    authorArtistLine = `<div class="meta"><strong>Dessinateur :</strong> ${s.artist}</div>`;
+    authorString = `<strong>Dess. :</strong> ${s.artist}`; 
   }
-  
+
+  let yearString = s.release_year ? `<strong>Année :</strong> ${s.release_year}` : '';
+
+  let authorYearLineHtml = '';
+  if (authorString || yearString) { 
+    authorYearLineHtml = `
+      <div class="meta series-author-year-line">
+        ${authorString ? `<span class="series-author-info">${authorString}</span>` : ''}
+        ${authorString && yearString ? `<span class="meta-separator-card"></span>` : ''}
+        ${yearString ? `<span class="series-year-info">${yearString}</span>` : ''}
+      </div>
+    `;
+  }
+
+  let tagsHtml = '';
+  if (Array.isArray(s.tags) && s.tags.length > 0) {
+    tagsHtml = `
+      <div class="tags series-tags">
+        ${s.tags
+          .slice(0, 4) 
+          .map((t) => `<span class="tag">${t}</span>`)
+          .join("")}
+      </div>`;
+  }
+
+
   const detailPageUrl = `series-detail.html?id=${slugify(s.title)}`;
 
   return `
@@ -157,433 +247,383 @@ function renderSeries(s) {
     </div>
     <div class="series-info">
       <div class="series-title">${s.title}</div>
-      ${authorArtistLine}
-      ${descriptionHtml}
-      ${
-        Array.isArray(s.tags)
-          ? `
-        <div class="tags">
-          ${s.tags
-            .slice(0, 6)
-            .map((t) => `<span class="tag">${t}</span>`)
-            .join("")}
-        </div>`
-          : ""
-      }
-      <div class="series-latest-chapters-container">
-        ${lastThreeChaptersHtml}
-      </div>
+      ${authorYearLineHtml}
+      ${tagsHtml} 
+      ${descriptionHtml} 
+      ${latestChapterAsButton} 
+      ${latestThreeChaptersHtml}
     </div>
   </div>`;
 }
 
-// Function to render individual chapter items
 function renderChaptersList(chaptersToRender) {
-    return chaptersToRender.map(c => {
-        const isLicensed = c.licencied && c.licencied.length > 0 && (!c.groups || c.groups.Big_herooooo === '');
-        const chapterClass = isLicensed ? 'detail-chapter-item licensed-chapter-item' : 'detail-chapter-item';
-        const clickAction = isLicensed ? '' : `onclick="window.open('${c.url}', '_blank')"`;
-        
-        // NOUVELLE MODIFICATION: Vérifier c.collab et ajouter le span
-        const collabHtml = c.collab ? `<span class="detail-chapter-collab">${c.collab}</span>` : '';
-
-        return `
+  return chaptersToRender.map(c => {
+    const isLicensed = c.licencied && c.licencied.length > 0 && (!c.groups || c.groups.Big_herooooo === '');
+    const chapterClass = isLicensed ? 'detail-chapter-item licensed-chapter-item' : 'detail-chapter-item';
+    const clickAction = isLicensed ? '' : `onclick="window.open('${c.url}', '_blank')"`;
+    const collabHtml = c.collab ? `<span class="detail-chapter-collab">${c.collab}</span>` : '';
+    return `
         <div class="${chapterClass}" ${clickAction}>
-            <span class="detail-chapter-number">Chapitre ${c.chapter}</span>
-            <span class="detail-chapter-title">${c.title}</span>
-            ${collabHtml} <!-- Insertion du collaborateur -->
-            <span class="detail-chapter-date">${timeAgo(c.last_updated)}</span>
+            <div class="chapter-main-info">
+                <span class="detail-chapter-number">Chapitre ${c.chapter}</span>
+                <span class="detail-chapter-title">${c.title}</span>
+            </div>
+            <div class="chapter-side-info">
+                ${collabHtml}
+                <span class="detail-chapter-date">${timeAgo(c.last_updated)}</span>
+            </div>
         </div>
         `;
-    }).join('');
+  }).join('');
 }
 
-// Function to render the entire chapter list with volume grouping and sorting
 function displayGroupedChapters(allChaptersRaw) {
-    const chaptersContainer = document.querySelector(".chapters-accordion-container");
-    if (!chaptersContainer) return;
-
-    // Group chapters by volume
-    let grouped = new Map();
-    let volumeLicenseInfo = new Map(); // Stores license info per volume
-    
-    allChaptersRaw.forEach(chap => {
-        const volKey = chap.volume && chap.volume.trim() !== '' ? chap.volume.trim() : 'hors_serie';
-        if (!grouped.has(volKey)) {
-            grouped.set(volKey, []);
-        }
-        grouped.get(volKey).push(chap);
-
-        // Store license info for this volume, if it exists AND the chapter is blocked
-        if (chap.licencied && chap.licencied.length > 0 && (!chap.groups || chap.groups.Big_herooooo === '')) {
-            if (!volumeLicenseInfo.has(volKey)) {
-                volumeLicenseInfo.set(volKey, chap.licencied);
-            }
-        }
-    });
-
-    // Sort chapters within each volume (ALWAYS DESCENDING BY CHAPTER NUMBER as requested)
-    for (const [volKey, chapters] of grouped.entries()) {
-        grouped.set(volKey, chapters.sort((a, b) => parseFloat(b.chapter) - parseFloat(a.chapter)));
+  const chaptersContainer = document.querySelector(".chapters-accordion-container");
+  if (!chaptersContainer) return;
+  let grouped = new Map();
+  let volumeLicenseInfo = new Map();
+  allChaptersRaw.forEach(chap => {
+    const volKey = chap.volume && chap.volume.trim() !== '' ? chap.volume.trim() : 'hors_serie';
+    if (!grouped.has(volKey)) grouped.set(volKey, []);
+    grouped.get(volKey).push(chap);
+    if (chap.licencied && chap.licencied.length > 0 && (!chap.groups || chap.groups.Big_herooooo === '')) {
+      if (!volumeLicenseInfo.has(volKey)) volumeLicenseInfo.set(volKey, chap.licencied);
     }
-
-    // Sort volume keys based on volumeSortOrder
-    let sortedVolumeKeys = [...grouped.keys()].sort((a, b) => {
-        const numA = parseFloat(a);
-        const numB = parseFloat(b);
-
-        if (volumeSortOrder === 'desc') { // Default: Hors-série, then Vmax..V1
-            if (a === 'hors_serie') return -1; // 'hors_serie' always comes first
-            if (b === 'hors_serie') return 1;
-            return numB - numA; // Numeric descending for volumes
-        } else { // 'asc': V1..Vmax, then Hors-série
-            if (a === 'hors_serie') return 1; // 'hors_serie' always comes last
-            if (b === 'hors_serie') return -1;
-            return numA - numB; // Numeric ascending for volumes
-        }
+  });
+  for (const [volKey, chapters] of grouped.entries()) {
+    grouped.set(volKey, chapters.sort((a, b) => parseFloat(b.chapter) - parseFloat(a.chapter)));
+  }
+  let sortedVolumeKeys = [...grouped.keys()].sort((a, b) => {
+    const numA = parseFloat(a); const numB = parseFloat(b);
+    if (volumeSortOrder === 'desc') { if (a === 'hors_serie') return -1; if (b === 'hors_serie') return 1; return numB - numA; }
+    else { if (a === 'hors_serie') return 1; if (b === 'hors_serie') return -1; return numA - numB; }
+  });
+  let html = '';
+  sortedVolumeKeys.forEach(volKey => {
+    const volumeDisplayName = volKey === 'hors_serie' ? 'Hors-série' : `Volume ${volKey}`;
+    const chaptersInVolume = grouped.get(volKey);
+    const licenseInfo = volumeLicenseInfo.get(volKey);
+    let volumeHeaderContent;
+    if (licenseInfo) {
+      const licenseLink = licenseInfo[0]; const releaseDate = licenseInfo[1];
+      volumeHeaderContent = `<h4 class="volume-title-main">${volumeDisplayName}</h4><div class="volume-license-details"><span class="volume-license-text">Ce volume est disponible en format papier, vous pouvez le commander</span><a href="${licenseLink}" target="_blank" rel="noopener noreferrer" class="volume-license-link">juste ici !</a><span class="volume-release-date">${releaseDate}</span></div>`;
+    } else { volumeHeaderContent = `<h4>${volumeDisplayName}</h4>`; }
+    html += `<div class="volume-group"><div class="volume-header active" data-volume="${volKey}">${volumeHeaderContent}<i class="fas fa-chevron-down volume-arrow rotated"></i></div><div class="volume-chapters-list">${renderChaptersList(chaptersInVolume)}</div></div>`;
+  });
+  chaptersContainer.innerHTML = html;
+  document.querySelectorAll('.volume-group').forEach(group => {
+    const header = group.querySelector('.volume-header');
+    const content = group.querySelector('.volume-chapters-list');
+    const arrow = header.querySelector('.volume-arrow');
+    setTimeout(() => { if (header.classList.contains('active')) content.style.maxHeight = content.scrollHeight + "px"; }, 0);
+    header.addEventListener('click', () => {
+      header.classList.toggle('active'); arrow.classList.toggle('rotated');
+      if (content.style.maxHeight && content.style.maxHeight !== "0px") content.style.maxHeight = "0px";
+      else content.style.maxHeight = content.scrollHeight + "px";
     });
-    
-    let html = '';
-    sortedVolumeKeys.forEach(volKey => {
-        const volumeDisplayName = volKey === 'hors_serie' ? 'Hors-série' : `Volume ${volKey}`;
-        const chaptersInVolume = grouped.get(volKey);
-        const licenseInfo = volumeLicenseInfo.get(volKey); // Get license info for this volume
-
-        let volumeHeaderContent;
-        if (licenseInfo) {
-            const licenseLink = licenseInfo[0];
-            const releaseDate = licenseInfo[1];
-            volumeHeaderContent = `
-                <h4 class="volume-title-main">${volumeDisplayName}</h4>
-                <div class="volume-license-details">
-                    <span class="volume-license-text">Ce volume est disponible en format papier, vous pouvez le commander</span>
-                    <a href="${licenseLink}" target="_blank" rel="noopener noreferrer" class="volume-license-link">juste ici !</a>
-                    <span class="volume-release-date">${releaseDate}</span>
-                </div>
-            `;
-        } else {
-            volumeHeaderContent = `<h4>${volumeDisplayName}</h4>`;
-        }
-
-        html += `
-            <div class="volume-group">
-                <div class="volume-header active" data-volume="${volKey}"> <!-- 'active' for default open -->
-                    ${volumeHeaderContent}
-                    <i class="fas fa-chevron-down volume-arrow rotated"></i> <!-- 'rotated' for initial arrow up -->
-                </div>
-                <div class="volume-chapters-list">
-                    ${renderChaptersList(chaptersInVolume)}
-                </div>
-            </div>
-        `;
-    });
-
-    chaptersContainer.innerHTML = html;
-
-    // Add accordion functionality and ensure they are open by default
-    document.querySelectorAll('.volume-group').forEach(group => {
-        const header = group.querySelector('.volume-header');
-        const content = group.querySelector('.volume-chapters-list');
-        const arrow = header.querySelector('.volume-arrow');
-
-        // Set max-height initially for open state (after content is rendered)
-        // Use a small timeout to ensure DOM has rendered fully before calculating scrollHeight
-        setTimeout(() => {
-            if (header.classList.contains('active')) {
-                content.style.maxHeight = content.scrollHeight + "px";
-            }
-        }, 0);
-
-
-        header.addEventListener('click', () => {
-            header.classList.toggle('active');
-            arrow.classList.toggle('rotated'); // Toggle rotated class for arrow animation
-
-            if (content.style.maxHeight && content.style.maxHeight !== "0px") { // If currently open (maxHeight has a value > 0)
-                content.style.maxHeight = "0px"; // Close it
-            } else { // If currently closed (maxHeight is 0px or not set)
-                content.style.maxHeight = content.scrollHeight + "px"; // Open it
-            }
-        });
-    });
+  });
 }
 
-
-// Fonction pour afficher la page de détail d'une série
 function renderSeriesDetailPage(s) {
-    if (!seriesDetailSection) return;
+  if (!seriesDetailSection) return;
 
-    // Store all chapters for current series globally (for sorting)
-    const allChaptersRaw = Object.entries(s.chapters)
-        .map(([chapNum, chapData]) => ({
-            chapter: chapNum,
-            title: chapData.title,
-            volume: chapData.volume,
-            last_updated: chapData.last_updated * 1000,
-            url: chapData.groups && chapData.groups.Big_herooooo !== '' ? `https://cubari.moe/read/gist/${s.base64Url}/${chapNum.replaceAll(".", "-")}/1/` : null, // Set URL to null if blocked
-            licencied: chapData.licencied, // Ensure licensed info is passed
-            groups: chapData.groups, // Ensure groups info is passed
-            collab: chapData.collab // Ensure collab info is passed
-        }));
-    
-    let authorArtistLine = '';
-    if (s.author && s.artist) {
-      authorArtistLine = `<p><strong>Auteur :</strong> ${s.author} <span class="detail-artist-spacing"><strong>Dessinateur :</strong> ${s.artist}</span></p>`;
-    } else if (s.author) {
-      authorArtistLine = `<p><strong>Auteur :</strong> ${s.author}</p>`;
-    } else if (s.artist) {
-      authorArtistLine = `<p><strong>Dessinateur :</strong> ${s.artist}</p>`;
+  const allChaptersRaw = Object.entries(s.chapters)
+    .map(([chapNum, chapData]) => ({
+      chapter: chapNum,
+      title: chapData.title,
+      volume: chapData.volume,
+      last_updated: chapData.last_updated * 1000,
+      url: chapData.groups && chapData.groups.Big_herooooo !== '' ? `https://cubari.moe/read/gist/${s.base64Url}/${chapNum.replaceAll(".", "-")}/1/` : null,
+      licencied: chapData.licencied,
+      groups: chapData.groups,
+      collab: chapData.collab
+    }));
+
+  const titleHtml = `<h1 class="detail-title">${s.title}</h1>`;
+  const tagsHtml = Array.isArray(s.tags) && s.tags.length > 0
+    ? `<div class="detail-tags">${s.tags.map((t) => `<span class="detail-tag">${t}</span>`).join("")}</div>`
+    : "";
+
+  let authorArtistHtml = '';
+  const authorText = s.author ? `<strong>Auteur :</strong> ${s.author}` : '';
+  const artistText = s.artist ? `<strong>Dessinateur :</strong> ${s.artist}` : '';
+
+  if (s.author && s.artist) {
+    if (s.author === s.artist) {
+      authorArtistHtml = `<p class="detail-meta">${authorText} <span class="detail-artist-spacing">${artistText}</span></p>`;
+    } else {
+      authorArtistHtml = `<p class="detail-meta">${authorText} <span class="detail-artist-spacing">${artistText}</span></p>`;
+    }
+  } else if (s.author) {
+    authorArtistHtml = `<p class="detail-meta">${authorText}</p>`;
+  } else if (s.artist) {
+    authorArtistHtml = `<p class="detail-meta">${artistText}</p>`;
+  }
+
+  let yearStatusHtmlMobile = '';
+  let typeMagazineHtmlMobile = '';
+  let additionalMetadataForDesktop = [];
+
+  if (s.release_year || s.release_status) {
+    let yearPart = s.release_year ? `<strong>Année :</strong> ${s.release_year}` : '';
+    let statusPart = s.release_status ? `<strong>Statut :</strong> ${s.release_status}` : '';
+
+    yearStatusHtmlMobile = `<p class="detail-meta detail-meta-flex-line detail-year-status-mobile">`;
+    yearStatusHtmlMobile += `<span class="detail-meta-flex-prefix">${yearPart}</span>`; 
+    if (yearPart && statusPart) { 
+      yearStatusHtmlMobile += `<span class="detail-meta-flex-suffix">${statusPart}</span>`;
+    } else if (!yearPart && statusPart) {
+      yearStatusHtmlMobile = `<p class="detail-meta detail-meta-flex-line detail-year-status-mobile"><span class="detail-meta-flex-prefix">${statusPart}</span></p>`;
+    }
+    if (yearPart && !statusPart) {
+      yearStatusHtmlMobile += `</p>`; 
+    } else if (yearPart && statusPart) {
+      yearStatusHtmlMobile += `</p>`;
     }
 
-    let additionalMetadataItems = [];
+  }
 
-    if (s.release_year) {
-        additionalMetadataItems.push(`<p><strong>Année :</strong> ${s.release_year}</p>`);
+
+  if (s.manga_type || s.magazine) {
+    let typePart = s.manga_type ? `<strong>Type :</strong> ${s.manga_type}` : '';
+    let magazinePart = s.magazine ? `<strong>Magazine :</strong> ${s.magazine}` : '';
+
+    typeMagazineHtmlMobile = `<p class="detail-meta detail-meta-flex-line detail-type-magazine-mobile">`;
+    typeMagazineHtmlMobile += `<span class="detail-meta-flex-prefix">${typePart}</span>`;
+    if (typePart && magazinePart) {
+      typeMagazineHtmlMobile += `<span class="detail-meta-flex-suffix">${magazinePart}</span>`;
+    } else if (!typePart && magazinePart) {
+      typeMagazineHtmlMobile = `<p class="detail-meta detail-meta-flex-line detail-type-magazine-mobile"><span class="detail-meta-flex-prefix">${magazinePart}</span></p>`;
     }
-    if (s.release_status) {
-        additionalMetadataItems.push(`<p><strong>Statut :</strong> ${s.release_status}</p>`);
+
+    if (typePart && !magazinePart) {
+      typeMagazineHtmlMobile += `</p>`;
+    } else if (typePart && magazinePart) {
+      typeMagazineHtmlMobile += `</p>`;
     }
+  }
+
+
+  if (s.release_year) additionalMetadataForDesktop.push(`<p><strong>Année :</strong> ${s.release_year}</p>`);
+  if (s.release_status) additionalMetadataForDesktop.push(`<p><strong>Statut :</strong> ${s.release_status}</p>`);
+  if (s.manga_type) additionalMetadataForDesktop.push(`<p><strong>Type :</strong> ${s.manga_type}</p>`);
+  if (s.magazine) additionalMetadataForDesktop.push(`<p><strong>Magazine :</strong> ${s.magazine}</p>`);
+  if (s.alternative_titles && s.alternative_titles.length > 0) {
+    additionalMetadataForDesktop.push(`<p><strong>Titre alternatif :</strong> ${s.alternative_titles.join(', ')}</p>`);
+  }
+
+  const additionalMetadataCombinedHtmlForDesktop = additionalMetadataForDesktop.length > 0
+    ? `<div class="detail-additional-metadata">${additionalMetadataForDesktop.join('')}</div>`
+    : "";
+
+  const descriptionHtmlText = s.description || 'Pas de description disponible.';
+
+  let finalHtmlStructure;
+  const isMobile = window.matchMedia("(max-width: 768px)").matches;
+
+  const chaptersSectionHtml = `
+    <div class="chapters-main-header">
+        <h3 class="section-title">Liste des Chapitres</h3>
+        <div class="chapter-sort-filter">
+            <button id="sort-volumes-btn" class="sort-button" title="Trier les volumes">
+                <i class="fas fa-sort-numeric-down-alt"></i>
+            </button>
+        </div>
+    </div>
+    <div class="chapters-accordion-container">
+        <!-- Chapters grouped by volume will be injected here -->
+    </div>
+  `;
+
+  if (isMobile) {
+    let alternativeTitlesMobileHtml = '';
     if (s.alternative_titles && s.alternative_titles.length > 0) {
-        additionalMetadataItems.push(`<p><strong>Titre alternatif :</strong> ${s.alternative_titles.join(', ')}</p>`);
-    }
-    if (s.manga_type) {
-        additionalMetadataItems.push(`<p><strong>Type :</strong> ${s.manga_type}</p>`);
-    }
-    if (s.magazine) {
-        additionalMetadataItems.push(`<p><strong>Magazine :</strong> ${s.magazine}</p>`);
+      alternativeTitlesMobileHtml = `<p class="detail-meta"><strong>Titre alternatif :</strong> ${s.alternative_titles.join(', ')}</p>`;
     }
 
-    const additionalMetadataHtml = additionalMetadataItems.length > 0 ?
-        `<div class="detail-additional-metadata">${additionalMetadataItems.join('')}</div>` :
-        '';
-
-    seriesDetailSection.innerHTML = `
+    finalHtmlStructure = `
         <div class="series-detail-container">
-            <div class="detail-top-section">
-                <div class="detail-info">
-                    <h1 class="detail-title">${s.title}</h1>
-                    ${ 
-                      Array.isArray(s.tags) && s.tags.length > 0
-                        ? `
-                        <div class="detail-tags">
-                            ${s.tags
-                                .map((t) => `<span class="detail-tag">${t}</span>`)
-                                .join("")}
-                        </div>`
-                        : ""
-                    }
-                    ${authorArtistLine}
-                    ${additionalMetadataHtml}
+            <div class="detail-top-layout-wrapper">
+                <div class="detail-cover-wrapper">
+                    <img src="${s.cover}" alt="${s.title} Cover" class="detail-cover">
                 </div>
-                <img src="${s.cover}" alt="${s.title} Cover" class="detail-cover">
-            </div>
-            
-            <p class="detail-description">${s.description || 'Pas de description disponible.'}</p>
-
-            <div class="chapters-main-header">
-                <h3 class="section-title">Liste des Chapitres</h3>
-                <div class="chapter-sort-filter">
-                    <button id="sort-volumes-btn" class="sort-button">
-                        <i class="fas fa-sort-numeric-down-alt"></i> Volumes : Du plus récent au plus ancien
-                    </button>
+                <div class="detail-all-info-column">
+                    <div class="detail-primary-info-wrapper">
+                        ${titleHtml}
+                        ${tagsHtml}
+                        ${authorArtistHtml}
+                    </div>
                 </div>
             </div>
-            
-            <div class="chapters-accordion-container">
-                <!-- Chapters grouped by volume will be injected here by displayGroupedChapters -->
+            <div class="detail-secondary-info-wrapper">
+              ${yearStatusHtmlMobile}
+              ${typeMagazineHtmlMobile}
+              ${alternativeTitlesMobileHtml}
             </div>
+            <p class="detail-description">${descriptionHtmlText}</p>
+            ${chaptersSectionHtml}
         </div>
     `;
+  } else {
+    finalHtmlStructure = `
+        <div class="series-detail-container">
+            <div class="detail-top-layout-wrapper">
+                <div class="detail-cover-wrapper">
+                    <img src="${s.cover}" alt="${s.title} Cover" class="detail-cover">
+                </div>
+                <div class="detail-all-info-column">
+                    <div class="detail-primary-info-wrapper">
+                        ${titleHtml}
+                        ${tagsHtml}
+                        ${authorArtistHtml}
+                    </div>
+                    <div class="detail-secondary-info-wrapper">
+                        ${additionalMetadataCombinedHtmlForDesktop}
+                    </div>
+                </div>
+            </div>
+            <p class="detail-description">${descriptionHtmlText}</p>
+            ${chaptersSectionHtml}
+        </div>
+    `;
+  }
 
-    document.title = `BigSolo – ${s.title}`;
+  seriesDetailSection.innerHTML = finalHtmlStructure;
 
-    // Initial display of grouped chapters
-    displayGroupedChapters(allChaptersRaw);
+  document.title = `BigSolo – ${s.title}`;
+  displayGroupedChapters(allChaptersRaw);
 
-    // Add event listener for the sort button
-    const sortButton = document.getElementById('sort-volumes-btn');
-    if (sortButton) {
-        sortButton.addEventListener('click', () => {
-            volumeSortOrder = volumeSortOrder === 'desc' ? 'asc' : 'desc';
-            const icon = sortButton.querySelector('i');
-            if (volumeSortOrder === 'desc') {
-                icon.className = "fas fa-sort-numeric-down-alt";
-                sortButton.innerHTML = `<i class="fas fa-sort-numeric-down-alt"></i> Volumes : Du plus récent au plus ancien`;
-            } else {
-                icon.className = "fas fa-sort-numeric-up-alt";
-                sortButton.innerHTML = `<i class="fas fa-sort-numeric-up-alt"></i> Volumes : Du plus ancien au plus récent`;
-            }
-            displayGroupedChapters(allChaptersRaw); // Re-render chapters with new sort order
-        });
-    }
+  const sortButton = document.getElementById('sort-volumes-btn');
+  if (sortButton) {
+    sortButton.addEventListener('click', () => {
+      volumeSortOrder = volumeSortOrder === 'desc' ? 'asc' : 'desc';
+      const icon = sortButton.querySelector('i');
+      if (icon) {
+        icon.className = volumeSortOrder === 'desc' ? "fas fa-sort-numeric-down-alt" : "fas fa-sort-numeric-up-alt";
+      }
+      displayGroupedChapters(allChaptersRaw);
+    });
+  }
 }
 
-
-// Récupérer et traiter les JSON de chaque série
 async function fetchAllSeries() {
   const dev = await fetch("./config-dev.json");
-  if (dev.status === 404) {
-    CONFIG = await fetch("./config.json").then((res) => res.json());
-  } else {
-    CONFIG = await dev.json();
-  }
+  if (dev.status === 404) CONFIG = await fetch("./config.json").then((res) => res.json());
+  else CONFIG = await dev.json();
   let seriesPromises = [];
-
   if (CONFIG.ENV === "LOCAL_DEV") {
-    if (!CONFIG.LOCAL_SERIES_FILES || !Array.isArray(CONFIG.LOCAL_SERIES_FILES)) {
-      console.error("Erreur de configuration : LOCAL_SERIES_FILES n'est pas défini ou n'est pas un tableau dans config.json pour l'environnement LOCAL_DEV.");
-      return [];
-    }
+    if (!CONFIG.LOCAL_SERIES_FILES || !Array.isArray(CONFIG.LOCAL_SERIES_FILES)) { console.error("Erreur de configuration : LOCAL_SERIES_FILES n'est pas défini ou n'est pas un tableau dans config.json pour l'environnement LOCAL_DEV."); return []; }
     seriesPromises = CONFIG.LOCAL_SERIES_FILES.map(async (filename) => {
       const localPath = `./cubari/${filename}`;
       try {
-        const serie = await fetch(localPath).then((r) => {
-          if (!r.ok) throw new Error(`Fichier local ${localPath} non trouvé ou inaccessible (HTTP ${r.status})`);
-          return r.json();
-        });
-        
-        const githubFileName = filename; 
-        const base64Url = btoa(`${CONFIG.URL_RAW_JSON_GITHUB}${githubFileName}`);
-        serie.urlSerie = `https://cubari.moe/read/gist/${base64Url}`;
-        serie.base64Url = base64Url;
-        return serie;
-      } catch (error) {
-        console.error(`Erreur lors du chargement du fichier de série local ${localPath}:`, error);
-        return null; 
-      }
+        const serie = await fetch(localPath).then((r) => { if (!r.ok) throw new Error(`Fichier local ${localPath} non trouvé (HTTP ${r.status})`); return r.json(); });
+        const githubFileName = filename; const base64Url = btoa(`${CONFIG.URL_RAW_JSON_GITHUB}${githubFileName}`);
+        serie.urlSerie = `https://cubari.moe/read/gist/${base64Url}`; serie.base64Url = base64Url; return serie;
+      } catch (error) { console.error(`Erreur chargement local ${localPath}:`, error); return null; }
     });
   } else {
-    const contents = await fetch(CONFIG.URL_GIT_CUBARI).then((r) => {
-      if (!r.ok) throw new Error(`GitHub API ${r.status}`);
-      return r.json();
-    });
-
-    seriesPromises = contents
-      .filter((file) => file.name.endsWith(".json"))
-      .map(async (file) => {
-        const serie = await fetch(file.download_url).then((r) => r.json());
+    const contents = await fetch(CONFIG.URL_GIT_CUBARI).then((r) => { if (!r.ok) throw new Error(`GitHub API ${r.status}`); return r.json(); });
+    seriesPromises = contents.filter((file) => file.name.endsWith(".json")).map(async (file) => {
+      try {
+        const serie = await fetch(file.download_url).then((r) => { if (!r.ok) throw new Error(`Erreur fetch ${file.download_url} (HTTP ${r.status})`); return r.json(); });
         const base64Url = btoa(`${CONFIG.URL_RAW_JSON_GITHUB}${file.name}`);
-        serie.urlSerie = `https://cubari.moe/read/gist/${base64Url}`;
-        serie.base64Url = base64Url;
-        return serie;
-      });
+        serie.urlSerie = `https://cubari.moe/read/gist/${base64Url}`; serie.base64Url = base64Url; return serie;
+      } catch (error) {
+        console.error(`Erreur chargement de ${file.name} depuis ${file.download_url}:`, error);
+        return null;
+      }
+    });
   }
-
   const allSeries = await Promise.all(seriesPromises);
-  return allSeries.filter(s => s !== null);
+  return allSeries.filter(s => s !== null && typeof s === 'object' && s.title);
 }
 
-// Fonction principale pour initialiser l'application
 async function bootstrap() {
   try {
-    const allSeries = await fetchAllSeries(); 
-
+    const allSeries = await fetchAllSeries();
     const urlParams = new URLSearchParams(window.location.search);
     const seriesId = urlParams.get('id');
 
     if (seriesId && seriesDetailSection) {
-        const seriesData = allSeries.find(s => slugify(s.title) === seriesId);
-        if (seriesData) {
-            renderSeriesDetailPage(seriesData);
-        } else {
-            seriesDetailSection.innerHTML = "<p>Série non trouvée.</p>";
-        }
-        return; 
+      const seriesData = allSeries.find(s => slugify(s.title) === seriesId);
+      if (seriesData) renderSeriesDetailPage(seriesData);
+      else seriesDetailSection.innerHTML = "<p>Série non trouvée.</p>";
+      initializeScrollObserver();
+      return;
     }
 
-    if (!latestContainer && !seriesGridOngoing && !seriesGridOneShot) {
-        return; 
-    }
-    
-    if (latestContainer && seriesGridOngoing && seriesGridOneShot) {
-        const onGoing = allSeries.filter((serie) => !serie.completed && !serie.os);
-        const os = allSeries.filter((serie) => serie.os);
+    if (latestContainer || seriesGridOngoing || seriesGridOneShot) {
+      if (seriesGridOngoing) {
+        const onGoing = allSeries.filter((serie) => serie && !serie.completed && !serie.os);
+        seriesGridOngoing.innerHTML = onGoing.map(renderSeries).join("") || "<p>Aucune série en cours pour le moment.</p>";
+      }
+      if (seriesGridOneShot) {
+        const os = allSeries.filter((serie) => serie && serie.os);
+        seriesGridOneShot.innerHTML = os.map(renderSeries).join("") || "<p>Aucun one-shot pour le moment.</p>";
+      }
 
-        seriesGridOngoing.innerHTML = onGoing.map(renderSeries).join("");
-        seriesGridOneShot.innerHTML = os.map(renderSeries).join("");
-
+      if (latestContainer) {
         const allChapters = allSeries
-        .flatMap((serie) =>
+          .filter(serie => serie && serie.chapters)
+          .flatMap((serie) =>
             Object.entries(serie.chapters).map(([chapNum, chapData]) => {
-            chapData.serieTitle = serie.title;
-            chapData.serieCover = serie.cover;
-            chapData.chapter = chapNum;
-            chapData.last_updated = chapData.last_updated * 1000;
-            chapData.url = `https://cubari.moe/read/gist/${
-                serie.base64Url
-            }/${chapNum.replaceAll(".", "-")}/1/`;
-            return chapData;
+              if (typeof chapData !== 'object' || chapData === null) {
+                console.warn(`Données de chapitre invalides pour ${serie.title} - Ch. ${chapNum}`);
+                return null;
+              }
+              return {
+                ...chapData,
+                serieTitle: serie.title,
+                serieCover: serie.cover,
+                chapter: chapNum,
+                last_updated: (chapData.last_updated || 0) * 1000,
+                url: `https://cubari.moe/read/gist/${serie.base64Url}/${chapNum.replaceAll(".", "-")}/1/`
+              };
             })
-        )
-        .sort((a, b) => b.last_updated - a.last_updated)
-        .slice(0, 15);
+          )
+          .filter(chapter => chapter !== null)
+          .sort((a, b) => b.last_updated - a.last_updated)
+          .slice(0, 15);
 
         const track = document.querySelector(".carousel-track");
         if (track) {
+          if (allChapters.length > 0) {
             track.innerHTML = allChapters.map(renderChapter).join("");
+          } else {
+            track.innerHTML = "<p>Aucune sortie récente.</p>";
+          }
 
-            const prevBtn = document.querySelector(".carousel-prev");
-            const nextBtn = document.querySelector(".carousel-next");
+          const prevBtn = document.querySelector(".carousel-prev");
+          const nextBtn = document.querySelector(".carousel-next");
 
-            nextBtn.addEventListener("click", () => {
-                const visibleWidth = track.clientWidth;
-                const maxScrollLeft = track.scrollWidth - visibleWidth;
-                if (track.scrollLeft >= maxScrollLeft) {
-                    track.scrollTo({ left: 0, behavior: "smooth" });
-                } else {
-                    track.scrollBy({ left: visibleWidth, behavior: "smooth" });
-                }
-            });
+          if (allChapters.length > 1 && prevBtn && nextBtn) {
+            prevBtn.style.display = 'flex';
+            nextBtn.style.display = 'flex';
+            nextBtn.addEventListener("click", () => { const visW = track.clientWidth; const maxSL = track.scrollWidth - visW; if (track.scrollLeft >= maxSL - 1) track.scrollTo({ left: 0, behavior: "smooth" }); else track.scrollBy({ left: visW, behavior: "smooth" }); });
+            prevBtn.addEventListener("click", () => { const visW = track.clientWidth; const maxSL = track.scrollWidth - visW; if (track.scrollLeft <= 1) track.scrollTo({ left: maxSL, behavior: "smooth" }); else track.scrollBy({ left: -visW, behavior: "smooth" }); });
 
-            prevBtn.addEventListener("click", () => {
-                const visibleWidth = track.clientWidth;
-                const maxScrollLeft = track.scrollWidth - visibleWidth;
-                if (track.scrollLeft <= 0) {
-                    track.scrollTo({ left: maxScrollLeft, behavior: "smooth" });
-                } else {
-                    track.scrollBy({ left: -visibleWidth, behavior: "smooth" });
-                }
-            });
-
-            let isDragging = false;
-            let startX = 0;
-            let scrollStart = 0;
-
-            track.addEventListener("mousedown", (e) => {
-                isDragging = true;
-                track.classList.add("active");
-                startX = e.pageX - track.offsetLeft;
-                scrollStart = track.scrollLeft;
-            });
-
-            document.addEventListener("mouseup", () => {
-                isDragging = false;
-                track.classList.remove("active");
-            });
-
-            track.addEventListener("mousemove", (e) => {
-                if (!isDragging) return;
-                e.preventDefault();
-                const x = e.pageX - track.offsetLeft;
-                const walk = (x - startX) * 1.5;
-                track.scrollLeft = scrollStart - walk;
-            });
-
-            track.addEventListener("touchstart", (e) => {
-                startX = e.touches[0].pageX - track.offsetLeft;
-                scrollStart = track.scrollLeft;
-            });
-
-            track.addEventListener("touchmove", (e) => {
-                const x = e.touches[0].pageX - track.offsetLeft;
-                const walk = (x - startX) * 1.5;
-                track.scrollLeft = scrollStart - walk;
-            });
+            let isDragging = false, startX = 0, scrollStart = 0;
+            track.addEventListener("mousedown", (e) => { isDragging = true; track.classList.add("active"); startX = e.pageX - track.offsetLeft; scrollStart = track.scrollLeft; });
+            document.addEventListener("mouseup", () => { if (isDragging) { isDragging = false; track.classList.remove("active"); } });
+            track.addEventListener("mouseleave", () => { if (isDragging) { isDragging = false; track.classList.remove("active"); } });
+            track.addEventListener("mousemove", (e) => { if (!isDragging) return; e.preventDefault(); const x = e.pageX - track.offsetLeft; const walk = (x - startX) * 1.5; track.scrollLeft = scrollStart - walk; });
+            track.addEventListener("touchstart", (e) => { isDragging = true; startX = e.touches[0].pageX - track.offsetLeft; scrollStart = track.scrollLeft; }, { passive: true });
+            track.addEventListener("touchmove", (e) => { if (!isDragging) return; const x = e.touches[0].pageX - track.offsetLeft; const walk = (x - startX) * 1.5; track.scrollLeft = scrollStart - walk; });
+            track.addEventListener("touchend", () => { isDragging = false; });
+            track.addEventListener("touchcancel", () => { isDragging = false; });
+          } else if (prevBtn && nextBtn) {
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+          }
         }
+      }
+      initializeScrollObserver();
+    } else if (document.querySelector(".section-title")) {
+      initializeScrollObserver();
     }
 
   } catch (err) {
-    console.error("Erreur de chargement :", err);
+    console.error("Erreur de chargement global de l'application :", err);
     if (latestContainer) latestContainer.innerHTML = "<p>Impossible de charger les chapitres.</p>";
     if (seriesGridOngoing) seriesGridOngoing.innerHTML = "<p>Impossible de charger les séries.</p>";
     if (seriesGridOneShot) seriesGridOneShot.innerHTML = "<p>Impossible de charger les one-shots.</p>";
@@ -591,5 +631,4 @@ async function bootstrap() {
   }
 }
 
-// Lancement de l’app
 bootstrap();
