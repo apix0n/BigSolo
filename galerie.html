@@ -24,7 +24,7 @@
   <meta charset="UTF-8" />
   <meta property="og:title" content="BigSolo – Galerie des Colorisations" />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="/img/banniere.webp" /> <!-- Ou une image spécifique à la galerie -->
+  <meta property="og:image" content="/img/banniere.webp" />
   <meta property="og:url" content="https://bigsolo.fr/galerie.html" />
   <meta property="og:description" content="Découvrez les magnifiques colorisations de la communauté BigSolo !" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -33,12 +33,11 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap"
-    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="img/icon.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" /> <!-- J'ai mis une intégrité valide pour Font Awesome -->
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -76,12 +75,12 @@
   </main>
 
   <!-- NOUVELLE STRUCTURE LIGHTBOX -->
-  <div id="lightbox-modal" class="lightbox-modal">
+  <div id="lightbox-modal" class="lightbox-modal" style="display:none;">
     <span class="lightbox-close">×</span>
     <div class="lightbox-content-wrapper">
       <!-- Image principale -->
       <div class="lightbox-image-container">
-        <img class="lightbox-image" id="lightbox-img" src="" alt="Colorisation en grand">
+        <img class="lightbox-image" id="lightbox-img" src="" alt="Colorisation en grand" />
       </div>
 
       <!-- Panneau d'informations pour Desktop (positionné par CSS) -->
@@ -96,15 +95,15 @@
           <!-- Sera rempli par JavaScript -->
         </div>
       </div>
-    </div>
 
-    <!-- Panneau d'informations pour Mobile (reste séparé pour une gestion CSS plus simple) -->
-    <div class="lightbox-info-panel lightbox-info-panel-mobile">
-      <div class="lightbox-artist-info"> <!-- Utilise les mêmes classes pour JS -->
-        <!-- Sera rempli par JavaScript (même contenu que desktop) -->
-      </div>
-      <div class="lightbox-colo-info"> <!-- Utilise les mêmes classes pour JS -->
-        <!-- Sera rempli par JavaScript (même contenu que desktop) -->
+      <!-- Panneau d'informations pour Mobile (déplacé **à l’intérieur** du wrapper, après image) -->
+      <div class="lightbox-info-panel lightbox-info-panel-mobile">
+        <div class="lightbox-artist-info">
+          <!-- Sera rempli par JavaScript -->
+        </div>
+        <div class="lightbox-colo-info">
+          <!-- Sera rempli par JavaScript -->
+        </div>
       </div>
     </div>
   </div>

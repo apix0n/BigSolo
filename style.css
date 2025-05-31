@@ -1397,7 +1397,6 @@ body.dark .lightbox-modal {
   /* Centre verticalement l'image et le panneau d'info s'ils ont des hauteurs différentes */
   justify-content: center;
   /* Centre le contenu horizontalement s'il est plus petit que max-width */
-  gap: 1.5rem;
   /* Espace entre l'image et le panneau d'info sur desktop */
   max-width: 95vw;
   /* Limite la largeur totale du contenu (image + infos) */
@@ -1658,6 +1657,7 @@ body.dark .lightbox-colo-info-block {
 
   .lightbox-info-panel-mobile {
     display: flex;
+    margin-top: 1rem;
   }
 
   .lightbox-artist-info .artist-header {
@@ -1692,6 +1692,17 @@ body.dark .lightbox-colo-info-block {
 
   p {
     font-size: 0.9rem;
+  }
+
+  .lightbox-content-wrapper {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;        /* Ajouté */
+    max-width: 100%;    /* Ajouté */
+  }
+
+  .lightbox-info-panel-mobile {
+    margin-top: 1rem; /* un peu d’espace au-dessus des infos */
   }
 
   .header-container {
@@ -2120,8 +2131,8 @@ body.dark .lightbox-colo-info-block {
   }
 
   .gallery-grid {
-    column-count: 2;
     column-gap: 0.6rem;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .colo-card {
@@ -2132,9 +2143,11 @@ body.dark .lightbox-colo-info-block {
   .colo-card-overlay {
     opacity: 1;
     transform: translateY(0);
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0) 80%);
-    font-size: 0.7rem;
     padding: 0.4rem;
+  }
+
+  .colo-card-overlay p{
+    font-size: 0.7rem;
   }
 
   /* Ajustements Lightbox pour Mobile */
@@ -2142,9 +2155,11 @@ body.dark .lightbox-colo-info-block {
     padding: 10px;
   }
 
-  .lightbox-image-container {
-    max-height: 50vh;
-  }
+.lightbox-image-container {
+  max-width: 600px;
+  width: 100%;
+  flex-shrink: 0;
+}
 
   .lightbox-info-panel-mobile {
     font-size: 0.9em;
@@ -2189,7 +2204,7 @@ body.dark .lightbox-colo-info-block {
 
   /* Encore plus petit */
   .gallery-grid {
-    column-count: 1;
+    grid-template-columns: repeat(3, 1fr);
   }
 
   /* Une seule colonne pour la galerie */
