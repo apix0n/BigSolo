@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <script>
+    // Script anti-flash (identique aux autres pages)
+    (function () {
+      try {
+        var theme = localStorage.getItem('mv-theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var htmlEl = document.documentElement;
+        if (theme === 'dark' || (!theme && prefersDark)) {
+          htmlEl.classList.add('dark');
+          htmlEl.style.backgroundColor = '#15171a';
+          htmlEl.style.color = '#eceff4';
+        } else {
+          htmlEl.classList.remove('dark');
+          htmlEl.style.backgroundColor = '#f7f8fc';
+          htmlEl.style.color = '#222831';
+        }
+      } catch (e) { }
+    })();
+  </script>
+  <meta charset="UTF-8" />
+  <meta property="og:title" content="BigSolo – Galerie des Colorisations" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="/img/banniere.webp" /> <!-- Ou une image spécifique à la galerie -->
+  <meta property="og:url" content="https://bigsolo.fr/galerie.html" />
+  <meta property="og:description" content="Découvrez les magnifiques colorisations de la communauté BigSolo !" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BigSolo – Galerie</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet" />
+  <link rel="icon" type="image/png" href="img/icon.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" /> <!-- J'ai mis une intégrité valide pour Font Awesome -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header id="main-header"></header>
+  <div class="mobile-menu-overlay" id="main-mobile-menu-overlay"></div>
+
+  <main>
+    <section class="gallery-section">
+      <h1 class="section-title page-title">Galerie des Colorisations</h1>
+
+      <div class="gallery-controls">
+        <div class="gallery-sort-filter">
+          <label for="sort-order">Trier par :</label>
+          <select id="sort-order" name="sort-order">
+            <option value="date_desc">Date (plus récentes)</option>
+            <option value="date_asc">Date (plus anciennes)</option>
+            <option value="chapitre_desc">Chapitre (décroissant)</option>
+            <option value="chapitre_asc">Chapitre (croissant)</option>
+          </select>
+        </div>
+        <div class="gallery-sort-filter">
+          <label for="filter-artist">Artiste :</label>
+          <select id="filter-artist" name="filter-artist">
+            <option value="all">Tous les artistes</option>
+            <!-- Les options des artistes seront injectées par JS -->
+          </select>
+        </div>
+      </div>
+
+      <div class="gallery-grid" id="gallery-grid-container">
+        <!-- Les cartes de colorisation seront injectées ici par JS -->
+      </div>
+    </section>
+  </main>
+
+  <!-- NOUVELLE STRUCTURE LIGHTBOX -->
+  <div id="lightbox-modal" class="lightbox-modal">
+    <span class="lightbox-close">×</span>
+    <div class="lightbox-content-wrapper">
+      <!-- Image principale -->
+      <div class="lightbox-image-container">
+        <img class="lightbox-image" id="lightbox-img" src="" alt="Colorisation en grand">
+      </div>
+
+      <!-- Panneau d'informations pour Desktop (positionné par CSS) -->
+      <div class="lightbox-info-panel lightbox-info-panel-desktop">
+        <!-- BLOC INFO ARTISTE (Desktop) -->
+        <div class="lightbox-artist-info-block">
+          <!-- Sera rempli par JavaScript -->
+        </div>
+
+        <!-- BLOC INFO COLORISATION (Desktop) -->
+        <div class="lightbox-colo-info-block">
+          <!-- Sera rempli par JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Panneau d'informations pour Mobile (reste séparé pour une gestion CSS plus simple) -->
+    <div class="lightbox-info-panel lightbox-info-panel-mobile">
+      <div class="lightbox-artist-info"> <!-- Utilise les mêmes classes pour JS -->
+        <!-- Sera rempli par JavaScript (même contenu que desktop) -->
+      </div>
+      <div class="lightbox-colo-info"> <!-- Utilise les mêmes classes pour JS -->
+        <!-- Sera rempli par JavaScript (même contenu que desktop) -->
+      </div>
+    </div>
+  </div>
+  <!-- FIN NOUVELLE STRUCTURE LIGHTBOX -->
+
+  <script src="index.js" type="module"></script>
+</body>
+
+</html>

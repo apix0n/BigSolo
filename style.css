@@ -1,54 +1,70 @@
+/* ==========================================================================
+   1. VARIABLES & THEME
+   ========================================================================== */
 html {
-  background-color: var(--clr-bg-light) !important;
+  background-color: #f7f8fc !important;
   color: #222831 !important;
 }
 
 html.dark {
-  background-color: var(--clr-bg-dark) !important;
+  background-color: #15171a !important;
   color: #eceff4 !important;
 }
 
 :root {
-  --clr-bg: #f7f8fc;
-  --clr-bg-card: #ffffff;
-  --clr-text: #222831;
-  --clr-text-sub: #69707d;
-  --clr-primary: #0095AD;
+  --clr-bg-light: #f7f8fc;
+  --clr-bg-dark: #15171a;
+  --clr-bg-card-light: #ffffff;
+  --clr-bg-card-dark: #1e2024;
+  --clr-text-light: #222831;
+  --clr-text-dark: #eceff4;
+  --clr-text-sub-light: #69707d;
+  --clr-text-sub-dark: #cad0da;
+  --clr-primary-light: #0095AD;
+  --clr-primary-dark: #1ab6b9;
+  --clr-accent-light: #ff6b6b;
+  --clr-accent-dark: #ff7f7f;
+
+  --clr-bg: var(--clr-bg-light);
+  --clr-bg-card: var(--clr-bg-card-light);
+  --clr-text: var(--clr-text-light);
+  --clr-text-sub: var(--clr-text-sub-light);
+  --clr-primary: var(--clr-primary-light);
   --clr-primary-rgb: 0, 149, 173;
-  --clr-accent: #ff6b6b;
+  --clr-accent: var(--clr-accent-light);
   --clr-accent-rgb: 255, 107, 107;
   --clr-text-rgb: 34, 40, 49;
+  /* Utilisé pour les bordures/ombres subtiles */
+  --clr-bg-rgb-val: 247, 248, 252;
+  /* Pour light theme background */
+
 
   --series-fixed-cover-width-desktop: 180px;
   --series-fixed-cover-width-mobile: 120px;
   --mobile-carousel-card-aspect-ratio: 1.8;
 }
 
-html.dark:root { /* Ou simplement html.dark si vous n'utilisez pas :root pour ça */
-  --clr-bg: var(--clr-bg-dark);
-  --clr-text: var(--clr-text-dark); 
-}
-
-body {
-  font-family: "Urbanist", system-ui, sans-serif;
-  background: var(--clr-bg);
-  color: var(--clr-text);
-  overflow-x: hidden;
-  line-height: 1.55;
-}
-
+html.dark:root,
 body.dark {
-  --clr-bg: #15171a;
-  --clr-bg-card: #1e2024;
-  --clr-text: #eceff4;
-  --clr-text-sub: #cad0da;
-  --clr-primary: #1ab6b9;
+  --clr-bg: var(--clr-bg-dark);
+  --clr-bg-card: var(--clr-bg-card-dark);
+  --clr-text: var(--clr-text-dark);
+  --clr-text-sub: var(--clr-text-sub-dark);
+  --clr-primary: var(--clr-primary-dark);
   --clr-primary-rgb: 26, 182, 185;
-  --clr-accent: #ff7f7f;
+  --clr-accent: var(--clr-accent-dark);
   --clr-accent-rgb: 255, 127, 127;
   --clr-text-rgb: 236, 239, 244;
+  --clr-bg-rgb-val: 21, 23, 26;
+  /* Pour dark theme background */
 }
 
+/* ... (Styles Reset, Header, Main Content, Carousel, Séries etc. restent identiques) ... */
+/* Copiez tout depuis votre style.css existant jusqu'à la section "Page Galerie" */
+
+/* ==========================================================================
+   2. RESET & BASE STYLES
+   ========================================================================== */
 * {
   margin: 0;
   padding: 0;
@@ -56,13 +72,32 @@ body.dark {
   transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Urbanist", system-ui, sans-serif;
+  background-color: var(--clr-bg);
+  color: var(--clr-text);
+  overflow-x: hidden;
+  line-height: 1.55;
+}
+
 img {
   display: block;
-  width: 100%;
+  max-width: 100%;
   height: auto;
 }
 
-/* ==========   HEADER   ========== */
+#main-header {
+  min-height: 60px;
+  /* Ou la hauteur de votre header */
+}
+
+/* ==========================================================================
+   3. HEADER & NAVIGATION
+   ========================================================================== */
 header {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -86,16 +121,19 @@ body.dark header {
   align-items: center;
   justify-content: space-between;
   height: auto;
+  /* Ajusté pour plus de flexibilité */
 }
 
 .header-left-group {
   display: flex;
   align-items: center;
   gap: 5rem;
+  /* Était 2rem, puis 5rem. Vérifiez ce que vous préférez. */
 }
 
 .hamburger-menu-btn {
   display: none;
+  /* Caché par défaut, affiché en mobile */
   background: none;
   border: none;
   color: var(--clr-text);
@@ -103,7 +141,9 @@ body.dark header {
   cursor: pointer;
   padding: 0.5rem;
   line-height: 1;
+  /* Pour un meilleur alignement vertical */
   z-index: 1001;
+  /* Au-dessus du contenu du menu */
 }
 
 .site-title-link {
@@ -113,6 +153,7 @@ body.dark header {
   font-size: 2.2rem;
   position: relative;
   line-height: 1;
+  /* Empêche le texte de bouger si la police a un line-height différent */
   transition: color 0.3s ease;
 }
 
@@ -125,6 +166,7 @@ body.dark header {
   position: absolute;
   left: 0;
   bottom: -6px;
+  /* Ajustez pour la position du soulignement */
   width: 0;
   height: 2px;
   background: var(--clr-primary);
@@ -133,10 +175,6 @@ body.dark header {
 
 .site-title-link:hover::after {
   width: 100%;
-}
-
-.desktop-nav {
-  display: flex;
 }
 
 .desktop-nav ul {
@@ -163,6 +201,7 @@ body.dark header {
   position: absolute;
   left: 0;
   bottom: -6px;
+  /* Doit correspondre au .site-title-link::after si vous voulez le même effet */
   width: 0;
   height: 2px;
   background: var(--clr-primary);
@@ -174,6 +213,7 @@ body.dark header {
 }
 
 .desktop-nav a i {
+  /* Pour les icônes dans les liens de nav */
   margin-right: 0.5rem;
 }
 
@@ -216,8 +256,10 @@ body.dark header {
 .theme-toggle:hover {
   background: var(--clr-primary);
   color: #fff;
+  /* Ou var(--clr-bg-card) si le fond primaire est clair */
 }
 
+/* Menu Mobile Overlay */
 .mobile-menu-overlay {
   position: fixed;
   top: 0;
@@ -228,6 +270,7 @@ body.dark header {
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
   z-index: 999;
+  /* Sous le contenu du menu mais au-dessus du reste */
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
@@ -245,17 +288,21 @@ body.dark header {
   top: 0;
   left: 0;
   width: 280px;
+  /* Ou une autre largeur souhaitée */
   max-width: 80%;
+  /* Pour les petits écrans */
   height: 100%;
   background: var(--clr-bg-card);
   padding: 1.5rem;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
   transform: translateX(-100%);
   z-index: 1000;
+  /* Au-dessus de l'overlay */
   display: flex;
   flex-direction: column;
   transition: transform 0.3s ease;
   overflow-y: auto;
+  /* Pour les listes de liens longues */
 }
 
 .mobile-menu-overlay.open .mobile-menu-content {
@@ -271,9 +318,11 @@ body.dark header {
   align-self: flex-end;
   margin-bottom: 1rem;
   padding: 0.2rem;
+  /* Zone de clic un peu plus grande */
 }
 
 .mobile-menu-content h3 {
+  /* Titres dans le menu mobile */
   font-size: 1.4rem;
   color: var(--clr-primary);
   margin-bottom: 1rem;
@@ -300,8 +349,10 @@ body.dark header {
   font-weight: 600;
   font-size: 1.1rem;
   display: flex;
+  /* Pour aligner icône et texte */
   align-items: center;
   gap: 0.8rem;
+  /* Espace entre icône et texte */
   padding: 0.5rem 0;
   transition: color 0.3s ease;
 }
@@ -311,6 +362,10 @@ body.dark header {
   color: var(--clr-primary);
 }
 
+
+/* ==========================================================================
+   4. MAIN CONTENT & SECTIONS
+   ========================================================================== */
 main {
   padding: 3rem 5%;
 }
@@ -324,6 +379,7 @@ section {
   font-weight: 700;
   margin-bottom: 2rem;
   display: inline-block;
+  /* Pour que le ::after se positionne correctement */
   position: relative;
   color: var(--clr-text);
 }
@@ -334,44 +390,75 @@ section {
   left: 0;
   bottom: -8px;
   width: 80px;
+  /* Longueur du soulignement */
   height: 4px;
+  /* Épaisseur du soulignement */
   background: var(--clr-primary);
 }
 
+.page-title {
+  /* Pour les titres de page comme "Galerie" */
+  text-align: left;
+  /* Ou center selon votre design */
+  margin-bottom: 1.5rem;
+  /* Ajusté pour moins d'espace que section-title */
+  display: block;
+  /* Prend toute la largeur */
+}
+
+.page-title::after {
+  /* Si vous voulez aussi un soulignement */
+  left: 0;
+  /* S'aligne à gauche si text-align: left */
+  /* transform: translateX(-50%); Si text-align: center */
+}
+
+/* ==========================================================================
+   5. COMPONENTS (Cards, Carousel, Grids)
+   ========================================================================== */
+
+/* Carousel (Dernières Sorties) */
 .carousel-container {
   position: relative;
   overflow: hidden;
+  /* Cache les parties du track qui dépassent */
   margin-bottom: 2rem;
 }
 
 .carousel-track {
   display: flex;
   gap: 1rem;
+  /* Espace entre les cartes */
   overflow-x: auto;
+  /* Permet le scroll horizontal */
   scroll-snap-type: x mandatory;
+  /* Effet de "snap" */
   scroll-behavior: smooth;
+  /* Pour les clics sur les boutons */
   -webkit-overflow-scrolling: touch;
+  /* Pour un scroll fluide sur iOS */
   padding: 0 5%;
-  margin-left: -5%;
-  margin-right: -5%;
-  scroll-padding-left: 5%;
-  scroll-padding-right: 5%;
+  /* Pour que les cartes ne collent pas aux bords avec les boutons */
+  /* Compense le padding */
   cursor: grab;
+  /* Indique qu'on peut scroller en draguant */
 }
 
 .carousel-track.active {
+  /* Pendant le drag */
   cursor: grabbing;
 }
 
 .carousel-track::-webkit-scrollbar {
+  /* Cache la scrollbar */
   display: none;
 }
 
 .carousel-track {
+  /* Cache la scrollbar pour Firefox */
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
 
 .chapter-card {
   position: relative;
@@ -381,30 +468,40 @@ section {
   background: var(--clr-bg-card);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.07);
   flex-shrink: 0;
+  /* Empêche les cartes de rétrécir */
   width: 300px;
   aspect-ratio: 2717 / 4063;
+  /* Conserve le ratio de l'image de fond */
   scroll-snap-align: start;
+  /* S'aligne au début lors du snap */
+  /* Animation d'apparition via JS initializeScrollObserver */
+  opacity: 0;
+  transform: translateY(20px);
 }
 
 .chapter-card:hover {
   transform: translateY(-10px) scale(1.02);
+  /* Petit effet au survol */
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
 .chapter-cover {
   height: 100%;
   overflow: hidden;
+  /* Pour l'effet de zoom de l'image */
 }
 
 .chapter-cover img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* S'assure que l'image remplit bien la div */
   transition: transform 0.3s ease;
 }
 
 .chapter-card:hover .chapter-cover img {
   transform: scale(1.07);
+  /* Zoom sur l'image au survol de la carte */
 }
 
 .chapter-info {
@@ -418,6 +515,7 @@ section {
   color: #fff;
   transition: background 0.35s ease;
   line-height: 1.4;
+  overflow: hidden;
 }
 
 .chapter-time {
@@ -433,8 +531,17 @@ section {
 
 .chapter-time i {
   font-size: 1rem;
+  /* Ajustez la taille de l'icône horloge */
 }
 
+.manga-title,
+.chapter-title,
+.chapter-number {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
 
 .manga-title {
   font-size: 1.1rem;
@@ -446,15 +553,16 @@ section {
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--clr-accent);
+  /* Utilise la couleur d'accentuation */
   margin-bottom: 0.1rem;
 }
 
 .chapter-title {
   font-size: 0.85rem;
   color: #ddd;
+  /* Un peu plus clair que le blanc pur pour le contraste */
   margin-bottom: 0.1rem;
 }
-
 
 .carousel-prev,
 .carousel-next {
@@ -473,6 +581,7 @@ section {
   font-size: 1.2rem;
   cursor: pointer;
   z-index: 10;
+  /* Au-dessus des cartes */
   transition: background 0.3s ease, transform 0.3s ease;
 }
 
@@ -480,6 +589,7 @@ section {
 .carousel-next:hover {
   background: rgba(0, 0, 0, 0.7);
   transform: translateY(-50%) scale(1.1);
+  /* Léger grossissement */
 }
 
 .carousel-prev {
@@ -490,11 +600,13 @@ section {
   right: 0.75rem;
 }
 
+/* Badge "NOUVEAU" */
 .new-badge {
   position: absolute;
   top: 12px;
   left: 12px;
   background: rgba(var(--clr-accent-rgb), 0.7);
+  /* Utilise la couleur d'accentuation avec transparence */
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   color: #fff;
@@ -502,35 +614,45 @@ section {
   font-size: 0.75rem;
   font-weight: 700;
   border-radius: 999px;
+  /* Badge arrondi */
 }
 
+/* Grille des Séries */
 .series-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(550px, 1fr));
+  /* Responsive */
   gap: 2rem;
 }
 
 .series-card {
   display: flex;
   align-items: stretch;
+  /* Les enfants prennent toute la hauteur */
   gap: 0.5rem;
+  /* Espace entre cover et info */
   background: var(--clr-bg-card);
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.07);
   cursor: pointer;
+  /* Animation d'apparition via JS initializeScrollObserver */
+  opacity: 0;
+  transform: translateY(20px);
 }
 
 .series-card:hover {
   transform: translateY(-8px) scale(1.01);
+  /* Effet au survol */
   box-shadow: 0 18px 36px rgba(0, 0, 0, 0.1);
 }
 
-
 .series-cover {
   flex: 0 0 var(--series-fixed-cover-width-desktop);
+  /* Largeur fixe pour la cover */
   width: var(--series-fixed-cover-width-desktop);
   height: auto;
+  /* La hauteur s'adapte au contenu de la carte (ou à l'aspect ratio de l'image) */
   position: relative;
   overflow: hidden;
 }
@@ -538,19 +660,23 @@ section {
 .series-cover img {
   width: 100%;
   height: 100%;
+  /* S'assurer que l'image remplit le conteneur */
   object-fit: cover;
   transition: transform 0.35s ease;
 }
 
 .series-card:hover .series-cover img {
   transform: scale(1.07);
+  /* Zoom sur l'image au survol */
 }
 
 .series-info {
   flex: 1;
+  /* Prend l'espace restant */
   padding: 1.2rem 1.4rem;
   display: flex;
   flex-direction: column;
+  /* Pour que la section des chapitres soit en bas */
 }
 
 .series-title {
@@ -558,15 +684,19 @@ section {
   font-weight: 700;
   margin-bottom: 0.3rem;
   color: var(--clr-text);
+  /* Gestion de l'overflow pour les titres longs */
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: unset;
+  -webkit-line-clamp: 2;
+  /* Limite à 2 lignes, ajustez si besoin */
   -webkit-box-orient: vertical;
   white-space: normal;
+  /* S'assure que le texte peut aller à la ligne */
 }
 
 .meta {
+  /* Classe générique pour les métadonnées */
   font-size: 0.9rem;
   color: var(--clr-text-sub);
   margin-bottom: 0.25rem;
@@ -577,7 +707,9 @@ section {
   align-items: baseline;
   justify-content: space-between;
   flex-wrap: wrap;
+  /* Permet le retour à la ligne si pas assez de place */
   gap: 0.3rem 0.8rem;
+  /* Espace vertical et horizontal */
   font-size: 0.85rem;
   color: var(--clr-text-sub);
   margin-bottom: 0.4rem;
@@ -585,20 +717,27 @@ section {
 
 .series-author-info {
   white-space: nowrap;
+  /* Empêche le retour à la ligne au milieu de l'info auteur */
   overflow: hidden;
   text-overflow: ellipsis;
+  /* Ajoute ... si trop long */
   max-width: calc(100% - 100px);
+  /* Ajustez pour laisser de la place à l'année */
 }
 
 .series-year-info {
   flex-shrink: 0;
+  /* Empêche l'année de rétrécir */
   white-space: nowrap;
 }
 
 .meta-separator-card {
+  /* Si vous utilisez un séparateur visible */
+  /* Styles pour le séparateur, ex: border-left: 1px solid var(--clr-text-sub); padding-left: 0.8rem; */
 }
 
 .series-tags {
+  /* Conteneur des tags */
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
@@ -614,21 +753,23 @@ section {
   font-weight: 600;
 }
 
-
 .series-description {
   font-size: 0.9rem;
   color: var(--clr-text-sub);
   margin-top: 0;
+  /* Ajusté */
   margin-bottom: 0.5rem;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  /* Limite la description à 2 lignes */
 }
 
 .series-latest-chapters-container-mobile {
   display: none;
+  /* Caché sur desktop */
 }
 
 .series-latest-chapters-container-desktop {
@@ -636,15 +777,16 @@ section {
   flex-direction: column;
   gap: 0.2rem;
   padding-top: 0.6rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  border-top: 1px solid rgba(var(--clr-text-rgb), 0.05);
   color: var(--clr-text);
   margin-top: auto;
+  /* Pousse cette section en bas de la carte */
 }
 
 body.dark .series-latest-chapters-container-desktop {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top-color: rgba(var(--clr-text-rgb), 0.08);
+  /* Bordure plus visible en mode sombre */
 }
-
 
 .series-chapter-item-desktop {
   display: flex;
@@ -655,6 +797,7 @@ body.dark .series-latest-chapters-container-desktop {
   border-radius: 4px;
   transition: background-color 0.2s ease;
   padding: 0.2rem 0.3rem;
+  /* Léger padding interne */
 }
 
 .series-chapter-item-desktop:hover {
@@ -665,11 +808,13 @@ body.dark .series-latest-chapters-container-desktop {
   font-weight: 600;
   color: var(--clr-primary);
   flex-shrink: 0;
+  /* Ne rétrécit pas */
   margin-right: 0.5rem;
 }
 
 .chapter-title-desktop {
   flex-grow: 1;
+  /* Prend l'espace disponible */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -684,36 +829,58 @@ body.dark .series-latest-chapters-container-desktop {
   white-space: nowrap;
 }
 
-
-.section-title,
+/* Style pour l'animation d'apparition des éléments observés (général) */
+/* Retiré .colo-card d'ici pour gérer son apparition via le lazy loading de l'image */
 .chapter-card,
-.series-card {
-  opacity: 0;
+.series-card,
+.section-title,
+.presentation-content,
+.profile-pic,
+.gallery-controls,
+.series-detail-container {
   transform: translateY(20px);
+  /* opacity: 0; opacity sera géré par JS pour ces éléments lors du scroll */
 }
 
+.colo-card {
+  /* Les colo-cards auront leur propre logique d'apparition via JS */
+  transform: translateY(20px);
+  /* opacity: 0; -- Géré par le lazyload et l'observer de scroll si besoin */
+}
+
+
+/* ==========================================================================
+   6. PAGE SPECIFIC STYLES
+   ========================================================================== */
+
+/* Page Présentation */
 .profile-pic {
   width: 100px;
   height: 100px;
   border-radius: 50%;
   object-fit: cover;
   float: left;
+  /* Pour que le texte s'enroule autour */
   margin-right: 2rem;
   margin-bottom: 0.5rem;
+  /* Espace en dessous si le texte est court */
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   border: 3px solid var(--clr-primary);
 }
 
 .presentation-content {
   margin: 0;
+  /* Pas de marge par défaut sur le conteneur */
   padding: 2rem;
   background: var(--clr-bg-card);
   border-radius: 14px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 12px 28px rgba(var(--clr-text-rgb), 0.07);
   color: var(--clr-text);
   line-height: 1.8;
+  /* Bonne lisibilité */
   text-align: left;
   overflow: hidden;
+  /* Pour contenir le float */
 }
 
 .presentation-content p {
@@ -726,35 +893,40 @@ body.dark .series-latest-chapters-container-desktop {
   margin-bottom: 0;
 }
 
-
+/* Page Détail Série */
 .series-detail-container {
   background: var(--clr-bg-card);
   border-radius: 14px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 12px 28px rgba(var(--clr-text-rgb), 0.07);
   padding: 2rem;
 }
 
 .detail-top-layout-wrapper {
   display: flex;
   flex-direction: row;
+  /* Cover à gauche, infos à droite sur desktop */
   align-items: flex-start;
+  /* Aligne en haut */
   gap: 1.5rem;
 }
 
 .detail-cover-wrapper {
   width: 200px;
+  /* Largeur fixe pour la cover */
   flex-shrink: 0;
+  /* Empêche de rétrécir */
 }
 
 .detail-cover {
   width: 100%;
   height: auto;
   border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 15px rgba(var(--clr-text-rgb), 0.1);
 }
 
 .detail-all-info-column {
   flex-grow: 1;
+  /* Prend le reste de la place */
   display: flex;
   flex-direction: column;
 }
@@ -779,6 +951,7 @@ body.dark .series-latest-chapters-container-desktop {
 }
 
 .detail-tag {
+  /* Style identique à .tag */
   background: rgba(var(--clr-primary-rgb), 0.15);
   color: var(--clr-primary);
   padding: 0.3rem 0.8rem;
@@ -795,7 +968,9 @@ body.dark .series-latest-chapters-container-desktop {
 }
 
 .detail-artist-spacing {
+  /* Pour l'espacement entre Auteur et Dessinateur */
   margin-left: 2rem;
+  /* Ajustez si besoin */
 }
 
 .detail-secondary-info-wrapper {
@@ -816,11 +991,12 @@ body.dark .series-latest-chapters-container-desktop {
   margin-bottom: 0;
 }
 
-
 p.detail-description {
   font-size: 1rem;
   color: var(--clr-text-sub);
   line-height: 1.6;
+  margin-top: 1.5rem;
+  /* Espace après les infos du haut */
 }
 
 .chapters-main-header {
@@ -829,18 +1005,19 @@ p.detail-description {
   align-items: center;
   margin-bottom: 1.5rem;
   margin-top: 3rem;
+  /* Espace avant la liste des chapitres */
 }
 
 .chapters-main-header .section-title {
   margin-left: 0;
   margin-bottom: 0;
   display: block;
+  /* Pour que le ::after soit relatif à ce bloc */
 }
 
 .chapters-main-header .section-title::after {
   left: 0;
 }
-
 
 .detail-chapter-item {
   display: flex;
@@ -849,26 +1026,30 @@ p.detail-description {
   padding: 0.7rem 1rem;
   cursor: pointer;
   transition: background 0.2s ease, transform 0.2s ease;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+  border-bottom: 1px solid rgba(var(--clr-text-rgb), 0.08);
 }
 
 body.dark .detail-chapter-item {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom-color: rgba(var(--clr-text-rgb), 0.08);
 }
 
 .volume-chapters-list .detail-chapter-item:last-child {
   border-bottom: none;
+  /* Pas de bordure pour le dernier item de la liste */
 }
 
 .licensed-chapter-item {
+  /* Style pour les chapitres licenciés */
   filter: blur(1.5px);
   pointer-events: none;
+  /* Non cliquable */
   opacity: 0.7;
 }
 
 .detail-chapter-item:hover:not(.licensed-chapter-item) {
   background: rgba(var(--clr-primary-rgb), 0.08);
   transform: translateX(5px);
+  /* Léger décalage au survol */
 }
 
 .chapter-main-info {
@@ -877,6 +1058,7 @@ body.dark .detail-chapter-item {
   flex-grow: 1;
   gap: 0.5rem;
   overflow: hidden;
+  /* Pour l'ellipsis du titre */
 }
 
 .chapter-side-info {
@@ -934,27 +1116,31 @@ body.dark .detail-chapter-item {
 
 .sort-button:hover {
   background: rgba(var(--clr-primary-rgb), 0.9);
+  /* Assombrir légèrement */
   transform: translateY(-2px);
 }
 
 .sort-button i {
   transition: transform 0.3s ease;
+  /* Pour l'animation de l'icône de tri */
 }
 
 .chapters-accordion-container {
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(var(--clr-text-rgb), 0.1);
   border-radius: 10px;
   overflow: hidden;
+  /* Pour les coins arrondis */
 }
 
 body.dark .chapters-accordion-container {
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-color: rgba(var(--clr-text-rgb), 0.1);
 }
 
 .volume-header {
-  background: var(--clr-bg);
+  background: rgba(var(--clr-primary-rgb), 0.03);
+  /* Très léger fond pour le header */
   padding: 0.8rem 1.2rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(var(--clr-text-rgb), 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -965,17 +1151,19 @@ body.dark .chapters-accordion-container {
   transition: background 0.2s ease;
 }
 
-.volume-group:last-child .volume-header {
-  border-bottom: none;
+body.dark .volume-header {
+  background-color: rgba(var(--clr-primary-rgb), 0.05);
+  /* Un peu plus visible en sombre */
+  border-color: rgba(var(--clr-text-rgb), 0.1);
 }
 
-body.dark .volume-header {
-  background: #191b1e;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+.volume-group:last-child .volume-header {
+  border-bottom: none;
+  /* Pas de bordure pour le dernier header */
 }
 
 .volume-header:hover {
-  background: rgba(var(--clr-primary-rgb), 0.05);
+  background: rgba(var(--clr-primary-rgb), 0.08);
 }
 
 .volume-header h4 {
@@ -1013,7 +1201,6 @@ body.dark .volume-header {
   white-space: nowrap;
 }
 
-
 .volume-arrow {
   font-size: 0.9em;
   flex-shrink: 0;
@@ -1028,22 +1215,28 @@ body.dark .volume-header {
 .volume-chapters-list {
   background: var(--clr-bg-card);
   max-height: 0;
+  /* Caché par défaut */
   overflow: hidden;
   transition: max-height 0.4s ease-out;
+  /* Animation de déploiement */
   padding: 0 1rem;
+  /* Padding interne pour les items */
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  /* Espace entre les items de chapitre */
 }
 
 .volume-chapters-list .detail-chapter-item {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+  border-bottom-color: rgba(var(--clr-text-rgb), 0.05);
+  /* Bordure plus fine */
   background: transparent;
   padding: 0.7rem 0;
+  /* Ajustement du padding vertical */
 }
 
 body.dark .volume-chapters-list .detail-chapter-item {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-color: rgba(var(--clr-text-rgb), 0.05);
 }
 
 .volume-chapters-list .detail-chapter-item:last-child {
@@ -1055,7 +1248,428 @@ body.dark .volume-chapters-list .detail-chapter-item {
   padding-top: 1rem;
 }
 
+/* Page Galerie */
+.gallery-section {
+  padding-top: 1rem;
+  /* Moins d'espace au-dessus du titre de la page galerie */
+}
+
+.gallery-controls {
+  display: flex;
+  justify-content: flex-start;
+  /* Alignement à gauche */
+  align-items: center;
+  flex-wrap: wrap;
+  /* Retour à la ligne si pas assez de place */
+  gap: 1rem 1.5rem;
+  /* Espace vertical et horizontal */
+  margin-bottom: 2.5rem;
+  padding: 1rem 0;
+  /* Un peu de padding vertical */
+}
+
+.gallery-sort-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.gallery-sort-filter label {
+  font-weight: 600;
+  color: var(--clr-text-sub);
+}
+
+.gallery-sort-filter select {
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid rgba(var(--clr-text-rgb), 0.2);
+  background-color: var(--clr-bg);
+  color: var(--clr-text);
+  font-family: inherit;
+  /* Utilise la police du body */
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.gallery-grid {
+  column-count: 6;
+  /* Nombre de colonnes sur grand écran */
+  column-gap: 0.8rem;
+  width: 100%;
+}
+
+.colo-card {
+  display: inline-block;
+  /* Important pour le layout en colonnes */
+  width: 100%;
+  /* Prend toute la largeur de sa colonne */
+  margin-bottom: 0.8rem;
+  /* Espace en dessous de chaque carte */
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: var(--clr-bg-card);
+  box-shadow: 0 4px 8px rgba(var(--clr-text-rgb), 0.05);
+  transform: translateY(20px);
+  /* Pour l'animation d'apparition initiale */
+  /* opacity: 0; -- Géré par l'observer de scroll pour l'apparition initiale */
+}
+
+.colo-card:hover {
+  transform: translateY(-3px) scale(1.015);
+  box-shadow: 0 6px 12px rgba(var(--clr-text-rgb), 0.07);
+}
+
+.colo-card img {
+  /* Style de base pour les images dans les cartes */
+  display: block;
+  width: 100%;
+  height: auto;
+  opacity: 0;
+  /* Commence invisible pour le lazy load */
+  transition: opacity 0.4s ease-in-out;
+  /* Pour l'effet de fondu du lazy loading */
+}
+
+/* Styles pour le lazy loading */
+img.lazy-load-gallery[src*="placeholder_preview.png"] {
+  opacity: 0.3;
+  /* Le placeholder est un peu visible */
+}
+
+img.lazy-load-gallery.image-loaded-fade-in {
+  /* Classe ajoutée par JS après chargement */
+  opacity: 1;
+}
+
+
+.colo-card-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0) 100%);
+  color: #fff;
+  padding: 0.5rem;
+  font-size: 0.7rem;
+  opacity: 0;
+  /* Caché par défaut, apparaît au survol */
+  transform: translateY(10px);
+  /* Légèrement décalé vers le bas */
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  text-align: left;
+}
+
+.colo-card:hover .colo-card-overlay {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.colo-card-overlay p {
+  margin: 0.1rem 0;
+  line-height: 1.2;
+}
+
+/* Lightbox Modal - NOUVELLE STRUCTURE */
+.lightbox-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  padding: 2.5vh 2.5vw;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  box-sizing: border-box;
+}
+
+body.dark .lightbox-modal {
+  background-color: rgba(10, 10, 12, 0.92);
+  /* Fond un peu plus opaque en mode sombre */
+}
+
+.lightbox-content-wrapper {
+  display: flex;
+  align-items: flex-start;
+  /* Centre verticalement l'image et le panneau d'info s'ils ont des hauteurs différentes */
+  justify-content: center;
+  /* Centre le contenu horizontalement s'il est plus petit que max-width */
+  gap: 1.5rem;
+  /* Espace entre l'image et le panneau d'info sur desktop */
+  max-width: 95vw;
+  /* Limite la largeur totale du contenu (image + infos) */
+  max-height: 95vh;
+  /* Limite la hauteur totale du contenu */
+  width: auto;
+  /* S'adapte à la largeur de son contenu jusqu'à max-width */
+  /* background-color: rgba(255,0,0,0.1); /* Pour déboguer la zone du wrapper */
+}
+
+.lightbox-image-container {
+  max-width: 100%;
+  max-height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.lightbox-image {
+  max-width: 90vw;
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin: auto;
+}
+
+/* Panneaux d'information */
+.lightbox-info-panel {
+  /* Style de base commun aux panneaux desktop et mobile */
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  /* Espace entre les blocs artiste et colo à l'intérieur du panneau */
+  padding: 1rem;
+  background-color: var(--clr-bg-card);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(var(--clr-text-rgb), 0.1);
+  color: var(--clr-text);
+}
+
+.lightbox-info-panel-desktop {
+  flex-shrink: 0;
+  /* Le panneau d'info ne rétrécit pas en largeur */
+  width: 320px;
+  /* Largeur fixe pour le panneau d'info desktop */
+  max-height: 100%;
+  /* Peut prendre toute la hauteur disponible dans .lightbox-content-wrapper */
+  overflow-y: auto;
+  /* Ajoute un scroll si le contenu du panneau dépasse sa hauteur */
+  display: none;
+  /* Caché par défaut, affiché par media query pour desktop */
+  gap: 1.5rem;
+  /* Espace plus grand entre les blocs artiste et colo sur desktop */
+  /* background-color: rgba(255,255,0,0.1); /* Pour déboguer */
+}
+
+.lightbox-artist-info-block,
+.lightbox-colo-info-block {
+  /* Fond et bordure pour séparer visuellement les blocs artiste et colo */
+  background-color: rgba(var(--clr-bg-rgb-val), 0.03);
+  /* Très léger fond */
+  border: 1px solid rgba(var(--clr-text-rgb), 0.08);
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+body.dark .lightbox-artist-info-block,
+body.dark .lightbox-colo-info-block {
+  background-color: rgba(var(--clr-bg-rgb-val), 0.08);
+  /* Un peu plus distinct en mode sombre */
+  border-color: rgba(var(--clr-text-rgb), 0.12);
+}
+
+.lightbox-info-panel-mobile {
+  display: none;
+  /* Caché par défaut, affiché par media query pour mobile */
+  width: 90%;
+  max-width: 450px;
+  margin: 1rem auto 0 auto;
+  /* En dessous de l'image sur mobile */
+}
+
+/* Contenu des blocs d'info (partagé entre desktop et mobile via classes .lightbox-artist-info et .lightbox-colo-info) */
+.lightbox-artist-info,
+.lightbox-colo-info {
+  text-align: left;
+}
+
+.lightbox-artist-info .artist-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.7rem;
+}
+
+.lightbox-artist-pfp {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--clr-primary);
+}
+
+.lightbox-artist-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+  flex-grow: 1;
+  /* Pour que le nom prenne l'espace et pousse le compteur */
+}
+
+.artist-occurrence-count {
+  font-size: 0.8rem;
+  color: var(--clr-text-sub);
+  margin-left: 0.5rem;
+  /* Espace avant le compteur s'il est sur la même ligne */
+  white-space: nowrap;
+  /* Empêche le compteur de passer à la ligne */
+  flex-shrink: 0;
+  /* Empêche le compteur de rétrécir */
+}
+
+.lightbox-artist-socials,
+.lightbox-colo-socials {
+  display: flex;
+  flex-wrap: wrap;
+  /* Permet aux liens de passer à la ligne si besoin */
+  gap: 0.5rem 0.8rem;
+  /* Espace vertical et horizontal entre les liens */
+  margin-top: 0.5rem;
+}
+
+.lightbox-artist-socials a,
+.lightbox-colo-socials a {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  /* Espace entre icône et texte du réseau */
+  color: var(--clr-text-sub);
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.lightbox-artist-socials a i,
+.lightbox-colo-socials a i {
+  font-size: 1.1rem;
+  color: var(--clr-primary);
+  /* Icônes en couleur primaire */
+  transition: color 0.2s ease;
+}
+
+.lightbox-artist-socials a:hover,
+.lightbox-colo-socials a:hover {
+  color: var(--clr-primary);
+  /* Texte du lien change de couleur */
+}
+
+.lightbox-colo-info p {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.lightbox-colo-info p:last-child {
+  margin-bottom: 0;
+}
+
+.lightbox-colo-info strong {
+  color: var(--clr-primary);
+}
+
+.lightbox-info-placeholder {
+  color: var(--clr-text-sub);
+  font-style: italic;
+}
+
+.lightbox-close {
+  position: fixed;
+  top: 20px;
+  right: 30px;
+  color: #ccc;
+  font-size: 35px;
+  font-weight: bold;
+  transition: 0.3s;
+  cursor: pointer;
+  z-index: 1002;
+  /* Au-dessus de tout le reste de la lightbox */
+}
+
+.lightbox-close:hover,
+.lightbox-close:focus {
+  color: #fff;
+  text-decoration: none;
+}
+
+
+/* ==========================================================================
+   7. RESPONSIVE STYLES (Media Queries)
+   ========================================================================== */
+@media (min-width: 993px) {
+
+  .lightbox-info-panel-desktop {
+    display: flex;
+  }
+
+  .lightbox-info-panel-mobile {
+    display: none;
+  }
+
+  .lightbox-content-wrapper {
+    /* Sur desktop, les éléments sont côte à côte */
+  }
+
+  /* .lightbox-image-container max-width n'est plus nécessaire ici si on utilise flex-grow et que le panneau info a une largeur fixe */
+}
+
+@media (max-width: 1300px) {
+  .gallery-grid {
+    column-count: 5;
+  }
+}
+
+@media (max-width: 1100px) {
+  .gallery-grid {
+    column-count: 4;
+  }
+}
+
+@media (max-width: 992px) {
+
+  /* Tablette et Mobile */
+  .gallery-grid {
+    column-count: 3;
+  }
+
+  .lightbox-content-wrapper {
+    flex-direction: column;
+    align-items: center;
+    padding-top: 40px;
+    /* Plus d'espace en haut pour le bouton close */
+  }
+
+  .lightbox-image-container {
+    max-width: 90%;
+    /* L'image peut prendre plus de largeur */
+    max-height: 60vh;
+    /* Mais hauteur limitée pour laisser place aux infos dessous */
+    margin-bottom: 1rem;
+    width: auto; /* S'adapte à l'image */
+  }
+
+  .lightbox-info-panel-desktop {
+    display: none;
+  }
+
+  .lightbox-info-panel-mobile {
+    display: flex;
+  }
+
+  .lightbox-artist-info .artist-header {
+    /* Sur mobile, on s'assure que ça reste flexible */
+    /* flex-wrap: nowrap; -- Peut être retiré si le nom est très long et doit passer à la ligne avant le compteur */
+  }
+}
+
+/* ... (Le reste de vos media queries pour < 768px et < 480px restent les mêmes) ... */
 @media (max-width: 768px) {
+
+  /* Styles pour mobile plus petits */
   body {
     font-size: 0.9rem;
   }
@@ -1135,10 +1749,17 @@ body.dark .volume-chapters-list .detail-chapter-item {
     height: 3px;
   }
 
+  .page-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .page-title::after {
+    width: 60px;
+  }
+
   .carousel-track {
     padding: 0 4%;
-    margin-left: -4%;
-    margin-right: -4%;
     scroll-padding-left: 4%;
     scroll-padding-right: 4%;
   }
@@ -1204,15 +1825,13 @@ body.dark .volume-chapters-list .detail-chapter-item {
 
   .series-card {
     flex-direction: row;
-    background: var(--clr-bg-card);
     border-radius: 10px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
+    box-shadow: 0 8px 16px rgba(var(--clr-text-rgb), 0.06);
   }
 
   .series-card:hover {
     transform: none;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 20px rgba(var(--clr-text-rgb), 0.08);
   }
 
   .series-cover {
@@ -1234,9 +1853,6 @@ body.dark .volume-chapters-list .detail-chapter-item {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    background: transparent;
-    box-shadow: none;
-    border-radius: 0;
     font-size: 0.8rem;
   }
 
@@ -1294,8 +1910,6 @@ body.dark .volume-chapters-list .detail-chapter-item {
     font-size: 0.75rem;
     font-weight: 500;
     width: 100%;
-    margin-top: 0;
-    border: none;
     text-align: left;
     cursor: pointer;
   }
@@ -1408,7 +2022,6 @@ body.dark .volume-chapters-list .detail-chapter-item {
 
   .detail-meta-flex-prefix {
     flex: 0 0 85px;
-    /* **À AJUSTER !** */
     margin-right: 0.5em;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1491,4 +2104,94 @@ body.dark .volume-chapters-list .detail-chapter-item {
   .detail-chapter-date {
     font-size: 0.75rem;
   }
+
+  .gallery-controls {
+    justify-content: flex-start;
+    gap: 0.8rem 1rem;
+    padding: 0.5rem 0;
+  }
+
+  .gallery-sort-filter {
+    width: auto;
+  }
+
+  .gallery-sort-filter select {
+    font-size: 0.85rem;
+  }
+
+  .gallery-grid {
+    column-count: 2;
+    column-gap: 0.6rem;
+  }
+
+  .colo-card {
+    margin-bottom: 0.6rem;
+    border-radius: 4px;
+  }
+
+  .colo-card-overlay {
+    opacity: 1;
+    transform: translateY(0);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0) 80%);
+    font-size: 0.7rem;
+    padding: 0.4rem;
+  }
+
+  /* Ajustements Lightbox pour Mobile */
+  .lightbox-modal {
+    padding: 10px;
+  }
+
+  .lightbox-image-container {
+    max-height: 50vh;
+  }
+
+  .lightbox-info-panel-mobile {
+    font-size: 0.9em;
+  }
+
+  /* Réduire un peu la taille de police globale du panneau mobile */
+  .lightbox-artist-pfp {
+    width: 40px;
+    height: 40px;
+  }
+
+  .lightbox-artist-name {
+    font-size: 1rem;
+  }
+
+  .artist-occurrence-count {
+    font-size: 0.75rem;
+  }
+
+  .lightbox-artist-socials a,
+  .lightbox-colo-socials a {
+    font-size: 0.8rem;
+  }
+
+  .lightbox-artist-socials a i,
+  .lightbox-colo-socials a i {
+    font-size: 1rem;
+  }
+
+  .lightbox-colo-info p {
+    font-size: 0.85rem;
+  }
+
+  .lightbox-close {
+    top: 10px;
+    right: 15px;
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+
+  /* Encore plus petit */
+  .gallery-grid {
+    column-count: 1;
+  }
+
+  /* Une seule colonne pour la galerie */
+  /* .lightbox-image-container { max-height: 45vh; } Image encore un peu plus petite */
 }
