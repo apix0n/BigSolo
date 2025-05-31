@@ -41,8 +41,76 @@
 </head>
 
 <body>
-  <header id="main-header"></header>
-  <div class="mobile-menu-overlay" id="main-mobile-menu-overlay"></div>
+  <header>
+    <div class="header-container">
+      <div class="header-left-group">
+        <button class="hamburger-menu-btn" aria-label="Ouvrir le menu">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="logo">
+
+          <a href="index.html" class="site-title-link">BigSolo</a>
+        </div>
+        <nav class="desktop-nav">
+          <ul>
+            <li>
+              <a href="index.html"><i class="fas fa-home"></i> Accueil</a>
+            </li>
+            <li>
+              <a href="index.html#on-going-section"><i class="fa-solid fa-solid fa-book"></i> Séries</a>
+            </li>
+            <li>
+              <!-- Pour index.html et series-detail.html -->
+              <a href="index.html#one-shot-section"><i class="fa-solid fa-scroll"></i> One-shot</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="header-actions">
+        <div class="social-icons desktop-social-icons">
+          <a href="https://discord.com/invite/wGTmFarxNY" target="_blank" rel="noopener noreferrer"
+            aria-label="Discord">
+            <i class="fab fa-discord"></i>
+          </a>
+          <a href="https://x.com/BHerooooo" target="_blank" rel="noopener noreferrer" aria-label="X">
+            <i class="fab fa-twitter"></i>
+          </a>
+        </div>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Changer de thème">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="mobile-menu-overlay">
+    <div class="mobile-menu-content">
+      <button class="close-mobile-menu-btn" aria-label="Fermer le menu">
+        <i class="fas fa-times"></i>
+      </button>
+      <h3>Menu</h3>
+      <ul class="mobile-nav-links">
+        <li><a href="index.html"><i class="fas fa-home"></i> Accueil</a></li>
+        <li><a href="index.html#on-going-section"><i class="fa-solid fa-solid fa-book"></i> Séries</a></li>
+        <li><a href="index.html#one-shot-section"><i class="fa-solid fa-scroll"></i> One-shot</a></li>
+      </ul>
+      <h3>Réseaux</h3>
+      <ul class="mobile-social-links-menu">
+        <li>
+          <a href="https://discord.com/invite/wGTmFarxNY" target="_blank" rel="noopener noreferrer"
+            aria-label="Discord">
+            <i class="fab fa-discord"></i> Discord
+          </a>
+        </li>
+        <li>
+          <a href="https://x.com/BHerooooo" target="_blank" rel="noopener noreferrer" aria-label="X">
+            <i class="fab fa-twitter"></i> Twitter
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
 
   <main>
     <section id="series-detail-section" class="series-detail-page">
