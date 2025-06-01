@@ -620,7 +620,7 @@ section {
 /* Grille des Séries */
 .series-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(550px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* par défaut */
   /* Responsive */
   gap: 2rem;
 }
@@ -1632,7 +1632,7 @@ body.dark .lightbox-colo-info-block {
 
   /* Tablette et Mobile */
   .gallery-grid {
-    column-count: 3;
+    column-count: 2;
   }
 
   .lightbox-content-wrapper {
@@ -2214,15 +2214,4 @@ body.dark .lightbox-colo-info-block {
     right: 15px;
     font-size: 28px;
   }
-}
-
-@media (max-width: 480px) {
-
-  /* Encore plus petit */
-  .gallery-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  /* Une seule colonne pour la galerie */
-  /* .lightbox-image-container { max-height: 45vh; } Image encore un peu plus petite */
 }
