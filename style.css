@@ -620,7 +620,7 @@ section {
 /* Grille des Séries */
 .series-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* par défaut */
+  grid-template-columns: repeat(auto-fill, minmax(550px, 1fr));
   /* Responsive */
   gap: 2rem;
 }
@@ -1451,8 +1451,6 @@ body.dark .lightbox-modal {
   display: none;
   /* Caché par défaut, affiché par media query pour desktop */
   gap: 1.5rem;
-  /* Espace plus grand entre les blocs artiste et colo sur desktop */
-  /* background-color: rgba(255,255,0,0.1); /* Pour déboguer */
 }
 
 .lightbox-artist-info-block,
@@ -1490,6 +1488,7 @@ body.dark .lightbox-colo-info-block {
 .lightbox-artist-info .artist-header {
   display: flex;
   align-items: center;
+  /* Default for desktop, will be overridden for mobile */
   gap: 0.8rem;
   margin-bottom: 0.7rem;
 }
@@ -1558,7 +1557,7 @@ body.dark .lightbox-colo-info-block {
 }
 
 .lightbox-colo-info p {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.1rem;
   font-size: 0.9rem;
   line-height: 1.4;
 }
@@ -1568,7 +1567,7 @@ body.dark .lightbox-colo-info-block {
 }
 
 .lightbox-colo-info strong {
-  color: var(--clr-primary);
+  color: var(--clr-text);
 }
 
 .lightbox-info-placeholder {
@@ -1603,6 +1602,7 @@ body.dark .lightbox-colo-info-block {
 
   .lightbox-info-panel-desktop {
     display: flex;
+    margin-left: 1rem;
   }
 
   .lightbox-info-panel-mobile {
@@ -1638,33 +1638,39 @@ body.dark .lightbox-colo-info-block {
   .lightbox-content-wrapper {
     flex-direction: column;
     align-items: center;
-    padding-top: 40px; /* Pour le bouton de fermeture, conservez ceci */
-    
-    /* NOUVEAU/MODIFIÉ : crucial pour la distribution de l'espace vertical */
-    height: 100%; /* Prend toute la hauteur disponible DANS lightbox-modal (après padding) */
-    width: 100%; /* Prend toute la largeur disponible DANS lightbox-modal (après padding) */
-    justify-content: flex-start; /* Aligne les éléments (image, puis infos) en haut */
-    overflow: hidden; /* Empêche les enfants de causer un scroll sur le body/modal */
+    /* Center children (image container, info panel) horizontally */
+    padding-top: 40px;
+    /* Space for the close button */
+    width: 100%;
+    /* Take full width of modal's inner area */
+    /* max-height: 95vh; is global, will apply */
+    justify-content: flex-start;
+    /* Stack image and panel from the top */
+    overflow-y: auto;
+    /* Allow vertical scroll if content exceeds max-height */
+    overflow-x: hidden;
+    /* Prevent horizontal scroll */
   }
 
   .lightbox-image-container {
-    max-width: 90%; /* Conservez */
-    /* max-height: 60vh; */ /* SUPPRIMEZ ou réduisez ceci. On va le laisser gérer par flex. */
-    
-    /* NOUVEAU/MODIFIÉ : pour que l'image s'adapte à l'espace restant */
-    flex-grow: 1;   /* Laisse ce conteneur prendre l'espace vertical disponible */
-    flex-shrink: 1; /* Laisse ce conteneur rétrécir si nécessaire */
-    min-height: 0;  /* TRÈS IMPORTANT pour que les items flex puissent rétrécir correctement */
-    
-    width: auto; /* S'adapte à la largeur de l'image, jusqu'à max-width */
-    display: flex; /* Pour centrer l'image si elle est plus petite que son conteneur */
+    max-width: 90%;
+    /* flex-grow: 1; Remove this to prevent vertical stretching */
+    flex-shrink: 1;
+    /* Allow shrinking if needed, though image max-height will limit */
+    min-height: 0;
+    /* Important for flex shrinking */
+    width: auto;
+    display: flex;
     align-items: center;
     justify-content: center;
+    /* The image itself will determine the height of this container */
   }
 
   .lightbox-image {
     max-width: 100%;
-    max-height: 100%; /* L'image prendra au maximum la taille de son conteneur dynamique */
+    /* Image takes full width of its container */
+    max-height: 70vh;
+    /* Limit image height to leave space for info panel, adjust as needed */
     object-fit: contain;
   }
 
@@ -1675,11 +1681,29 @@ body.dark .lightbox-colo-info-block {
   .lightbox-info-panel-mobile {
     display: flex;
     margin-top: 1rem;
+    /* Space between image and this panel */
+    flex-direction: row;
+    /* Artist/Colo info side-by-side for tablet-like */
+    width: 90%;
+    /* Ensure it doesn't take full screen width */
+    max-width: 600px;
+    /* Max width for the panel */
+    flex-shrink: 0;
+    /* Prevent info panel from shrinking if content wrapper scrolls */
   }
 
+  .lightbox-info-panel-mobile .lightbox-artist-info {
+    border-right: 1px solid rgba(var(--clr-text-rgb), 0.1);
+    /* Separator line */
+  }
+
+  body.dark .lightbox-info-panel-mobile .lightbox-artist-info {
+    border-right-color: rgba(var(--clr-text-rgb), 0.15);
+  }
+
+
   .lightbox-artist-info .artist-header {
-    /* Sur mobile, on s'assure que ça reste flexible */
-    /* flex-wrap: nowrap; -- Peut être retiré si le nom est très long et doit passer à la ligne avant le compteur */
+    /* No changes needed here for this specific request for 992px */
   }
 }
 
@@ -1712,14 +1736,82 @@ body.dark .lightbox-colo-info-block {
   }
 
   .lightbox-content-wrapper {
-    flex-direction: column;
-    align-items: center;
-    width: 100%;        /* Ajouté */
-    max-width: 100%;    /* Ajouté */
+    /* Inherits from 992px: flex-direction: column, align-items: center, etc. */
+  }
+
+  .lightbox-image {
+    max-height: 60vh;
+    /* Further adjust image height for smaller screens if needed */
   }
 
   .lightbox-info-panel-mobile {
-    margin-top: 1rem; /* un peu d’espace au-dessus des infos */
+    margin-top: 1rem;
+    font-size: 0.9em;
+    flex-direction: row;
+    /* Stack artist and colo info blocks on very small screens */
+    width: 90%;
+    /* Keep consistent width */
+    max-width: 450px;
+    /* Adjust max-width if needed for smaller screens */
+  }
+
+  .lightbox-info-panel-mobile .lightbox-artist-info {
+    border-right: none;
+    /* Remove separator line when stacked */
+    padding-bottom: 1rem;
+    /* Add space if colo info follows */
+    border-right: 1px solid rgba(var(--clr-text-rgb), 0.1);
+    /* Separator line when stacked */
+    /* Space between artist and colo info block */
+  }
+
+  body.dark .lightbox-info-panel-mobile .lightbox-artist-info {
+    border-bottom-color: rgba(var(--clr-text-rgb), 0.15);
+  }
+
+  .lightbox-info-panel-mobile .lightbox-colo-info {
+    padding-top: 0;
+    /* No extra top padding if artist info is above */
+  }
+
+
+  /* Styles for the internal layout of artist/colo info on small mobile */
+  .lightbox-info-panel-mobile .lightbox-artist-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .lightbox-info-panel-mobile .lightbox-artist-info .artist-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin-bottom: 0;
+  }
+
+  .lightbox-info-panel-mobile .lightbox-artist-info .artist-text-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .lightbox-info-panel-mobile .lightbox-artist-info .artist-text-details .lightbox-artist-name,
+  .lightbox-info-panel-mobile .lightbox-artist-info .artist-text-details .artist-occurrence-count {
+    margin-left: 0;
+    flex-grow: 0;
+  }
+
+  .lightbox-info-panel-mobile .lightbox-artist-socials {
+    margin-top: 0.5rem;
+  }
+
+  .lightbox-info-panel-mobile .lightbox-colo-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    width: 100%;
   }
 
   .header-container {
@@ -2163,7 +2255,7 @@ body.dark .lightbox-colo-info-block {
     padding: 0.4rem;
   }
 
-  .colo-card-overlay p{
+  .colo-card-overlay p {
     font-size: 0.7rem;
   }
 
@@ -2172,16 +2264,11 @@ body.dark .lightbox-colo-info-block {
     padding: 10px;
   }
 
-.lightbox-image-container {
-  max-width: 600px;
-  width: 100%;
-}
-
-  .lightbox-info-panel-mobile {
-    font-size: 0.9em;
+  .lightbox-image-container {
+    max-width: 600px;
+    width: 100%;
   }
 
-  /* Réduire un peu la taille de police globale du panneau mobile */
   .lightbox-artist-pfp {
     width: 40px;
     height: 40px;

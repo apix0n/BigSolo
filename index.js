@@ -501,7 +501,6 @@ function displayLightboxInfo(colo, author) {
   const mobileColoInfoContainer = document.querySelector('.lightbox-info-panel-mobile .lightbox-colo-info');
 
   const getSocialsHTML = (links, type) => {
-    // ... (fonction getSocialsHTML reste identique) ...
     let html = '';
     const classPrefix = type === 'artist' ? 'lightbox-artist-socials' : 'lightbox-colo-socials';
     if (!links || Object.values(links).every(val => val === null || (typeof val === 'string' && val.trim() === ""))) return '';
@@ -514,7 +513,7 @@ function displayLightboxInfo(colo, author) {
     return html;
   };
 
-  let artistHtmlContent = ''; // Contenu HTML pour les infos artiste
+  let artistHtmlContent = '';
   if (author && colo) {
     const currentAuthorId = colo.author_id;
     const occurrenceCount = allColosData.filter(c => c.author_id === currentAuthorId).length;
@@ -522,8 +521,10 @@ function displayLightboxInfo(colo, author) {
     artistHtmlContent = `
       <div class="artist-header">
         <img src="${author.profile_img || 'img/placeholder_pfp.png'}" alt="Photo de profil de ${author.username}" class="lightbox-artist-pfp" loading="lazy">
-        <h3 class="lightbox-artist-name">${author.username}</h3>
-        <span class="artist-occurrence-count">(${occurrenceCount} colo${occurrenceCount > 1 ? 's' : ''})</span>
+        <div class="artist-text-details">
+          <h3 class="lightbox-artist-name" data-author-id="${currentAuthorId}">${author.username}</h3>
+          <span class="artist-occurrence-count">(${occurrenceCount} colo${occurrenceCount > 1 ? 's' : ''})</span>
+        </div>
       </div>
       ${getSocialsHTML({ twitter: author.twitter, instagram: author.instagram, tiktok: author.tiktok }, 'artist')}
     `;
@@ -531,7 +532,7 @@ function displayLightboxInfo(colo, author) {
     artistHtmlContent = '<p class="lightbox-info-placeholder">Infos artiste non disponibles.</p>';
   }
 
-  let coloHtmlContent = ''; // Contenu HTML pour les infos colo
+  let coloHtmlContent = '';
   if (colo) {
     coloHtmlContent = `
       <p><strong>Chapitre :</strong> ${colo.chapitre || 'N/A'}, Page ${colo.page || 'N/A'}</p>
@@ -546,9 +547,36 @@ function displayLightboxInfo(colo, author) {
   if (desktopArtistBlock) desktopArtistBlock.innerHTML = artistHtmlContent;
   if (desktopColoBlock) desktopColoBlock.innerHTML = coloHtmlContent;
 
-  // Injecter dans les conteneurs Mobile (qui ont gardé les classes .lightbox-artist-info et .lightbox-colo-info)
+  // Injecter dans les conteneurs Mobile
   if (mobileArtistInfoContainer) mobileArtistInfoContainer.innerHTML = artistHtmlContent;
   if (mobileColoInfoContainer) mobileColoInfoContainer.innerHTML = coloHtmlContent;
+
+  // Add event listener to the newly injected artist names
+  const artistNameElements = document.querySelectorAll('.lightbox-artist-name[data-author-id]');
+  artistNameElements.forEach(nameElement => {
+    nameElement.style.cursor = 'pointer'; // Indicate it's clickable
+
+    nameElement.addEventListener('mouseenter', () => { nameElement.style.textDecoration = 'underline'; });
+    nameElement.addEventListener('mouseleave', () => { nameElement.style.textDecoration = 'none'; });
+
+    nameElement.addEventListener('click', function () {
+      const authorIdToFilter = this.dataset.authorId;
+      if (filterArtistSelect && authorIdToFilter) {
+        const optionExists = Array.from(filterArtistSelect.options).some(opt => opt.value === authorIdToFilter);
+        if (optionExists) {
+          filterArtistSelect.value = authorIdToFilter;
+          displayColos(); // Re-render gallery
+
+          // Close lightbox
+          if (lightboxModal) lightboxModal.style.display = 'none';
+          document.body.style.overflow = 'auto';
+          if (lightboxImg) lightboxImg.src = "";
+        } else {
+          console.warn(`Author ID "${authorIdToFilter}" not found in filter options.`);
+        }
+      }
+    });
+  });
 }
 
 
