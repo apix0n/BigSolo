@@ -1638,17 +1638,34 @@ body.dark .lightbox-colo-info-block {
   .lightbox-content-wrapper {
     flex-direction: column;
     align-items: center;
-    padding-top: 40px;
-    /* Plus d'espace en haut pour le bouton close */
+    padding-top: 40px; /* Pour le bouton de fermeture, conservez ceci */
+    
+    /* NOUVEAU/MODIFIÉ : crucial pour la distribution de l'espace vertical */
+    height: 100%; /* Prend toute la hauteur disponible DANS lightbox-modal (après padding) */
+    width: 100%; /* Prend toute la largeur disponible DANS lightbox-modal (après padding) */
+    justify-content: flex-start; /* Aligne les éléments (image, puis infos) en haut */
+    overflow: hidden; /* Empêche les enfants de causer un scroll sur le body/modal */
   }
 
   .lightbox-image-container {
-    max-width: 90%;
-    /* L'image peut prendre plus de largeur */
-    max-height: 60vh;
-    /* Mais hauteur limitée pour laisser place aux infos dessous */
-    margin-bottom: 1rem;
-    width: auto; /* S'adapte à l'image */
+    max-width: 90%; /* Conservez */
+    /* max-height: 60vh; */ /* SUPPRIMEZ ou réduisez ceci. On va le laisser gérer par flex. */
+    
+    /* NOUVEAU/MODIFIÉ : pour que l'image s'adapte à l'espace restant */
+    flex-grow: 1;   /* Laisse ce conteneur prendre l'espace vertical disponible */
+    flex-shrink: 1; /* Laisse ce conteneur rétrécir si nécessaire */
+    min-height: 0;  /* TRÈS IMPORTANT pour que les items flex puissent rétrécir correctement */
+    
+    width: auto; /* S'adapte à la largeur de l'image, jusqu'à max-width */
+    display: flex; /* Pour centrer l'image si elle est plus petite que son conteneur */
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lightbox-image {
+    max-width: 100%;
+    max-height: 100%; /* L'image prendra au maximum la taille de son conteneur dynamique */
+    object-fit: contain;
   }
 
   .lightbox-info-panel-desktop {
@@ -2158,7 +2175,6 @@ body.dark .lightbox-colo-info-block {
 .lightbox-image-container {
   max-width: 600px;
   width: 100%;
-  flex-shrink: 0;
 }
 
   .lightbox-info-panel-mobile {

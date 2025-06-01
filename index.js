@@ -752,19 +752,12 @@ async function bootstrapAppLogic() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // 1. Initialiser les interactions du header qui ne dépendent pas du contenu chargé dynamiquement (comme le thème)
-  initializeHeaderAndMenuInteractions(); // La partie thème s'exécute, la partie menu mobile est maintenant dans une fonction séparée
-
-  // 2. Charger les composants HTML de manière asynchrone
   await loadHTMLComponents();
-
-  // 3. MAINTENANT que les composants sont chargés, initialiser les interactions du menu mobile
+  initializeHeaderAndMenuInteractions();
   if (window.setupMobileMenuInteractions) {
     window.setupMobileMenuInteractions();
   } else {
-    console.error("La fonction setupMobileMenuInteractions n'est pas définie.");
+    console.error("La fonction setupMobileMenuInteractions n'est pas définie. Assurez-vous que initializeHeaderAndMenuInteractions est appelée et fonctionne.");
   }
-
-  // 4. Lancer la logique principale de l'application
   await bootstrapAppLogic();
 });
