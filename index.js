@@ -32,7 +32,7 @@ let mainScrollObserver; // Déclarez-le globalement ou passez-le
 
 // Fonction pour initialiser l'IntersectionObserver pour l'animation d'apparition générale
 function initializeScrollObserver() {
-  const elementsToObserve = document.querySelectorAll(".chapter-card, .series-card, .section-title, .colo-card, .presentation-content, .profile-pic, .gallery-controls, .series-detail-container");
+  const elementsToObserve = document.querySelectorAll(".chapter-card, .series-card, .section-title, .presentation-content, .profile-pic, .gallery-controls, .series-detail-container");
   if (elementsToObserve.length === 0) return;
 
   const observer = new IntersectionObserver(
@@ -581,6 +581,7 @@ function displayLightboxInfo(colo, author) {
 
 
 function displayColos() {
+  console.log("displayColos called")
   if (!galleryGridContainer) return;
 
   if (!allColosData.length || typeof authorsInfoData !== 'object' || authorsInfoData === null || Object.keys(authorsInfoData).length === 0) {
@@ -715,69 +716,133 @@ if (lightboxModal && lightboxCloseBtn) {
   });
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+  initializeGallery();
+});
+
 // ───────────────────────────────── BOOTSTRAP PRINCIPAL ─────────────────────────────────────
 async function bootstrapAppLogic() {
+  console.log("🔁 bootstrapAppLogic started");
   try {
-    const allSeries = await fetchAllSeries();
+    const allSeries = await fetchAllSeries().catch(err => {
+      console.error("❌ fetchAllSeries failed:", err);
+      return [];
+    });
+
+    if (!Array.isArray(allSeries) || allSeries.length === 0) {
+      console.warn("⚠️ Aucune série chargée. Vérifie le fichier de données.");
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const seriesId = urlParams.get('id');
 
-    if (seriesId && seriesDetailSection) {
+    // ─────────── PAGE DÉTAIL SÉRIE ───────────
+    if (seriesId && typeof seriesDetailSection !== 'undefined' && seriesDetailSection) {
       const seriesData = allSeries.find(s => slugify(s.title) === seriesId);
-      seriesData ? renderSeriesDetailPage(seriesData) : (seriesDetailSection.innerHTML = "<p>Série non trouvée.</p>");
-    } else if (galleryGridContainer) { // Page galerie
-      await initializeGallery();
-    } else if (latestContainer || seriesGridOngoing || seriesGridOneShot) { // Page d'accueil (index.html)
+      if (seriesData) {
+        renderSeriesDetailPage(seriesData);
+      } else {
+        seriesDetailSection.innerHTML = "<p>❌ Série non trouvée.</p>";
+      }
+
+    // ─────────── PAGE ACCUEIL ───────────
+    } else if (
+      typeof latestContainer !== 'undefined' || 
+      typeof seriesGridOngoing !== 'undefined' || 
+      typeof seriesGridOneShot !== 'undefined'
+    ) {
+
       if (seriesGridOngoing) {
         const onGoing = allSeries.filter(s => s && !s.completed && !s.os);
-        seriesGridOngoing.innerHTML = onGoing.length > 0 ? onGoing.map(renderSeries).join("") : "<p>Aucune série en cours.</p>";
+        seriesGridOngoing.innerHTML = onGoing.length > 0
+          ? onGoing.map(renderSeries).join("")
+          : "<p>Aucune série en cours.</p>";
       }
+
       if (seriesGridOneShot) {
-        const os = allSeries.filter(s => s && s.os);
-        seriesGridOneShot.innerHTML = os.length > 0 ? os.map(renderSeries).join("") : "<p>Aucun one-shot.</p>";
+        const oneShots = allSeries.filter(s => s && s.os);
+        seriesGridOneShot.innerHTML = oneShots.length > 0
+          ? oneShots.map(renderSeries).join("")
+          : "<p>Aucun one-shot.</p>";
       }
+
       if (latestContainer) {
         const allChaptersForHomepage = allSeries.filter(s => s && s.chapters)
-          .flatMap(s => Object.entries(s.chapters).map(([cn, cd]) => (typeof cd === 'object' && cd !== null) ? {
-            ...cd,
-            serieTitle: s.title,
-            serieCover: s.cover,
-            chapter: cn,
-            last_updated_ts: (cd.last_updated || 0) * 1000, // Pour les chapitres de série, last_updated est un timestamp Unix
-            url: `https://cubari.moe/read/gist/${s.base64Url}/${cn.replaceAll(".", "-")}/1/`
-          } : null))
-          .filter(c => c).sort((a, b) => b.last_updated_ts - a.last_updated_ts).slice(0, 15);
+          .flatMap(s =>
+            Object.entries(s.chapters).map(([cn, cd]) =>
+              typeof cd === 'object' && cd !== null
+                ? {
+                    ...cd,
+                    serieTitle: s.title,
+                    serieCover: s.cover,
+                    chapter: cn,
+                    last_updated_ts: (cd.last_updated || 0) * 1000,
+                    url: `https://cubari.moe/read/gist/${s.base64Url}/${cn.replaceAll(".", "-")}/1/`
+                  }
+                : null
+            )
+          )
+          .filter(Boolean)
+          .sort((a, b) => b.last_updated_ts - a.last_updated_ts)
+          .slice(0, 15);
 
         const track = document.querySelector(".carousel-track");
         if (track) {
-          track.innerHTML = allChaptersForHomepage.length > 0 ? allChaptersForHomepage.map(renderChapter).join("") : "<p>Aucune sortie récente.</p>";
-          const prevBtn = document.querySelector(".carousel-prev"), nextBtn = document.querySelector(".carousel-next");
+          track.innerHTML = allChaptersForHomepage.length > 0
+            ? allChaptersForHomepage.map(renderChapter).join("")
+            : "<p>Aucune sortie récente.</p>";
+
+          const prevBtn = document.querySelector(".carousel-prev");
+          const nextBtn = document.querySelector(".carousel-next");
+
           if (allChaptersForHomepage.length > 1 && prevBtn && nextBtn) {
             [prevBtn, nextBtn].forEach(btn => btn.style.display = 'flex');
             const scrollAmount = () => track.clientWidth * 0.8;
             nextBtn.addEventListener("click", () => track.scrollBy({ left: scrollAmount(), behavior: "smooth" }));
             prevBtn.addEventListener("click", () => track.scrollBy({ left: -scrollAmount(), behavior: "smooth" }));
+
+            // Drag-to-scroll
             let isDragging = false, startX, scrollLeftVal;
-            const startDragging = (e) => { isDragging = true; startX = (e.pageX || e.touches[0].pageX) - track.offsetLeft; scrollLeftVal = track.scrollLeft; track.classList.add("active"); };
-            const stopDragging = () => { isDragging = false; track.classList.remove("active"); };
-            const drag = (e) => { if (!isDragging) return; e.preventDefault(); const x = (e.pageX || e.touches[0].pageX) - track.offsetLeft; track.scrollLeft = scrollLeftVal - (x - startX) * 1.5; };
-            track.addEventListener('mousedown', startDragging); track.addEventListener('touchstart', startDragging, { passive: true });
-            document.addEventListener('mousemove', drag); document.addEventListener('touchmove', drag, { passive: false });
-            document.addEventListener('mouseup', stopDragging); document.addEventListener('touchend', stopDragging);
-          } else if (prevBtn && nextBtn) { [prevBtn, nextBtn].forEach(btn => btn.style.display = 'none'); }
+            const startDragging = (e) => {
+              isDragging = true;
+              startX = (e.pageX || e.touches[0].pageX) - track.offsetLeft;
+              scrollLeftVal = track.scrollLeft;
+              track.classList.add("active");
+            };
+            const stopDragging = () => {
+              isDragging = false;
+              track.classList.remove("active");
+            };
+            const drag = (e) => {
+              if (!isDragging) return;
+              e.preventDefault();
+              const x = (e.pageX || e.touches[0].pageX) - track.offsetLeft;
+              track.scrollLeft = scrollLeftVal - (x - startX) * 1.5;
+            };
+
+            track.addEventListener('mousedown', startDragging);
+            track.addEventListener('touchstart', startDragging, { passive: true });
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('touchmove', drag, { passive: false });
+            document.addEventListener('mouseup', stopDragging);
+            document.addEventListener('touchend', stopDragging);
+          } else if (prevBtn && nextBtn) {
+            [prevBtn, nextBtn].forEach(btn => btn.style.display = 'none');
+          }
         }
       }
     }
-    initializeScrollObserver(); // Initialiser l'animation d'apparition pour tous les éléments concernés
+
+    initializeScrollObserver(); // Animation d'apparition
   } catch (err) {
-    console.error("Erreur Bootstrap App Logic:", err);
+    console.error("🚨 Erreur dans bootstrapAppLogic:", err);
     if (latestContainer) latestContainer.innerHTML = "<p>Erreur chargement chapitres.</p>";
     if (seriesGridOngoing) seriesGridOngoing.innerHTML = "<p>Erreur chargement séries.</p>";
     if (seriesGridOneShot) seriesGridOneShot.innerHTML = "<p>Erreur chargement one-shots.</p>";
     if (seriesDetailSection) seriesDetailSection.innerHTML = "<p>Erreur chargement détails.</p>";
-    if (galleryGridContainer) galleryGridContainer.innerHTML = "<p>Erreur chargement galerie.</p>";
   }
 }
+
 
 document.addEventListener("DOMContentLoaded", async () => {
   await loadHTMLComponents();
