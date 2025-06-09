@@ -10,11 +10,11 @@
         var htmlEl = document.documentElement;
         if (theme === 'dark' || (!theme && prefersDark)) {
           htmlEl.classList.add('dark');
-          htmlEl.style.backgroundColor = '#15171a'; // Applique directement la couleur de fond
+          htmlEl.style.backgroundColor = '#15171a';
           htmlEl.style.color = '#eceff4';
         } else {
           htmlEl.classList.remove('dark');
-          htmlEl.style.backgroundColor = '#f7f8fc'; // Fond clair
+          htmlEl.style.backgroundColor = '#f7f8fc';
           htmlEl.style.color = '#222831';
         }
       } catch (e) { }
@@ -36,19 +36,28 @@
     rel="stylesheet" />
   <link rel="icon" type="image/png" href="img/icon.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="stylesheet" href="style.css" />
+    integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/pages/series-detail.css" />
+
+  <script src="js/theme-init.js"></script>
 </head>
 
-<body>
+<body id="seriesdetailpage">
   <header id="main-header"></header>
   <div class="mobile-menu-overlay" id="main-mobile-menu-overlay"></div>
 
   <main>
     <section id="series-detail-section" class="series-detail-page">
+      <p>Chargement des détails de la série...</p>
     </section>
   </main>
-  <script src="index.js" type="module"></script>
+
+  <script src="js/index.js" type="module"></script>
 </body>
 
 </html>

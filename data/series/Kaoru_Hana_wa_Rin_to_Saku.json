@@ -3,7 +3,7 @@
 	"description": "Au cœur d'une banlieue japonaise, se dressent face à face deux établissements que tout oppose : Chidori, le lycée public pour garçons, réunit les pires cancres de la ville, tandis que le prestigieux Kikyô rassemble les esprits les plus brillants des filles de bonne famille. \n\nDonnant régulièrement un coup de main à la pâtisserie familiale, Rintarô Tsumugi, élève à Chidori, sympathise avec l'une de ses clientes régulières, Kaoruko Waguri. Alors qu'il sent peu à peu un lien se tisser entre eux, le lycéen apprend que la jeune fille fréquente Kikyô... et que comme tous les élèves de ces établissements, ils sont supposés se haïr mutuellement ! \n\nLa rivalité entre leurs lycées est-elle forcément signe de fatalité ?",
 	"artist": "Saka Mikami",
 	"author": "Saka Mikami",
-	"cover": "https://meo.comick.pictures/7yO0re.jpg",
+	"cover": "https://meo.comick.pictures/nR2aBm.jpg",
 	"manga_type": "Shonen",
     "magazine": "Pocket Magazine",
 	"release_year": 2021,
@@ -1102,7 +1102,7 @@
 		},
 		"126": {
 			"title": "Beau-père et Rintaro",
-			"volume": "",
+			"volume": "17",
 			"last_updated": "1726704000",
 			"groups": {
 				"Big_herooooo": "/proxy/api/imgchest/chapter/m9yxrwz9pyq"
@@ -1110,15 +1110,23 @@
 		},
 		"127": {
 			"title": "Le dernier festival sportif",
-			"volume": "",
+			"volume": "17",
 			"last_updated": "1727308800",
 			"groups": {
 				"Big_herooooo": "/proxy/api/imgchest/chapter/9249wro2byn"
 			}
 		},
+		"127.5": {
+			"title": "Extra volume 17",
+			"volume": "17",
+			"last_updated": "1749481200",
+			"groups": {
+				"Big_herooooo": "/proxy/api/imgchest/chapter/agyv9e9ab78"
+			}
+		},
 		"128": {
 			"title": "Bonté d'âme",
-			"volume": "",
+			"volume": "17",
 			"last_updated": "1728518400",
 			"groups": {
 				"Big_herooooo": "/proxy/api/imgchest/chapter/9p4nw95vb4n"
@@ -1126,7 +1134,7 @@
 		},
 		"129": {
 			"title": "Le futur de Kaoruko",
-			"volume": "",
+			"volume": "17",
 			"last_updated": "1729123200",
 			"groups": {
 				"Big_herooooo": "/proxy/api/imgchest/chapter/md7own6a24p"
@@ -1134,7 +1142,7 @@
 		},
 		"130": {
 			"title": "Petit ami",
-			"volume": "",
+			"volume": "17",
 			"last_updated": "1729728000",
 			"groups": {
 				"Big_herooooo": "/proxy/api/imgchest/chapter/ne7bdm8lm45"
@@ -1142,7 +1150,7 @@
 		},
 		"131": {
 			"title": "Gynécologue-obstétricienne",
-			"volume": "",
+			"volume": "17",
 			"last_updated": "1730419200",
 			"groups": {
 				"Big_herooooo": "/proxy/api/imgchest/chapter/na7km63a348"
@@ -1150,7 +1158,7 @@
 		},
 		"132": {
 			"title": "Chacun sa voie",
-			"volume": "",
+			"volume": "17",
 			"last_updated": "1732838400",
 			"groups": {
 				"Big_herooooo": "/proxy/api/imgchest/chapter/dl7pe2xa3yo"
@@ -1158,7 +1166,7 @@
 		},
 		"133": {
 			"title": "Grand frère Usami",
-			"volume": "",
+			"volume": "17",
 			"last_updated": "1733529600",
 			"groups": {
 				"Big_herooooo": "/proxy/api/imgchest/chapter/5xy2a9woz7l"
