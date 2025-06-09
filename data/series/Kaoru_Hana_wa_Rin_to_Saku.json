@@ -1,6 +1,6 @@
 {
 	"title": "Kaoru Hana wa Rin to Saku",
-	"description": "Au cœur d'une banlieue japonaise, se dressent face à face deux établissements que tout oppose : Chidori, le lycée public pour garçons, réunit les pires cancres de la ville, tandis que le prestigieux Kikyô rassemble les esprits les plus brillants des filles de bonne famille. \n\nDonnant régulièrement un coup de main à la pâtisserie familiale, Rintarô Tsumugi, élève à Chidori, sympathise avec l'une de ses clientes régulières, Kaoruko Waguri. Alors qu'il sent peu à peu un lien se tisser entre eux, le lycéen apprend que la jeune fille fréquente Kikyô... et que comme tous les élèves de ces établissements, ils sont supposés se haïr mutuellement ! \n\nLa rivalité entre leurs lycées est-elle forcément signe de fatalité ?",
+	"description": "Au cœur d'une banlieue japonaise, se dressent face à face deux établissements que tout oppose : Chidori, le lycée public pour garçons, réunit les pires cancres de la ville, tandis que le prestigieux Kikyô rassemble les esprits les plus brillants des filles de bonne famille. Donnant régulièrement un coup de main à la pâtisserie familiale, Rintarô Tsumugi, élève à Chidori, sympathise avec l'une de ses clientes régulières, Kaoruko Waguri. Alors qu'il sent peu à peu un lien se tisser entre eux, le lycéen apprend que la jeune fille fréquente Kikyô... et que comme tous les élèves de ces établissements, ils sont supposés se haïr mutuellement ! La rivalité entre leurs lycées est-elle forcément signe de fatalité ?",
 	"artist": "Saka Mikami",
 	"author": "Saka Mikami",
 	"cover": "https://meo.comick.pictures/nR2aBm.jpg",
@@ -10,6 +10,25 @@
 	"tags": ["Comédie", "Drame", "Ecole", "Romance", "Tranche de vie"],
 	"alternative_titles": ["薫る花は凛と咲く", "The Fragrant Flower Blooms with Dignity", "Bloom"],
 	"release_status": "En cours",
+	"covers_gallery": [
+		{ "url_hq": "https://meo.comick.pictures/nR2aBm.jpg", "url_lq": "https://meo.comick.pictures/nR2aBm-s.jpg", "volume": "17" },
+		{ "url_hq": "https://meo.comick.pictures/7yO0re.jpg", "url_lq": "https://meo.comick.pictures/7yO0re-s.jpg", "volume": "16" },
+		{ "url_hq": "https://meo.comick.pictures/g6rL0Y.jpg", "url_lq": "https://meo.comick.pictures/g6rL0Y-s.jpg", "volume": "15" },
+		{ "url_hq": "https://meo.comick.pictures/l6Xgj7.jpg", "url_lq": "https://meo.comick.pictures/l6Xgj7-s.jpg", "volume": "14" },
+		{ "url_hq": "https://meo.comick.pictures/W8zR3Q.jpg", "url_lq": "https://meo.comick.pictures/W8zR3Q-s.jpg", "volume": "13" },
+		{ "url_hq": "https://meo.comick.pictures/3Kpyqz.jpg", "url_lq": "https://meo.comick.pictures/3Kpyqz-s.jpg", "volume": "12" },
+		{ "url_hq": "https://meo.comick.pictures/BLwGJ2.jpg", "url_lq": "https://meo.comick.pictures/BLwGJ2-s.jpg", "volume": "11" },
+		{ "url_hq": "https://meo.comick.pictures/X8XrD5.jpg", "url_lq": "https://meo.comick.pictures/X8XrD5-s.jpg", "volume": "10" },
+		{ "url_hq": "https://meo.comick.pictures/y7Qp1n.jpg", "url_lq": "https://meo.comick.pictures/y7Qp1n-s.jpg", "volume": "9" },
+		{ "url_hq": "https://meo.comick.pictures/Jn7mO0.jpg", "url_lq": "https://meo.comick.pictures/Jn7mO0-s.jpg", "volume": "8" },
+		{ "url_hq": "https://meo.comick.pictures/EOmMJM.jpg", "url_lq": "https://meo.comick.pictures/EOmMJM-s.jpg", "volume": "7" },
+		{ "url_hq": "https://meo.comick.pictures/8yK8Bp.jpg", "url_lq": "https://meo.comick.pictures/8yK8Bp-s.jpg", "volume": "6" },
+		{ "url_hq": "https://meo.comick.pictures/ez3oKZ.jpg", "url_lq": "https://meo.comick.pictures/ez3oKZ-s.jpg", "volume": "5" },
+		{ "url_hq": "https://meo.comick.pictures/O8bKGg.jpg", "url_lq": "https://meo.comick.pictures/O8bKGg-s.jpg", "volume": "4" },
+		{ "url_hq": "https://meo.comick.pictures/D42gyL.jpg", "url_lq": "https://meo.comick.pictures/D42gyL-s.jpg", "volume": "3" },
+		{ "url_hq": "https://meo.comick.pictures/4kKB7X.jpg", "url_lq": "https://meo.comick.pictures/4kKB7X-s.jpg", "volume": "2" },
+		{ "url_hq": "https://meo.comick.pictures/1vOnpz.jpg", "url_lq": "https://meo.comick.pictures/1vOnpz-s.jpg", "volume": "1" }
+	],
 	"chapters": {
 		"1": {
 			"title": "Rintaro et Kaoruko",

@@ -93,7 +93,9 @@ function renderSeriesCard(series) {
     tagsHtml = `<div class="tags series-tags">${series.tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>`;
   }
 
-  const detailPageUrl = `series-detail.html?id=${slugify(series.title)}`;
+  // MODIFICATION ICI pour utiliser la "pretty URL"
+  const seriesSlug = slugify(series.title);
+  const detailPageUrl = `/series-detail/${seriesSlug}`; // Format: /series-detail/slug-de-la-serie
 
   return `
     <div class="series-card" onclick="window.location.href='${detailPageUrl}'">

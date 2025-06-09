@@ -109,7 +109,6 @@ p.detail-description {
 
 @media (max-width: 768px) {
 
-  /* Mobile */
   .series-detail-container {
     padding: 1.2rem;
   }
@@ -218,6 +217,7 @@ p.detail-description {
   }
 
   .detail-secondary-info-wrapper.detail-secondary-mobile {
+    margin-top: 0.5rem;
     display: block;
     width: 100%;
     text-align: left;

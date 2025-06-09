@@ -1,20 +1,21 @@
-import { qs, qsa } from '../utils/domUtils.js';
+import { qs, qsa, slugify } from '../utils/domUtils.js';
 
 const mainNavLinksConfig = [
-  { text: "Accueil", href: "/index.html", icon: "fas fa-home", id: "home" },
-  { text: "Fan-Arts", href: "/galerie.html", icon: "fa-solid fa-palette", id: "gallery" },
-  { text: "À propos", href: "/presentation.html", icon: "fas fa-user", id: "about" }
+  { text: "Accueil", href: "/index", icon: "fas fa-home", id: "home" },
+  { text: "Fan-Arts", href: "/galerie", icon: "fa-solid fa-palette", id: "gallery" },
+  { text: "À propos", href: "/presentation", icon: "fas fa-user", id: "about" }
 ];
 
 const subNavTitlesConfig = {
   homepage: "Sur cette page",
+  seriesdetailpage: "Navigation Série",
 };
 
 const subNavLinksConfig = {
   homepage: [
-    { text: "Dernières sorties", href: "/index.html#latest-chapters-section", id: "latest" },
-    { text: "Séries", href: "/index.html#on-going-section", id: "series" },
-    { text: "One-Shot", href: "/index.html#one-shot-section", id: "oneshots" }
+    { text: "Dernières sorties", href: "/index#latest-chapters-section", id: "latest" },
+    { text: "Séries", href: "/index#on-going-section", id: "series" },
+    { text: "One-Shot", href: "/index#one-shot-section", id: "oneshots" }
   ],
   galeriepage: [
   ],
@@ -29,12 +30,25 @@ function getCurrentPageId() {
     return document.body.id;
   }
   const path = window.location.pathname;
-  if (path.includes("index.html") || path === "/") return "homepage";
-  if (path.includes("galerie.html")) return "galeriepage";
-  if (path.includes("presentation.html")) return "presentationpage";
-  if (path.includes("series-detail.html")) return "seriesdetailpage";
+  if (path.startsWith('/series-detail/') && path.endsWith('/cover')) return "seriescoverspage";
+  if (path.startsWith('/series-detail/')) return "seriesdetailpage";
+  if (path.includes("index") || path === "/") return "homepage";
+  if (path.includes("galerie")) return "galeriepage";
+  if (path.includes("presentation")) return "presentationpage";
   return null;
 }
+
+function getCurrentSeriesSlugFromPath() {
+    const path = window.location.pathname;
+    if (path.startsWith('/series-detail/')) {
+        const segments = path.split('/');
+        if (segments.length >= 3 && segments[1] === 'series-detail') {
+            return segments[2];
+        }
+    }
+    return null;
+}
+
 
 function renderNavLinks(container, links, isMobile = false) {
   if (!container) return;
@@ -44,6 +58,9 @@ function renderNavLinks(container, links, isMobile = false) {
     const li = document.createElement('li');
     const a = document.createElement('a');
     a.href = link.href;
+    if (link.id) {
+        a.id = `navlink-${link.id}${isMobile ? '-mobile' : '-desktop'}`;
+    }
         
     if (link.icon) {
       const i = document.createElement('i');
@@ -57,6 +74,28 @@ function renderNavLinks(container, links, isMobile = false) {
   });
 }
 
+function getSubNavLinksForPage(pageId) {
+    let baseLinks = [...(subNavLinksConfig[pageId] || [])];
+
+    if (pageId === 'seriesdetailpage' || pageId === 'seriescoverspage') {
+        const seriesSlug = getCurrentSeriesSlugFromPath();
+        if (seriesSlug) {
+            const coversLink = { text: "Galerie des Couvertures", href: `/series-detail/${seriesSlug}/cover`, id: "series-covers-gallery" };
+
+            if (pageId === 'seriesdetailpage') {
+                baseLinks = [coversLink, ...baseLinks.filter(l => !["series-info", "series-covers-gallery", "series-chapters"].includes(l.id))];
+            } else if (pageId === 'seriescoverspage') {
+                 baseLinks = [
+                    { text: "Retour à la Série", href: `/series-detail/${seriesSlug}`, id: "back-to-series" },
+
+                 ];
+            }
+        }
+    }
+    return baseLinks;
+}
+
+
 function populateDesktopNavigation() {
   const mainNavContainer = qs('#desktop-nav-main');
   const subNavContainer = qs('#desktop-nav-sub');
@@ -65,7 +104,7 @@ function populateDesktopNavigation() {
 
   renderNavLinks(mainNavContainer, mainNavLinksConfig, false);
 
-  const subLinksForCurrentPage = subNavLinksConfig[currentPageId] || [];
+  const subLinksForCurrentPage = getSubNavLinksForPage(currentPageId);
   renderNavLinks(subNavContainer, subLinksForCurrentPage, false);
 
   if (mainNavContainer && subNavContainer && separator) {
@@ -87,7 +126,7 @@ function populateMobileNavigation() {
 
   renderNavLinks(mobileMainNavContainer, mainNavLinksConfig, true);
 
-  const subLinksForCurrentPage = subNavLinksConfig[currentPageId] || [];
+  const subLinksForCurrentPage = getSubNavLinksForPage(currentPageId);
   if (subLinksForCurrentPage.length > 0) {
     renderNavLinks(mobileSubNavContainer, subLinksForCurrentPage, true);
     if (mobileSubNavTitleElement) {
@@ -115,56 +154,54 @@ function updateThemeToggleIcon() {
 
 function setupThemeToggle() {
   const toggleBtn = qs("#theme-toggle");
-  updateThemeToggleIcon();
   if (toggleBtn && window.themeUtils) {
+    updateThemeToggleIcon();
     toggleBtn.addEventListener("click", () => {
       window.themeUtils.toggleTheme();
       updateThemeToggleIcon();
     });
+  } else if (toggleBtn) {
+    console.warn("themeUtils non trouvé, le bouton de thème ne sera pas fonctionnel.");
   }
 }
 
 function handleAnchorLinkClick(e, linkElement) {
   const href = linkElement.getAttribute('href');
+  if (!href.includes('#')) return;
+
   const targetId = href.substring(href.indexOf('#') + 1);
   const targetElement = document.getElementById(targetId);
 
   const hrefPath = href.split('#')[0];
   const currentPagePath = window.location.pathname;
-  
+
   const isSamePageTarget = 
     (hrefPath === currentPagePath) || 
-    (hrefPath === "/index.html" && currentPagePath === "/") ||
-    (hrefPath === "" && currentPagePath === "/") || 
-    (hrefPath === "" && currentPagePath.endsWith("/index.html"));
+    (hrefPath.replace('/index', '') === currentPagePath.replace('/index', '')) ||
+    (hrefPath === '' && (currentPagePath === '/' || currentPagePath.endsWith('/index')));
+
 
   if (targetElement && isSamePageTarget) {
     e.preventDefault(); 
     setTimeout(() => {
       const headerHeight = qs('#main-header') ? qs('#main-header').offsetHeight : 0;
       const elementPosition = targetElement.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 15; 
+      const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 15;
 
       window.scrollTo({
         top: offsetPosition,
         behavior: 'smooth'
       });
 
-      if (history.pushState) {
+      if (history.pushState && targetId) {
         history.pushState(null, null, `#${targetId}`);
-      } else {
+      } else if (targetId) {
         window.location.hash = `#${targetId}`;
       }
       updateActiveNavLinks();
-    }, 100); 
+    }, 50);
 
-  } else if (!isSamePageTarget && (href.startsWith('/index.html#') || (href.startsWith('/#') && href.length > 2))) {
-    if (href.startsWith('/#') && href.length > 2) {
-      window.location.href = '/index.html#' + targetId;
-    } else {
-      window.location.href = href; 
-    }
-    e.preventDefault();
+  } else if (!isSamePageTarget && href.includes('#')) {
   }
 }
 
@@ -175,10 +212,7 @@ function initAnchorLinks() {
       target = target.parentElement;
     }
     if (target && target.tagName === 'A' && target.getAttribute('href')) {
-      const href = target.getAttribute('href');
-      if (href.includes('#')) {
-        handleAnchorLinkClick(e, target);
-      }
+      handleAnchorLinkClick(e, target);
     }
   });
 
@@ -193,8 +227,10 @@ function initAnchorLinks() {
           const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 15;
           window.scrollTo({ top: offsetPosition, behavior: 'auto' });
           updateActiveNavLinks(); 
-        }, 200); 
+        }, 100); 
       }
+    } else {
+        updateActiveNavLinks();
     }
   });
 
@@ -207,29 +243,32 @@ function initAnchorLinks() {
 
 
 function updateActiveNavLinks() {
-  const currentPath = window.location.pathname;
+  const currentPath = window.location.pathname.replace(/\/index(\.html)?$/, '/');
   const currentHash = window.location.hash;
   const navLinks = qsa('#desktop-nav-main a, #desktop-nav-sub a, #mobile-nav-main a, #mobile-nav-sub a'); 
 
   navLinks.forEach(a => {
     const linkHref = a.getAttribute('href');
-    const linkPath = linkHref.split('#')[0];
+    if (!linkHref) return;
+
+    let linkPath = linkHref.split('#')[0].replace(/\/index(\.html)?$/, '/');
     const linkHash = linkHref.includes('#') ? linkHref.substring(linkHref.indexOf('#')) : '';
+    if (linkPath === '') {
+        linkPath = '/';
+    }
+
 
     let isActive = false;
-    if (linkPath === currentPath || (linkPath === "/index.html" && currentPath === "/")) {
-      if (linkHash && linkHash === currentHash) {
-        isActive = true;
-      } else if (!linkHash && !currentHash) {
-        isActive = true;
-      }
-    }
-    if (linkPath === "/index.html" && !linkHash && currentPath === "/" && !currentHash) {
-        isActive = true;
-    }
     
-    if (a.parentElement.parentElement.id === 'desktop-nav-main' || a.parentElement.parentElement.id === 'mobile-nav-main') {
-        if (linkPath === "/index.html" && !linkHash && (currentPath === "/" || currentPath === "/index.html") && currentHash) {
+    if (linkPath === currentPath) {
+        if ((linkHash && linkHash === currentHash) || (!linkHash && !currentHash)) {
+            isActive = true;
+        }
+        if ((a.parentElement.parentElement.id === 'desktop-nav-main' || a.parentElement.parentElement.id === 'mobile-nav-main') &&
+            linkPath === '/' && !linkHash && currentPath === '/' && currentHash) {
+             isActive = true;
+        }
+        if (linkHash && linkHash !== currentHash && currentPath === linkPath) {
             isActive = false;
         }
     }
@@ -253,6 +292,7 @@ function setupMobileMenuInteractions() {
         populateMobileNavigation();
         updateActiveNavLinks();
         mobileMenuOverlayContainer.classList.add("open");
+        document.body.classList.add("mobile-menu-open");
     }
     if (hamburgerBtn) hamburgerBtn.setAttribute("aria-expanded", "true");
   }
@@ -260,22 +300,29 @@ function setupMobileMenuInteractions() {
   function closeMobileMenu() {
     if (mobileMenuOverlayContainer) mobileMenuOverlayContainer.classList.remove("open");
     if (hamburgerBtn) hamburgerBtn.setAttribute("aria-expanded", "false");
+    document.body.classList.remove("mobile-menu-open");
   }
 
   if (hamburgerBtn && mobileMenuOverlayContainer) {
     hamburgerBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      const mobileMenuContent = qs(".mobile-menu-content", mobileMenuOverlayContainer);
-      const currentCloseBtn = mobileMenuContent ? qs(".close-mobile-menu-btn", mobileMenuContent) : null;
+      const isMenuOpen = mobileMenuOverlayContainer.classList.contains("open");
       
-      if (currentCloseBtn && !currentCloseBtn.dataset.listenerAttached) {
-        currentCloseBtn.addEventListener("click", (ev) => {
-          ev.stopPropagation();
-          closeMobileMenu();
-        });
-        currentCloseBtn.dataset.listenerAttached = "true";
+      if (isMenuOpen) {
+        closeMobileMenu();
+      } else {
+        openMobileMenu();
+        const mobileMenuContent = qs(".mobile-menu-content", mobileMenuOverlayContainer);
+        const currentCloseBtn = mobileMenuContent ? qs(".close-mobile-menu-btn", mobileMenuContent) : null;
+        
+        if (currentCloseBtn && !currentCloseBtn.dataset.listenerAttached) {
+          currentCloseBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            closeMobileMenu();
+          });
+          currentCloseBtn.dataset.listenerAttached = "true";
+        }
       }
-      mobileMenuOverlayContainer.classList.contains("open") ? closeMobileMenu() : openMobileMenu();
     });
 
     mobileMenuOverlayContainer.addEventListener("click", (e) => {
@@ -292,12 +339,12 @@ function setupMobileMenuInteractions() {
 
             if (targetLink && targetLink.tagName === 'A') {
                 const href = targetLink.getAttribute('href');
-                const isCurrentPageAnchor = href.startsWith('#') || (href.startsWith(window.location.pathname + '#'));
-                const isIndexPageAnchor = href.includes('/index.html#') || href.startsWith('/#');
-                const isCurrentlyOnIndex = window.location.pathname === '/' ||
-                                           window.location.pathname.endsWith('/index.html');
+                if (!href) return;
 
-                if (isCurrentPageAnchor || (isIndexPageAnchor && isCurrentlyOnIndex)) {
+                const isJustAnAnchor = href.startsWith('#');
+                const isPathWithAnchor = href.includes('#') && href.split('#')[0] === window.location.pathname.replace(/\/index(\.html)?$/, '/');
+                
+                if (isJustAnAnchor || isPathWithAnchor) {
                     setTimeout(() => { closeMobileMenu(); }, 150); 
                 } else {
                     closeMobileMenu();
@@ -310,9 +357,11 @@ function setupMobileMenuInteractions() {
 
 
 export function initHeader() {
+  if (typeof window.themeUtils === 'undefined') {
+    console.warn("themeUtils (theme-init.js) n'est pas chargé. Le bouton de thème pourrait ne pas fonctionner.");
+  }
   setupThemeToggle();
   populateDesktopNavigation();
   initAnchorLinks(); 
-  updateActiveNavLinks(); 
 }
 export { setupMobileMenuInteractions };
