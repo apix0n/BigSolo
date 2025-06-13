@@ -10,13 +10,17 @@
 	"tags": ["Romance", "comédie", "Ecole", "Tranche de vie"],
 	"alternative_titles": ["若葉さんちの青い恋", "The Wakaba Home's Blue Loves"],
 	"release_status": "En cours",
+	"covers_gallery": [
+		{ "url_hq": "https://meo.comick.pictures/Q8z7Lp.jpg", "url_lq": "https://meo.comick.pictures/Q8z7Lp-s.jpg", "volume": "2" },
+		{ "url_hq": "https://meo.comick.pictures/2NRx7L.jpg", "url_lq": "https://meo.comick.pictures/2NRx7L-s.jpg", "volume": "1" }
+	],
 	"chapters": {
 		"1": {
 			"title": "Les quatre sœurs et leur premier amour",
 			"volume": "1",
 			"last_updated": "1747094400",
 			"groups": {
-				"Unknown": "/proxy/api/imgchest/chapter/ljyqxjeoo42"
+				"Big_herooooo": "/proxy/api/imgchest/chapter/ljyqxjeoo42"
 			}
 		},
 		"2": {
@@ -24,7 +28,7 @@
 			"volume": "1",
 			"last_updated": "1747094401",
 			"groups": {
-				"Unknown": "/proxy/api/imgchest/chapter/vj4jkxjb278"
+				"Big_herooooo": "/proxy/api/imgchest/chapter/vj4jkxjb278"
 			}
 		},
 		"3": {
@@ -32,7 +36,7 @@
 			"volume": "1",
 			"last_updated": "1747094402",
 			"groups": {
-				"Unknown": "/proxy/api/imgchest/chapter/wl7lgndbpyx"
+				"Big_herooooo": "/proxy/api/imgchest/chapter/wl7lgndbpyx"
 			}
 		}
 	}

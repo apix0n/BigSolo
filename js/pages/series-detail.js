@@ -7,37 +7,123 @@ let currentSeriesAllChaptersRaw = [];
 let currentVolumeSortOrder = 'desc';
 const CHAPTER_SEPARATOR = '__';
 
+/**
+ * Récupère (via scraping) le nombre de vues pour un post ImgChest donné via une fonction proxy.
+ * @param {string} imgchestPostId - L'ID du post ImgChest.
+ * @param {string} chapterElementDomId - L'ID de l'élément DOM du chapitre où afficher les vues.
+ */
+async function fetchChapterViews(imgchestPostId, chapterElementDomId) {
+  const viewsSpan = qs(`#${chapterElementDomId} .detail-chapter-views`);
+  if (!viewsSpan) {
+    console.warn(`[fetchChapterViews] Views span not found for DOM ID: ${chapterElementDomId}`);
+    return;
+  }
+
+  viewsSpan.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i>`; // Indicateur de chargement
+
+  try {
+    // L'URL de notre fonction proxy Cloudflare Pages qui fera le scraping
+    const proxyUrl = `/api/imgchest-views?id=${imgchestPostId}`; 
+    console.log(`[fetchChapterViews] Calling proxy: ${proxyUrl} for ImgChest ID: ${imgchestPostId}`);
+    
+    const response = await fetch(proxyUrl);
+    
+    if (!response.ok) {
+      let errorText = `Erreur API: ${response.status}`;
+      try { 
+        const errorJson = await response.json();
+        errorText = errorJson.error || errorText;
+      } catch (e) { /* ignore si pas JSON */ }
+      console.warn(`[fetchChapterViews] Failed to fetch views for ${imgchestPostId} from ${proxyUrl}. Status: ${response.status}. Message: ${errorText}`);
+      viewsSpan.innerHTML = `<i class="fas fa-eye-slash" title="Vues non disponibles (${errorText})"></i>`;
+      return;
+    }
+
+    let data;
+    try {
+        data = await response.json();
+    } catch (e) {
+        console.error(`[fetchChapterViews] Error parsing JSON from proxy for ${imgchestPostId}. Response may not have been valid JSON.`, e);
+        viewsSpan.innerHTML = `<i class="fas fa-exclamation-circle" title="Réponse invalide du serveur de vues"></i>`;
+        return;
+    }
+    
+    if (data && typeof data.views !== 'undefined') {
+      viewsSpan.innerHTML = `<i class="fas fa-eye"></i> ${data.views.toLocaleString('fr-FR')}`;
+    } else {
+      console.warn(`[fetchChapterViews] Unexpected view data structure for ${imgchestPostId}. Data:`, data, "Error from proxy:", data.error);
+      viewsSpan.innerHTML = `<i class="fas fa-eye-slash" title="${data.error || 'Données de vues incorrectes'}"></i>`;
+    }
+  } catch (error) {
+    console.error(`[fetchChapterViews] Network or other error fetching views for ${imgchestPostId}:`, error);
+    viewsSpan.innerHTML = `<i class="fas fa-exclamation-circle" title="Erreur réseau chargement des vues"></i>`;
+  }
+}
+
 function renderChaptersListForVolume(chaptersToRender, seriesBase64Url, seriesSlug) {
-  return chaptersToRender.map(c => {
+  const chapterViewsFetchQueue = []; // Stocker les infos pour les fetches à faire après le rendu
+
+  const chaptersHtml = chaptersToRender.map((c, index) => {
     const isLicensed = c.licencied && c.licencied.length > 0 && (!c.groups || c.groups.Big_herooooo === '');
     const chapterClass = isLicensed ? 'detail-chapter-item licensed-chapter-item' : 'detail-chapter-item';
     let clickAction = '';
     let dataHref = '';
-    if (isLicensed || !c.groups || c.groups.Big_herooooo === '') {
-      if (isLicensed && c.licencied[0]) { /* clickAction = `onclick="window.open('${c.licencied[0]}', '_blank')"`; */ }
-    } else {
+    let viewsHtmlPlaceholder = ''; // Sera remplacé par le nombre de vues ou restera un spinner
+
+    // Générer un ID DOM unique pour chaque élément de chapitre pour pouvoir cibler le span des vues
+    const chapterElementDomId = `ch-item-${seriesSlug}-${String(c.chapter).replace(/\./g, '_')}-${index}`;
+
+    if (!isLicensed && c.groups && c.groups.Big_herooooo) {
       const chapterNumberForLink = String(c.chapter).replaceAll(".", "-");
       dataHref = `/series-detail/${seriesSlug}/${chapterNumberForLink}`;
       clickAction = `data-internal-redirect-href="${dataHref}"`;
+
+      // Vérifier si c'est un lien ImgChest et extraire l'ID
+      if (c.groups.Big_herooooo.includes('/proxy/api/imgchest/chapter/')) {
+        const parts = c.groups.Big_herooooo.split('/');
+        const imgchestPostId = parts[parts.length - 1];
+        if (imgchestPostId) {
+          viewsHtmlPlaceholder = `<span class="detail-chapter-views"><i class="fas fa-circle-notch fa-spin"></i></span>`;
+          // Ajouter à la file d'attente pour fetch après le rendu du DOM
+          chapterViewsFetchQueue.push({ imgchestPostId, chapterElementDomId });
+        }
+      }
     }
+
     const collabHtml = c.collab ? `<span class="detail-chapter-collab">${c.collab}</span>` : '';
     return `
-      <div class="${chapterClass}" ${clickAction} ${dataHref && !clickAction.includes('onclick') ? `data-href="${dataHref}"` : ''} role="link" tabindex="0">
+      <div class="${chapterClass}" ${clickAction} ${dataHref ? `data-href="${dataHref}"` : ''} role="link" tabindex="0" id="${chapterElementDomId}">
         <div class="chapter-main-info">
           <span class="detail-chapter-number">Chapitre ${c.chapter}</span>
           <span class="detail-chapter-title">${c.title || 'Titre inconnu'}</span>
         </div>
         <div class="chapter-side-info">
+          ${viewsHtmlPlaceholder}
           ${collabHtml}
           <span class="detail-chapter-date">${timeAgo(c.last_updated_ts)}</span>
         </div>
       </div>`;
   }).join('');
+
+  // Lancer les fetches après un court délai pour s'assurer que le DOM est mis à jour
+  // et que les éléments avec les ID cibles existent.
+  if (chapterViewsFetchQueue.length > 0) {
+    setTimeout(() => {
+      chapterViewsFetchQueue.forEach(item => {
+        fetchChapterViews(item.imgchestPostId, item.chapterElementDomId);
+      });
+    }, 10); // Un petit délai peut suffire, ajustable si besoin
+  }
+
+  return chaptersHtml;
 }
 
 function displayGroupedChapters(seriesBase64Url, seriesSlug) {
   const chaptersContainer = qs(".chapters-accordion-container");
-  if (!chaptersContainer) return;
+  if (!chaptersContainer) {
+      console.error("'.chapters-accordion-container' not found in displayGroupedChapters.");
+      return;
+  }
   if (!currentSeriesAllChaptersRaw || currentSeriesAllChaptersRaw.length === 0) {
     chaptersContainer.innerHTML = "<p>Aucun chapitre à afficher pour cette série.</p>";
     return;
@@ -103,6 +189,7 @@ function displayGroupedChapters(seriesBase64Url, seriesSlug) {
       </div>`;
   });
   chaptersContainer.innerHTML = html;
+
   qsa('.volume-group', chaptersContainer).forEach(group => {
     const header = group.querySelector('.volume-header');
     const content = group.querySelector('.volume-chapters-list');
@@ -125,17 +212,11 @@ function renderSeriesDetailPageContent(s, seriesSlug) {
     if (seriesDetailSection) seriesDetailSection.innerHTML = "<p>Données de série invalides ou série non trouvée.</p>";
     return;
   }
-
   currentSeriesAllChaptersRaw = Object.entries(s.chapters).map(([chapNum, chapData]) => ({
-    chapter: chapNum,
-    ...chapData,
-    last_updated_ts: parseDateToTimestamp(chapData.last_updated || 0),
+    chapter: chapNum, ...chapData, last_updated_ts: parseDateToTimestamp(chapData.last_updated || 0),
   }));
-
   const titleHtml = `<h1 class="detail-title">${s.title}</h1>`;
-  
-  // La variable coversGalleryLinkHtml et sa logique de création sont supprimées.
-
+  let coversGalleryLinkHtml = '';
   const tagsHtml = (Array.isArray(s.tags) && s.tags.length > 0) ? `<div class="detail-tags">${s.tags.map(t => `<span class="detail-tag">${t}</span>`).join("")}</div>` : "";
   let authorArtistHtml = '';
   const authorText = s.author ? `<strong>Auteur :</strong> ${s.author}` : '';
@@ -143,7 +224,6 @@ function renderSeriesDetailPageContent(s, seriesSlug) {
   if (s.author && s.artist) authorArtistHtml = `<p class="detail-meta">${authorText}${s.author !== s.artist ? `<span class="detail-artist-spacing">${artistText}</span>` : ''}</p>`;
   else if (s.author) authorArtistHtml = `<p class="detail-meta">${authorText}</p>`;
   else if (s.artist) authorArtistHtml = `<p class="detail-meta">${artistText}</p>`;
-
   let yearStatusHtmlMobile = '', typeMagazineHtmlMobile = '', alternativeTitlesMobileHtml = '';
   if (s.release_year || s.release_status) {
     let yearPart = s.release_year ? `<strong>Année :</strong> ${s.release_year}` : '';
@@ -162,7 +242,6 @@ function renderSeriesDetailPageContent(s, seriesSlug) {
   if (s.alternative_titles && s.alternative_titles.length > 0) {
     alternativeTitlesMobileHtml = `<p class="detail-meta"><strong>Titres alt. :</strong> ${s.alternative_titles.join(', ')}</p>`;
   }
-
   let additionalMetadataForDesktop = [];
   if (s.release_year) additionalMetadataForDesktop.push(`<p><strong>Année :</strong> ${s.release_year}</p>`);
   if (s.release_status) additionalMetadataForDesktop.push(`<p><strong>Statut :</strong> ${s.release_status}</p>`);
@@ -170,7 +249,6 @@ function renderSeriesDetailPageContent(s, seriesSlug) {
   if (s.magazine) additionalMetadataForDesktop.push(`<p><strong>Magazine :</strong> ${s.magazine}</p>`);
   if (s.alternative_titles && s.alternative_titles.length > 0) additionalMetadataForDesktop.push(`<p><strong>Titres alternatifs :</strong> ${s.alternative_titles.join(', ')}</p>`);
   const additionalMetadataCombinedHtmlForDesktop = additionalMetadataForDesktop.length > 0 ? `<div class="detail-additional-metadata">${additionalMetadataForDesktop.join('')}</div>` : "";
-
   const descriptionHtmlText = s.description || 'Pas de description disponible.';
   const chaptersSectionHtml = `
     <div class="chapters-main-header">
@@ -182,7 +260,6 @@ function renderSeriesDetailPageContent(s, seriesSlug) {
       </div>
     </div>
     <div class="chapters-accordion-container"></div>`;
-
   const finalHtmlStructure = `
     <div class="series-detail-container">
       <div class="detail-top-layout-wrapper">
@@ -205,20 +282,17 @@ function renderSeriesDetailPageContent(s, seriesSlug) {
         ${typeMagazineHtmlMobile}
         ${alternativeTitlesMobileHtml}
       </div>
+      ${coversGalleryLinkHtml}
       <p class="detail-description">${descriptionHtmlText}</p>
       ${chaptersSectionHtml}
     </div>`;
-
   seriesDetailSection.innerHTML = finalHtmlStructure;
   document.title = `BigSolo – ${s.title}`;
-
   displayGroupedChapters(s.base64Url, seriesSlug);
-
   const sortButton = qs('#sort-volumes-btn');
   if (sortButton) {
     const icon = sortButton.querySelector('i');
     if (icon) icon.className = (currentVolumeSortOrder === 'desc') ? "fas fa-sort-numeric-down-alt" : "fas fa-sort-numeric-up-alt";
-
     if (!sortButton.dataset.listenerAttached) {
       sortButton.addEventListener('click', function () {
         currentVolumeSortOrder = (currentVolumeSortOrder === 'desc') ? 'asc' : 'desc';
@@ -234,54 +308,54 @@ function renderSeriesDetailPageContent(s, seriesSlug) {
 async function handleChapterRedirect(internalId, allSeries) {
   const parts = internalId.split(CHAPTER_SEPARATOR);
   if (parts.length < 2 || !parts[1]) {
-    console.warn("handleChapterRedirect: internalId n'a pas le format slug__chapitre ou chapitre manquant:", internalId);
+    console.warn("[handleChapterRedirect] internalId n'a pas le format slug__chapitre ou chapitre manquant:", internalId);
     return false;
   }
   const seriesSlugForLookup = parts[0];
   const chapterNumber = parts[1];
   const seriesData = allSeries.find(s => slugify(s.title) === seriesSlugForLookup);
+
   if (seriesData && seriesData.base64Url && chapterNumber) {
-    const chapterNumberFormatted = String(chapterNumber).replaceAll(".", "-");
-    const cubariUrl = `https://cubari.moe/read/gist/${seriesData.base64Url}/${chapterNumberFormatted}/1/`;
+    const chapterNumberFormattedForCubari = String(chapterNumber).replaceAll(".", "-");
+    const cubariUrl = `https://cubari.moe/read/gist/${seriesData.base64Url}/${chapterNumberFormattedForCubari}/1/`;
     console.log(`[handleChapterRedirect] Redirecting to Cubari: ${cubariUrl}`);
     window.location.href = cubariUrl;
     return true;
   }
-  console.warn(`[handleChapterRedirect] Could not find series data for Cubari redirect. Slug: ${seriesSlugForLookup}, Chapter: ${chapterNumber}`);
+  console.warn(`[handleChapterRedirect] Could not find series data or base64Url for Cubari redirect. Slug: ${seriesSlugForLookup}, Chapter: ${chapterNumber}`);
   return false;
 }
 
 export async function initSeriesDetailPage() {
   const seriesDetailSection = qs("#series-detail-section");
   if (!seriesDetailSection) {
-    console.error("#series-detail-section not found in the DOM.");
+    console.error("[SeriesDetail] #series-detail-section not found.");
     return;
   }
   seriesDetailSection.innerHTML = '<p class="loading-message">Chargement des informations de la série...</p>'; 
-
+  
   let internalIdToProcess;
   const pathname = window.location.pathname;
-  const urlParams = new URLSearchParams(window.location.search);
+  console.log("[SeriesDetail] Current pathname:", pathname);
+  const pathSegments = pathname.split('/').filter(Boolean);
+  console.log("[SeriesDetail] Path segments:", pathSegments);
 
-  if (pathname.startsWith('/series-detail/')) {
-    const pathSegments = pathname.split('/').filter(Boolean);
-    if (pathSegments.length === 3 && pathSegments[2] !== 'cover') {
-      const slug = pathSegments[1];
-      const chapter = pathSegments[2];
-      internalIdToProcess = `${slug}${CHAPTER_SEPARATOR}${chapter}`;
-      console.log(`[initSeriesDetailPage] Parsed from pretty path (slug & chapter): ${internalIdToProcess}`);
-    } else if (pathSegments.length === 2) {
-      internalIdToProcess = pathSegments[1];
-      console.log(`[initSeriesDetailPage] Parsed from pretty path (slug only): ${internalIdToProcess}`);
-    }
-  } else if (urlParams.has('id')) {
-    internalIdToProcess = urlParams.get('id');
-    console.log(`[initSeriesDetailPage] ID from query param (fallback): ${internalIdToProcess}`);
+  if (pathSegments.length === 3 && pathSegments[0] === 'series-detail' && pathSegments[2] !== 'cover') {
+    const slug = pathSegments[1];
+    const chapter = pathSegments[2];
+    internalIdToProcess = `${slug}${CHAPTER_SEPARATOR}${chapter}`;
+    console.log(`[SeriesDetail] Parsed from path (slug & chapter): ${internalIdToProcess}`);
+  } 
+  else if (pathSegments.length === 2 && pathSegments[0] === 'series-detail') {
+    internalIdToProcess = pathSegments[1];
+    console.log(`[SeriesDetail] Parsed from path (slug only): ${internalIdToProcess}`);
   }
 
   if (!internalIdToProcess) {
-    console.warn("[initSeriesDetailPage] No ID to process for series detail (might be a covers page or invalid URL). Pathname:", pathname);
-    return;
+    console.warn("[SeriesDetail] Could not determine ID to process. Pathname:", pathname, "Segments:", pathSegments);
+    // Ne pas afficher d'erreur ici si c'est potentiellement une page /cover
+    // seriesDetailSection.innerHTML = "<p>Aucune série spécifiée dans l'URL.</p>";
+    return; 
   }
 
   try {
@@ -296,17 +370,17 @@ export async function initSeriesDetailPage() {
     const chapterPartFromId = parts.length > 1 ? parts[1] : null;
 
     if (chapterPartFromId) {
-      console.log(`[initSeriesDetailPage] Chapter part detected ('${chapterPartFromId}'). Attempting Cubari redirect for: ${internalIdToProcess}`);
+      console.log(`[SeriesDetail] Chapter part detected ('${chapterPartFromId}'). Attempting redirect for: ${internalIdToProcess}`);
       const redirected = await handleChapterRedirect(internalIdToProcess, allSeries);
       if (redirected) {
         seriesDetailSection.innerHTML = `<p class="loading-message">Redirection vers le chapitre...</p>`;
         return; 
       } else {
-        console.warn(`[initSeriesDetailPage] Cubari redirect failed for '${internalIdToProcess}'. Will display series page for slug: '${seriesSlugForLookup}'`);
+        console.warn(`[SeriesDetail] Redirect failed for '${internalIdToProcess}'. Will display series page for slug: '${seriesSlugForLookup}'`);
       }
     }
 
-    console.log(`[initSeriesDetailPage] Displaying series detail page for slug: ${seriesSlugForLookup}`);
+    console.log(`[SeriesDetail] Displaying series detail page for slug: ${seriesSlugForLookup}`);
     const seriesData = allSeries.find(s => slugify(s.title) === seriesSlugForLookup);
     
     if (seriesData) {
@@ -314,7 +388,7 @@ export async function initSeriesDetailPage() {
     } else {
       seriesDetailSection.innerHTML = `<p>Série avec l'identifiant "${seriesSlugForLookup}" non trouvée.</p>`;
       document.title = `BigSolo – Série non trouvée`;
-      console.warn(`[initSeriesDetailPage] Series data not found for slug: ${seriesSlugForLookup}`);
+      console.warn(`[SeriesDetail] Series data not found for slug: ${seriesSlugForLookup}`);
     }
 
   } catch (error) {
@@ -342,7 +416,7 @@ export async function initSeriesDetailPage() {
               const allSeriesData = await fetchAllSeriesData();
               const redirected = await handleChapterRedirect(internalIdForRedirect, allSeriesData);
               if (!redirected) {
-                console.warn("[Click Listener] Cubari redirect from click failed for", internalIdForRedirect);
+                console.warn("[Click Listener] Redirect from click failed for", internalIdForRedirect);
               }
             } else {
               console.warn("[Click Listener] Malformed pretty URL path from click:", prettyUrlPath);

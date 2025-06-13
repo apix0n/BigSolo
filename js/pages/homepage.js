@@ -69,11 +69,11 @@ function renderSeriesCard(series) {
       <div class="series-latest-chapters-container-desktop">
         ${chaptersArray.slice(0, 3).map(chap => {
       const chapterTitleDesktop = chap.title || 'Titre inconnu';
-      // const truncatedTitleDesktop = truncateText(chapterTitleDesktop, 40); // Optionnel pour desktop
+      const truncatedTitleDesktop = truncateText(chapterTitleDesktop, 30);
       return `
             <div class="series-chapter-item-desktop" ${chap.url ? `onclick="event.stopPropagation(); window.open('${chap.url}', '_blank')"` : ''}>
               <span class="chapter-number-desktop">Ch. ${chap.chapter}</span>
-              <span class="chapter-title-desktop" title="${chapterTitleDesktop}">${chapterTitleDesktop}</span>
+              <span class="chapter-title-desktop" title="${chapterTitleDesktop}">${truncatedTitleDesktop}</span>
               <span class="chapter-date-desktop">${timeAgo(chap.last_updated_ts)}</span>
             </div>`;
     }).join('')}

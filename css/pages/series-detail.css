@@ -107,6 +107,32 @@ p.detail-description {
   display: none;
 }
 
+.detail-chapter-item .chapter-side-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* Ajustez l'espacement si nécessaire */
+  flex-shrink: 0; /* Empêche le rétrécissement excessif */
+}
+
+.detail-chapter-views {
+  display: inline-flex; /* Pour aligner l'icône et le texte */
+  align-items: center;
+  gap: 0.3em; /* Espace entre l'icône et le nombre */
+  font-size: 0.8rem; /* Ou la taille souhaitée */
+  color: var(--clr-text-sub, var(--text-color-secondary)); /* Couleur du texte secondaire */
+  white-space: nowrap; /* Empêche le retour à la ligne */
+}
+
+.detail-chapter-views .fa-spinner {
+  font-size: 0.9em; /* Ajuster la taille du spinner si besoin */
+}
+
+.detail-chapter-views .fa-eye,
+.detail-chapter-views .fa-eye-slash,
+.detail-chapter-views .fa-exclamation-circle {
+  margin-right: 0.2em; /* Petit espace après l'icône d'œil/erreur */
+}
+
 @media (max-width: 768px) {
 
   .series-detail-container {
