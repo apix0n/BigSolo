@@ -1,1 +1,3 @@
 CNAME
+node_modules/
+.wrangler/

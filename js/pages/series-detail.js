@@ -7,115 +7,150 @@ let currentSeriesAllChaptersRaw = [];
 let currentVolumeSortOrder = 'desc';
 const CHAPTER_SEPARATOR = '__';
 
-/**
- * Récupère (via scraping) le nombre de vues pour un post ImgChest donné via une fonction proxy.
- * @param {string} imgchestPostId - L'ID du post ImgChest.
- * @param {string} chapterElementDomId - L'ID de l'élément DOM du chapitre où afficher les vues.
- */
-async function fetchChapterViews(imgchestPostId, chapterElementDomId) {
-  const viewsSpan = qs(`#${chapterElementDomId} .detail-chapter-views`);
-  if (!viewsSpan) {
-    console.warn(`[fetchChapterViews] Views span not found for DOM ID: ${chapterElementDomId}`);
+let imgChestPostViewsCache = new Map();
+let isLoadingImgChestViews = false;
+let allImgChestViewsPreloadedAttempted = false;
+
+const IMGCHEST_EXPECTED_POSTS_PER_PAGE = 24; // Ce que l'API ImgChest semble renvoyer par défaut
+
+async function preloadAllImgChestViewsIncrementally() {
+  if (allImgChestViewsPreloadedAttempted && !isLoadingImgChestViews) {
+    console.log("[PreloadViewsIncr] All pages of views already attempted.");
+    updateAllVisibleChapterViews();
+    return;
+  }
+  if (isLoadingImgChestViews) {
+    console.log("[PreloadViewsIncr] View preloading already in progress.");
     return;
   }
 
-  viewsSpan.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i>`; // Indicateur de chargement
+  isLoadingImgChestViews = true;
+  console.log("[PreloadViewsIncr] Starting incremental preload of ImgChest profile post views...");
 
-  try {
-    // L'URL de notre fonction proxy Cloudflare Pages qui fera le scraping
-    const proxyUrl = `/api/imgchest-views?id=${imgchestPostId}`; 
-    console.log(`[fetchChapterViews] Calling proxy: ${proxyUrl} for ImgChest ID: ${imgchestPostId}`);
-    
-    const response = await fetch(proxyUrl);
-    
-    if (!response.ok) {
-      let errorText = `Erreur API: ${response.status}`;
-      try { 
-        const errorJson = await response.json();
-        errorText = errorJson.error || errorText;
-      } catch (e) { /* ignore si pas JSON */ }
-      console.warn(`[fetchChapterViews] Failed to fetch views for ${imgchestPostId} from ${proxyUrl}. Status: ${response.status}. Message: ${errorText}`);
-      viewsSpan.innerHTML = `<i class="fas fa-eye-slash" title="Vues non disponibles (${errorText})"></i>`;
-      return;
-    }
+  let currentPage = 1;
+  let hasMorePagesToFetch = true; 
+  const MAX_PAGES_CLIENT = 15;
+  let totalPostsFetchedOverall = 0;
 
-    let data;
+  while (hasMorePagesToFetch && currentPage <= MAX_PAGES_CLIENT) {
     try {
-        data = await response.json();
-    } catch (e) {
-        console.error(`[fetchChapterViews] Error parsing JSON from proxy for ${imgchestPostId}. Response may not have been valid JSON.`, e);
-        viewsSpan.innerHTML = `<i class="fas fa-exclamation-circle" title="Réponse invalide du serveur de vues"></i>`;
-        return;
+      const proxyUrl = `/api/imgchest-get-page?page=${currentPage}`;
+      console.log(`[PreloadViewsIncr] Fetching page ${currentPage} from proxy: ${proxyUrl}`);
+      const response = await fetch(proxyUrl);
+
+      if (!response.ok) {
+        let errorText = `Failed to fetch page ${currentPage}`;
+        try { 
+          const errorJson = await response.json();
+          errorText = errorJson.error || `Status ${response.status}`; 
+        } catch (e) { /* ignorer */ }
+        console.warn(`[PreloadViewsIncr] ${errorText}. Halting further page fetches.`);
+        hasMorePagesToFetch = false; 
+        break;
+      }
+
+      const data = await response.json();
+      if (data && Array.isArray(data.posts)) {
+        if (data.posts.length === 0) {
+          console.log(`[PreloadViewsIncr] Page ${currentPage} returned 0 posts. End of data.`);
+          hasMorePagesToFetch = false;
+        } else {
+          data.posts.forEach(post => {
+            if (post.id && typeof post.views !== 'undefined') {
+              imgChestPostViewsCache.set(post.id, post.views);
+            }
+          });
+          totalPostsFetchedOverall += data.posts.length;
+          console.log(`[PreloadViewsIncr] Fetched ${data.posts.length} posts from page ${currentPage}. Total in cache: ${imgChestPostViewsCache.size}`);
+          updateAllVisibleChapterViews(); 
+
+          // CORRECTION ICI: Déterminer s'il y a plus de pages
+          // Si on a reçu moins de posts que la taille de page attendue, c'est la fin.
+          if (data.posts.length < IMGCHEST_EXPECTED_POSTS_PER_PAGE) {
+            console.log(`[PreloadViewsIncr] Fetched ${data.posts.length} posts (less than expected ${IMGCHEST_EXPECTED_POSTS_PER_PAGE}). Assuming end of data.`);
+            hasMorePagesToFetch = false;
+          } else {
+            currentPage++;
+          }
+        }
+      } else {
+        console.warn("[PreloadViewsIncr] Unexpected data structure from proxy (expected data.posts array):", data);
+        hasMorePagesToFetch = false;
+      }
+    } catch (error) {
+      console.error(`[PreloadViewsIncr] Error fetching page ${currentPage}:`, error);
+      hasMorePagesToFetch = false; 
     }
-    
-    if (data && typeof data.views !== 'undefined') {
-      viewsSpan.innerHTML = `<i class="fas fa-eye"></i> ${data.views.toLocaleString('fr-FR')}`;
-    } else {
-      console.warn(`[fetchChapterViews] Unexpected view data structure for ${imgchestPostId}. Data:`, data, "Error from proxy:", data.error);
-      viewsSpan.innerHTML = `<i class="fas fa-eye-slash" title="${data.error || 'Données de vues incorrectes'}"></i>`;
+    if (hasMorePagesToFetch && currentPage <= MAX_PAGES_CLIENT) {
+        await new Promise(resolve => setTimeout(resolve, 300));
     }
-  } catch (error) {
-    console.error(`[fetchChapterViews] Network or other error fetching views for ${imgchestPostId}:`, error);
-    viewsSpan.innerHTML = `<i class="fas fa-exclamation-circle" title="Erreur réseau chargement des vues"></i>`;
   }
+  isLoadingImgChestViews = false;
+  allImgChestViewsPreloadedAttempted = true; 
+  console.log(`[PreloadViewsIncr] Finished incremental preloading. Total posts in cache: ${imgChestPostViewsCache.size}`);
+  updateAllVisibleChapterViews(); 
+}
+
+function updateAllVisibleChapterViews() {
+    console.log("[UpdateViews] Updating visible chapter views with current cache data...");
+    qsa('.detail-chapter-views[data-imgchest-id]').forEach(viewsSpan => {
+        const postId = viewsSpan.dataset.imgchestId;
+        if (imgChestPostViewsCache.has(postId)) {
+            const views = imgChestPostViewsCache.get(postId);
+            viewsSpan.innerHTML = `<i class="fas fa-eye"></i> ${views.toLocaleString('fr-FR')}`;
+        } else {
+            if (allImgChestViewsPreloadedAttempted && !isLoadingImgChestViews) {
+                console.warn(`[UpdateViews] View count for ImgChest ID ${postId} not found in cache after all pages processed.`);
+                viewsSpan.innerHTML = `<i class="fas fa-eye-slash" title="Vues non trouvées"></i>`;
+            } else {
+                 if (!viewsSpan.querySelector('.fa-eye') && !viewsSpan.querySelector('.fa-eye-slash')) {
+                 }
+            }
+        }
+    });
 }
 
 function renderChaptersListForVolume(chaptersToRender, seriesBase64Url, seriesSlug) {
-  const chapterViewsFetchQueue = []; // Stocker les infos pour les fetches à faire après le rendu
-
-  const chaptersHtml = chaptersToRender.map((c, index) => {
+  return chaptersToRender.map((c) => {
     const isLicensed = c.licencied && c.licencied.length > 0 && (!c.groups || c.groups.Big_herooooo === '');
     const chapterClass = isLicensed ? 'detail-chapter-item licensed-chapter-item' : 'detail-chapter-item';
     let clickAction = '';
     let dataHref = '';
-    let viewsHtmlPlaceholder = ''; // Sera remplacé par le nombre de vues ou restera un spinner
-
-    // Générer un ID DOM unique pour chaque élément de chapitre pour pouvoir cibler le span des vues
-    const chapterElementDomId = `ch-item-${seriesSlug}-${String(c.chapter).replace(/\./g, '_')}-${index}`;
+    let viewsHtml = '';
 
     if (!isLicensed && c.groups && c.groups.Big_herooooo) {
       const chapterNumberForLink = String(c.chapter).replaceAll(".", "-");
       dataHref = `/series-detail/${seriesSlug}/${chapterNumberForLink}`;
       clickAction = `data-internal-redirect-href="${dataHref}"`;
 
-      // Vérifier si c'est un lien ImgChest et extraire l'ID
       if (c.groups.Big_herooooo.includes('/proxy/api/imgchest/chapter/')) {
         const parts = c.groups.Big_herooooo.split('/');
         const imgchestPostId = parts[parts.length - 1];
         if (imgchestPostId) {
-          viewsHtmlPlaceholder = `<span class="detail-chapter-views"><i class="fas fa-circle-notch fa-spin"></i></span>`;
-          // Ajouter à la file d'attente pour fetch après le rendu du DOM
-          chapterViewsFetchQueue.push({ imgchestPostId, chapterElementDomId });
+          if (imgChestPostViewsCache.has(imgchestPostId)) {
+            const views = imgChestPostViewsCache.get(imgchestPostId);
+            viewsHtml = `<span class="detail-chapter-views" data-imgchest-id="${imgchestPostId}"><i class="fas fa-eye"></i> ${views.toLocaleString('fr-FR')}</span>`;
+          } else {
+            viewsHtml = `<span class="detail-chapter-views" data-imgchest-id="${imgchestPostId}"><i class="fas fa-circle-notch fa-spin"></i></span>`;
+          }
         }
       }
     }
 
     const collabHtml = c.collab ? `<span class="detail-chapter-collab">${c.collab}</span>` : '';
     return `
-      <div class="${chapterClass}" ${clickAction} ${dataHref ? `data-href="${dataHref}"` : ''} role="link" tabindex="0" id="${chapterElementDomId}">
+      <div class="${chapterClass}" ${clickAction} ${dataHref ? `data-href="${dataHref}"` : ''} role="link" tabindex="0">
         <div class="chapter-main-info">
           <span class="detail-chapter-number">Chapitre ${c.chapter}</span>
           <span class="detail-chapter-title">${c.title || 'Titre inconnu'}</span>
         </div>
         <div class="chapter-side-info">
-          ${viewsHtmlPlaceholder}
+          ${viewsHtml}
           ${collabHtml}
           <span class="detail-chapter-date">${timeAgo(c.last_updated_ts)}</span>
         </div>
       </div>`;
   }).join('');
-
-  // Lancer les fetches après un court délai pour s'assurer que le DOM est mis à jour
-  // et que les éléments avec les ID cibles existent.
-  if (chapterViewsFetchQueue.length > 0) {
-    setTimeout(() => {
-      chapterViewsFetchQueue.forEach(item => {
-        fetchChapterViews(item.imgchestPostId, item.chapterElementDomId);
-      });
-    }, 10); // Un petit délai peut suffire, ajustable si besoin
-  }
-
-  return chaptersHtml;
 }
 
 function displayGroupedChapters(seriesBase64Url, seriesSlug) {
@@ -189,7 +224,7 @@ function displayGroupedChapters(seriesBase64Url, seriesSlug) {
       </div>`;
   });
   chaptersContainer.innerHTML = html;
-
+  updateAllVisibleChapterViews();
   qsa('.volume-group', chaptersContainer).forEach(group => {
     const header = group.querySelector('.volume-header');
     const content = group.querySelector('.volume-chapters-list');
@@ -334,6 +369,8 @@ export async function initSeriesDetailPage() {
   }
   seriesDetailSection.innerHTML = '<p class="loading-message">Chargement des informations de la série...</p>'; 
   
+  preloadAllImgChestViewsIncrementally();
+
   let internalIdToProcess;
   const pathname = window.location.pathname;
   console.log("[SeriesDetail] Current pathname:", pathname);
@@ -352,9 +389,10 @@ export async function initSeriesDetailPage() {
   }
 
   if (!internalIdToProcess) {
-    console.warn("[SeriesDetail] Could not determine ID to process. Pathname:", pathname, "Segments:", pathSegments);
-    // Ne pas afficher d'erreur ici si c'est potentiellement une page /cover
-    // seriesDetailSection.innerHTML = "<p>Aucune série spécifiée dans l'URL.</p>";
+    console.warn("[SeriesDetail] Could not determine ID to process for series details. Pathname:", pathname);
+    if (document.body.id === "seriesdetailpage") {
+        seriesDetailSection.innerHTML = "<p>Aucune série spécifiée dans l'URL ou format d'URL incorrect.</p>";
+    }
     return; 
   }
 
@@ -413,7 +451,7 @@ export async function initSeriesDetailPage() {
               const chapter = pathSegments[2];
               const internalIdForRedirect = `${slug}${CHAPTER_SEPARATOR}${chapter}`;
               console.log("[Click Listener] Reconstructed internal ID for redirect:", internalIdForRedirect);
-              const allSeriesData = await fetchAllSeriesData();
+              const allSeriesData = await fetchAllSeriesData(); 
               const redirected = await handleChapterRedirect(internalIdForRedirect, allSeriesData);
               if (!redirected) {
                 console.warn("[Click Listener] Redirect from click failed for", internalIdForRedirect);
