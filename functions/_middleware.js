@@ -39,7 +39,7 @@ export async function onRequest(context) {
         const pageInfo = selectedColo.page ? `, Page ${selectedColo.page}` : '';
         const title = `Colorisation Chap. ${selectedColo.chapitre}${pageInfo} par ${authorName} | BigSolo`;
         const description = `Découvrez cette magnifique colorisation du chapitre ${selectedColo.chapitre} par ${authorName}.`;
-        const imageUrl = `https://file.garden/aDmcfobZthZjQO3m/images/${selectedColo.id}_preview.webp`;
+        const imageUrl = `https://file.garden/aDmcfobZthZjQO3m/previews/${selectedColo.id}_preview.webp`;
         const dynamicMetaTags = `
           <title>${title}</title>
           <meta name="description" content="${description}">
