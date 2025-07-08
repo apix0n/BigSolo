@@ -19,11 +19,12 @@ const lightboxCloseBtn = qs('.lightbox-close');
 function renderColoCard(colo, author) {
   const authorName = author && author.username ? author.username : 'Artiste inconnu';
   return `
-    <div class="colo-card" data-colo-id="${colo.url}"> 
+    <div class="colo-card" data-colo-id="${colo.id}"> 
       <img class="lazy-load-gallery" 
            src="img/placeholder_preview.png" 
            alt="Colorisation Chap. ${colo.chapitre || 'N/A'} par ${authorName}" 
-           data-src="${colo.url_preview || colo.url}"> 
+           data-src="${"https://file.garden/aDmcfobZthZjQO3m/previews/" + colo.id + "_preview.webp"
+            || "https://file.garden/aDmcfobZthZjQO3m/images/" + colo.id + "_preview.webp"}"> 
       <div class="colo-card-overlay">
         <p>Chap. ${colo.chapitre || 'N/A'}${colo.page ? `, Page ${colo.page}` : ''}</p>
         <p>Par ${authorName}</p>
@@ -38,6 +39,7 @@ function getSocialsHTML(links, typeClassPrefix) {
     if (links.twitter && String(links.twitter).trim() !== "") html += `<a href="${String(links.twitter).trim()}" target="_blank" rel="noopener noreferrer"><i class="fab fa-twitter"></i> Twitter</a>`;
     if (links.instagram && String(links.instagram).trim() !== "") html += `<a href="${String(links.instagram).trim()}" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i> Instagram</a>`;
     if (links.tiktok && String(links.tiktok).trim() !== "") html += `<a href="${String(links.tiktok).trim()}" target="_blank" rel="noopener noreferrer"><i class="fab fa-tiktok"></i> TikTok</a>`;
+    if (links.reddit && String(links.reddit).trim() !== "") html += `<a href="${String(links.reddit).trim()}" target="_blank" rel="noopener noreferrer"><i class="fab fa-reddit"></i> Reddit</a>`;
     html += '</div>';
     return html;
 }
@@ -59,7 +61,7 @@ function displayLightboxInfo(colo, author) {
           <span class="artist-occurrence-count">(${occurrenceCount} colo${occurrenceCount > 1 ? 's' : ''})</span>
         </div>
       </div>
-      ${getSocialsHTML({ twitter: author.twitter, instagram: author.instagram, tiktok: author.tiktok }, 'lightbox-artist')}
+      ${getSocialsHTML({ twitter: author.twitter, instagram: author.instagram, tiktok: author.tiktok, reddit: author.reddit }, 'lightbox-artist')}
     `;
   }
   let coloHtmlContent = '<p class="lightbox-info-placeholder">Infos colorisation non disponibles.</p>';
@@ -67,7 +69,7 @@ function displayLightboxInfo(colo, author) {
     coloHtmlContent = `
       <p><strong>Chapitre :</strong> ${colo.chapitre || 'N/A'}${colo.page ? `, Page ${colo.page}` : ''}</p>
       <p><strong>Date :</strong> ${formatDateForGallery(colo.date)}</p>
-      ${getSocialsHTML({ twitter: colo.twitter, instagram: colo.instagram, tiktok: colo.tiktok }, 'lightbox-colo')}
+      ${getSocialsHTML({ twitter: colo.twitter, instagram: colo.instagram, tiktok: colo.tiktok, reddit: colo.reddit }, 'lightbox-colo')}
     `;
   }
   if (desktopArtistBlock) desktopArtistBlock.innerHTML = artistHtmlContent;
@@ -134,10 +136,12 @@ function displayColos() {
     // et que les cartes ne sont pas entièrement recréées (ce qui n'est pas le cas ici avec innerHTML, mais bonne pratique)
     if (!card.dataset.lightboxListenerAttached) {
         card.addEventListener('click', () => {
-          const coloUrlFromDataset = card.dataset.coloId;
-          const selectedColo = allColosData.find(c => c.url === coloUrlFromDataset);
+          const coloIdFromDataset = card.dataset.coloId;
+          console.log(coloIdFromDataset)
+          const selectedColo = allColosData.find(c => c.id.toString() === coloIdFromDataset);
+          console.log(selectedColo)
           if (selectedColo && lightboxModal && lightboxImg) {
-            lightboxImg.src = selectedColo.url;
+            lightboxImg.src = "https://file.garden/aDmcfobZthZjQO3m/images/" + selectedColo.id + ".webp";
             const author = selectedColo.author_id ? authorsInfoData[selectedColo.author_id] : null;
             displayLightboxInfo(selectedColo, author);
             lightboxModal.style.display = 'flex';
