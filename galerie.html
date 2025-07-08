@@ -2,6 +2,7 @@
 <html lang="fr">
 
 <head>
+  <!-- Le script theme-init reste ici -->
   <script>
     (function () {
       try {
@@ -21,30 +22,34 @@
     })();
   </script>
   <meta charset="UTF-8" />
-  <meta property="og:title" content="BigSolo – Galerie des Colorisations" />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="/img/banniere.webp" />
-  <meta property="og:url" content="https://bigsolo.fr/galerie.html" />
-  <meta property="og:description" content="Découvrez les magnifiques colorisations de la communauté BigSolo !" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BigSolo – Galerie</title>
 
+  <!-- ↓↓↓ SECTION MODIFIÉE ↓↓↓ -->
+  <!-- Ces balises seront remplacées ou complétées par le middleware -->
+  <title>BigSolo – Galerie</title>
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <!-- DYNAMIC_OG_TAGS_PLACEHOLDER -->
+  <!-- ↑↑↑ FIN DE LA SECTION MODIFIÉE ↑↑↑ -->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
-  <link rel="icon" type="image/png" href="img/icon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet" />
+  <link rel="icon" type="image/png" href="/img/icon.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/layout.css" />
-  <link rel="stylesheet" href="css/components.css" />
-  <link rel="stylesheet" href="css/pages/galerie.css" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/layout.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <link rel="stylesheet" href="/css/pages/galerie.css" />
 
-  <script src="js/theme-init.js"></script>
+  <script src="/js/theme-init.js"></script>
 </head>
+
+<!-- Le reste du body reste identique -->
 
 <body id="galeriepage">
   <header id="main-header"></header>
@@ -94,6 +99,7 @@
     </div>
   </div>
 
-  <script src="js/index.js" type="module"></script>
+  <script src="/js/index.js" type="module"></script>
 </body>
+
 </html>
