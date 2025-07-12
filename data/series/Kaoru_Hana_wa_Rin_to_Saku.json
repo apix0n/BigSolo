@@ -1,40 +1,165 @@
 {
 	"title": "Kaoru Hana wa Rin to Saku",
-	"description": "Au cœur d'une banlieue japonaise, se dressent face à face deux établissements que tout oppose : Chidori, le lycée public pour garçons, réunit les pires cancres de la ville, tandis que le prestigieux Kikyô rassemble les esprits les plus brillants des filles de bonne famille. Donnant régulièrement un coup de main à la pâtisserie familiale, Rintarô Tsumugi, élève à Chidori, sympathise avec l'une de ses clientes régulières, Kaoruko Waguri. Alors qu'il sent peu à peu un lien se tisser entre eux, le lycéen apprend que la jeune fille fréquente Kikyô... et que comme tous les élèves de ces établissements, ils sont supposés se haïr mutuellement ! La rivalité entre leurs lycées est-elle forcément signe de fatalité ?",
+	"description": "Deux lycées que tout oppose se font face : Chidori, le repaire des garçons cancres, et Kikyô, l'établissement prestigieux des filles d'élite. Rintarô, élève de Chidori, sympathise avec Kaoruko, une cliente de la pâtisserie familiale. Alors qu'un lien se tisse entre eux, il découvre qu'elle étudie à Kikyô... et qu'ils sont censés se détester. Leur relation naissante pourra-t-elle survivre à la haine qui oppose leurs écoles ?",
 	"artist": "Saka Mikami",
 	"author": "Saka Mikami",
 	"cover": "https://meo.comick.pictures/nR2aBm.jpg",
 	"manga_type": "Shonen",
-    "magazine": "Pocket Magazine",
+	"magazine": "Pocket Magazine",
 	"release_year": 2021,
-	"tags": ["Comédie", "Drame", "Ecole", "Romance", "Tranche de vie"],
-	"alternative_titles": ["薫る花は凛と咲く", "The Fragrant Flower Blooms with Dignity", "Bloom"],
+	"tags": [
+		"Comédie",
+		"Drame",
+		"Ecole",
+		"Romance",
+		"Tranche de vie"
+	],
+	"alternative_titles": [
+		"薫る花は凛と咲く",
+		"The Fragrant Flower Blooms with Dignity",
+		"Bloom"
+	],
 	"release_status": "En cours",
 	"covers_gallery": [
-		{ "url_hq": "https://meo.comick.pictures/nR2aBm.jpg", "url_lq": "https://meo.comick.pictures/nR2aBm-s.jpg", "volume": "17" },
-		{ "url_hq": "https://meo.comick.pictures/7yO0re.jpg", "url_lq": "https://meo.comick.pictures/7yO0re-s.jpg", "volume": "16" },
-		{ "url_hq": "https://meo.comick.pictures/g6rL0Y.jpg", "url_lq": "https://meo.comick.pictures/g6rL0Y-s.jpg", "volume": "15" },
-		{ "url_hq": "https://meo.comick.pictures/l6Xgj7.jpg", "url_lq": "https://meo.comick.pictures/l6Xgj7-s.jpg", "volume": "14" },
-		{ "url_hq": "https://meo.comick.pictures/W8zR3Q.jpg", "url_lq": "https://meo.comick.pictures/W8zR3Q-s.jpg", "volume": "13" },
-		{ "url_hq": "https://meo.comick.pictures/3Kpyqz.jpg", "url_lq": "https://meo.comick.pictures/3Kpyqz-s.jpg", "volume": "12" },
-		{ "url_hq": "https://meo.comick.pictures/BLwGJ2.jpg", "url_lq": "https://meo.comick.pictures/BLwGJ2-s.jpg", "volume": "11" },
-		{ "url_hq": "https://meo.comick.pictures/X8XrD5.jpg", "url_lq": "https://meo.comick.pictures/X8XrD5-s.jpg", "volume": "10" },
-		{ "url_hq": "https://meo.comick.pictures/y7Qp1n.jpg", "url_lq": "https://meo.comick.pictures/y7Qp1n-s.jpg", "volume": "9" },
-		{ "url_hq": "https://meo.comick.pictures/Jn7mO0.jpg", "url_lq": "https://meo.comick.pictures/Jn7mO0-s.jpg", "volume": "8" },
-		{ "url_hq": "https://meo.comick.pictures/EOmMJM.jpg", "url_lq": "https://meo.comick.pictures/EOmMJM-s.jpg", "volume": "7" },
-		{ "url_hq": "https://meo.comick.pictures/8yK8Bp.jpg", "url_lq": "https://meo.comick.pictures/8yK8Bp-s.jpg", "volume": "6" },
-		{ "url_hq": "https://meo.comick.pictures/ez3oKZ.jpg", "url_lq": "https://meo.comick.pictures/ez3oKZ-s.jpg", "volume": "5" },
-		{ "url_hq": "https://meo.comick.pictures/O8bKGg.jpg", "url_lq": "https://meo.comick.pictures/O8bKGg-s.jpg", "volume": "4" },
-		{ "url_hq": "https://meo.comick.pictures/D42gyL.jpg", "url_lq": "https://meo.comick.pictures/D42gyL-s.jpg", "volume": "3" },
-		{ "url_hq": "https://meo.comick.pictures/4kKB7X.jpg", "url_lq": "https://meo.comick.pictures/4kKB7X-s.jpg", "volume": "2" },
-		{ "url_hq": "https://meo.comick.pictures/1vOnpz.jpg", "url_lq": "https://meo.comick.pictures/1vOnpz-s.jpg", "volume": "1" }
+		{
+			"url_hq": "https://meo.comick.pictures/nR2aBm.jpg",
+			"url_lq": "https://meo.comick.pictures/nR2aBm-s.jpg",
+			"volume": "17"
+		},
+		{
+			"url_hq": "https://meo.comick.pictures/7yO0re.jpg",
+			"url_lq": "https://meo.comick.pictures/7yO0re-s.jpg",
+			"volume": "16"
+		},
+		{
+			"url_hq": "https://meo.comick.pictures/g6rL0Y.jpg",
+			"url_lq": "https://meo.comick.pictures/g6rL0Y-s.jpg",
+			"volume": "15"
+		},
+		{
+			"url_hq": "https://meo.comick.pictures/l6Xgj7.jpg",
+			"url_lq": "https://meo.comick.pictures/l6Xgj7-s.jpg",
+			"volume": "14"
+		},
+		{
+			"url_hq": "https://meo.comick.pictures/W8zR3Q.jpg",
+			"url_lq": "https://meo.comick.pictures/W8zR3Q-s.jpg",
+			"volume": "13"
+		},
+		{
+			"url_hq": "https://meo.comick.pictures/3Kpyqz.jpg",
+			"url_lq": "https://meo.comick.pictures/3Kpyqz-s.jpg",
+			"volume": "12"
+		},
+		{
+			"url_hq": "https://meo.comick.pictures/BLwGJ2.jpg",
+			"url_lq": "https://meo.comick.pictures/BLwGJ2-s.jpg",
+			"volume": "11"
+		},
+		{
+			"url_hq": "https://meo.comick.pictures/X8XrD5.jpg",
+			"url_lq": "https://meo.comick.pictures/X8XrD5-s.jpg",
+			"volume": "10"
+		},
+		{
+			"url_hq": "https://meo.comick.pictures/y7Qp1n.jpg",
+			"url_lq": "https://meo.comick.pictures/y7Qp1n-s.jpg",
+			"volume": "9"
+		},
+		{
+			"url_hq": "https://meo.comick.pictures/Jn7mO0.jpg",
+			"url_lq": "https://meo.comick.pictures/Jn7mO0-s.jpg",
+			"volume": "8"
+		},
+		{
+			"url_hq": "https://meo.comick.pictures/EOmMJM.jpg",
+			"url_lq": "https://meo.comick.pictures/EOmMJM-s.jpg",
+			"volume": "7"
+		},
+		{
+			"url_hq": "https://meo.comick.pictures/8yK8Bp.jpg",
+			"url_lq": "https://meo.comick.pictures/8yK8Bp-s.jpg",
+			"volume": "6"
+		},
+		{
+			"url_hq": "https://meo.comick.pictures/ez3oKZ.jpg",
+			"url_lq": "https://meo.comick.pictures/ez3oKZ-s.jpg",
+			"volume": "5"
+		},
+		{
+			"url_hq": "https://meo.comick.pictures/O8bKGg.jpg",
+			"url_lq": "https://meo.comick.pictures/O8bKGg-s.jpg",
+			"volume": "4"
+		},
+		{
+			"url_hq": "https://meo.comick.pictures/D42gyL.jpg",
+			"url_lq": "https://meo.comick.pictures/D42gyL-s.jpg",
+			"volume": "3"
+		},
+		{
+			"url_hq": "https://meo.comick.pictures/4kKB7X.jpg",
+			"url_lq": "https://meo.comick.pictures/4kKB7X-s.jpg",
+			"volume": "2"
+		},
+		{
+			"url_hq": "https://meo.comick.pictures/1vOnpz.jpg",
+			"url_lq": "https://meo.comick.pictures/1vOnpz-s.jpg",
+			"volume": "1"
+		}
+	],
+	"episodes": [
+		{
+			"type": "vidmoly",
+			"id": "hpchuvv9caw2",
+			"indice_ep": 1,
+			"date_ep": "1720137600",
+			"title_ep": "Rintaro et Kaoruko"
+		}
+	],
+	"anime": [
+		{
+			"cover_an": "https://i.imgur.com/q5dLTZD.jpeg",
+			"type_an": "TV",
+			"status_an": "En cours",
+			"studios_an": [
+				"CloverWorks"
+			],
+			"date_start_an": "06/07/2025",
+			"op_an": [
+				{
+					"title_op_fr_an": "Ton regard est lumière",
+					"title_op_jp_an": "まなざしは光",
+					"author_op_an": "Tatsuya Kitani",
+					"youtube_url_op_an": "https://www.youtube.com/watch?v=8WLNNu78mUk"
+				}
+			],
+			"ed_an": [
+				{
+					"title_op_fr_an": "Un grand jour",
+					"title_op_jp_an": "ハレの日に]",
+					"author_op_an": "Ushio Reira",
+					"youtube_url_op_an": "https://www.youtube.com/watch?v=W4fND8qaTtE"
+				}
+			],
+			"tags": [
+				"Comédie",
+				"Drame",
+				"Ecole",
+				"Romance",
+				"Tranche de vie"
+			],
+			"description": "Deux lycées que tout oppose se font face : Chidori, le repaire des garçons cancres, et Kikyô, l'établissement prestigieux des filles d'élite. Rintarô, élève de Chidori, sympathise avec Kaoruko, une cliente de la pâtisserie familiale. Alors qu'un lien se tisse entre eux, il découvre qu'elle étudie à Kikyô... et qu'ils sont censés se détester. Leur relation naissante pourra-t-elle survivre à la haine qui oppose leurs écoles ?"
+		}
 	],
 	"chapters": {
 		"1": {
 			"title": "Rintaro et Kaoruko",
 			"volume": "1",
 			"last_updated": "1726704000",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t01-9782373499759/", "22/01/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t01-9782373499759/",
+				"22/01/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -43,7 +168,10 @@
 			"title": "Chidori et Kikyo",
 			"volume": "1",
 			"last_updated": "1653868800",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t01-9782373499759/", "22/01/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t01-9782373499759/",
+				"22/01/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -52,7 +180,10 @@
 			"title": "Préparation des examens",
 			"volume": "1",
 			"last_updated": "1654473600",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t01-9782373499759/", "22/01/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t01-9782373499759/",
+				"22/01/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -61,7 +192,10 @@
 			"title": "Les amis de Kaoruko",
 			"volume": "1",
 			"last_updated": "1655078400",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t01-9782373499759/", "22/01/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t01-9782373499759/",
+				"22/01/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -70,7 +204,10 @@
 			"title": "Camarades d'étude",
 			"volume": "1",
 			"last_updated": "1655683200",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t01-9782373499759/", "22/01/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t01-9782373499759/",
+				"22/01/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -79,7 +216,10 @@
 			"title": "Subaru Hoshina",
 			"volume": "2",
 			"last_updated": "1656288000",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t02-9782373499766/", "19/03/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t02-9782373499766/",
+				"19/03/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -88,7 +228,10 @@
 			"title": "La chaleur d'un cœur",
 			"volume": "2",
 			"last_updated": "1656892800",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t02-9782373499766/", "19/03/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t02-9782373499766/",
+				"19/03/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -97,7 +240,10 @@
 			"title": "Une amitié à quatre",
 			"volume": "2",
 			"last_updated": "1656892800",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t02-9782373499766/", "19/03/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t02-9782373499766/",
+				"19/03/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -106,7 +252,10 @@
 			"title": "Grâce à Waguri",
 			"volume": "2",
 			"last_updated": "1657497600",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t02-9782373499766/", "19/03/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t02-9782373499766/",
+				"19/03/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -115,7 +264,10 @@
 			"title": "Haine",
 			"volume": "2",
 			"last_updated": "1658102400",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t02-9782373499766/", "19/03/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t02-9782373499766/",
+				"19/03/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -124,7 +276,10 @@
 			"title": "Amour",
 			"volume": "2",
 			"last_updated": "1658102400",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t02-9782373499766/", "19/03/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t02-9782373499766/",
+				"19/03/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -133,7 +288,10 @@
 			"title": "Rintaro et Subaru",
 			"volume": "2",
 			"last_updated": "1658707200",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t02-9782373499766/", "19/03/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t02-9782373499766/",
+				"19/03/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -142,7 +300,10 @@
 			"title": "Maman",
 			"volume": "2",
 			"last_updated": "1659398400",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t02-9782373499766/", "19/03/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t02-9782373499766/",
+				"19/03/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -151,7 +312,10 @@
 			"title": "Mon endroit préféré",
 			"volume": "3",
 			"last_updated": "1659916800",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t03-9782373499773/", "07/05/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t03-9782373499773/",
+				"07/05/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -160,7 +324,10 @@
 			"title": "Un type cool",
 			"volume": "3",
 			"last_updated": "1661126400",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t03-9782373499773/", "07/05/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t03-9782373499773/",
+				"07/05/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -169,7 +336,10 @@
 			"title": "Journée sportive",
 			"volume": "3",
 			"last_updated": "1661731200",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t03-9782373499773/", "07/05/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t03-9782373499773/",
+				"07/05/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -178,7 +348,10 @@
 			"title": "Dégel hivernal",
 			"volume": "3",
 			"last_updated": "1662336000",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t03-9782373499773/", "07/05/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t03-9782373499773/",
+				"07/05/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -187,7 +360,10 @@
 			"title": "L'aquarium",
 			"volume": "3",
 			"last_updated": "1662336000",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t03-9782373499773/", "07/05/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t03-9782373499773/",
+				"07/05/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -196,7 +372,10 @@
 			"title": "Ce que je ressens vraiment",
 			"volume": "3",
 			"last_updated": "1662336000",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t03-9782373499773/", "07/05/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t03-9782373499773/",
+				"07/05/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -205,7 +384,10 @@
 			"title": "Et les nuages se séparent",
 			"volume": "3",
 			"last_updated": "1662336000",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t03-9782373499773/", "07/05/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t03-9782373499773/",
+				"07/05/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -214,7 +396,10 @@
 			"title": "Cheveux blonds et piercings",
 			"volume": "3",
 			"last_updated": "1662940800",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t03-9782373499773/", "07/05/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t03-9782373499773/",
+				"07/05/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -1395,7 +1580,10 @@
 			"title": "Extras Volume 1",
 			"volume": "1",
 			"last_updated": "1685577600",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t01-9782373499759/", "22/01/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t01-9782373499759/",
+				"22/01/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -1404,7 +1592,10 @@
 			"title": "Extras Volume 2",
 			"volume": "2",
 			"last_updated": "1694044800",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t02-9782373499766/", "19/03/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t02-9782373499766/",
+				"19/03/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -1413,7 +1604,10 @@
 			"title": "Après le coup de fil",
 			"volume": "2",
 			"last_updated": "1687132800",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t02-9782373499766/", "19/03/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t02-9782373499766/",
+				"19/03/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -1422,7 +1616,10 @@
 			"title": "Après le coup de fil",
 			"volume": "3",
 			"last_updated": "1694304000",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t03-9782373499773/", "07/05/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t03-9782373499773/",
+				"07/05/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}
@@ -1648,7 +1845,10 @@
 			"title": "Extras Volume 3",
 			"volume": "3",
 			"last_updated": "1705968000",
-			"licencied": ["https://www.nobi-nobi.fr/livre/bloom-t03-9782373499773/", "07/05/2025"],
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t03-9782373499773/",
+				"07/05/2025"
+			],
 			"groups": {
 				"Big_herooooo": ""
 			}

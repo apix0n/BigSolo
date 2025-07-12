@@ -65,18 +65,20 @@ export async function onRequest(context) {
     }
   }
 
-  // --- AUTRES RÈGLES ---
+  // Pattern pour la page des couvertures de série
   const seriesCoverPattern = /^\/series-detail\/([a-zA-Z0-9_-][a-zA-Z0-9_.-]*)\/cover\/?$/;
   if (seriesCoverPattern.test(pathname)) {
     const assetUrl = new URL("/series-covers.html", url.origin);
     return env.ASSETS.fetch(assetUrl.toString());
   }
 
-  const seriesDetailPattern = /^\/series-detail\/([a-zA-Z0-9_-][a-zA-Z0-9_.-]*)(\/([a-zA-Z0-9_.-]+))?\/?$/;
+  // Pattern pour tous les chemins de series-detail (manga, episodes, lecteur)
+  const seriesDetailPattern = /^\/series-detail\/.+/;
   if (seriesDetailPattern.test(pathname)) {
     const assetUrl = new URL("/series-detail.html", url.origin);
     return env.ASSETS.fetch(assetUrl.toString());
   }
 
+  // Si aucun pattern ne correspond, passer à la requête suivante
   return next();
 }
