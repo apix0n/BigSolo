@@ -1,5 +1,3 @@
 CNAME
-node_modules/
-.wrangler/
 summary.py
 summary.txt

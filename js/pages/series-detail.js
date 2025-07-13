@@ -13,46 +13,34 @@ let isLoadingImgChestViews = false;
 let allImgChestViewsPreloadedAttempted = false;
 const IMGCHEST_EXPECTED_POSTS_PER_PAGE = 24;
 
-async function preloadAllImgChestViewsIncrementally() {
-  if (allImgChestViewsPreloadedAttempted) {
-    updateAllVisibleChapterViews();
-    return;
-  }
-  if (isLoadingImgChestViews) return;
+async function preloadAllImgChestViewsOnce() {
+  if (allImgChestViewsPreloadedAttempted || isLoadingImgChestViews) return;
 
   isLoadingImgChestViews = true;
-  let currentPage = 1;
-  let hasMorePages = true;
-  const MAX_PAGES_TO_FETCH = 15;
 
-  while (hasMorePages && currentPage <= MAX_PAGES_TO_FETCH) {
-    try {
-      const response = await fetch(`/api/imgchest-get-page?page=${currentPage}`);
-      if (!response.ok) throw new Error(`Proxy request failed: ${response.status}`);
-      const data = await response.json();
+  try {
+    const response = await fetch(`/api/imgchest-get-all-pages`);
+    if (!response.ok) throw new Error(`Proxy request failed: ${response.status}`);
+    const data = await response.json();
 
-      if (data?.posts?.length > 0) {
-        data.posts.forEach(post => {
-          if (post.id && typeof post.views !== 'undefined') {
-            imgChestPostViewsCache.set(post.id, post.views);
-          }
-        });
-        updateAllVisibleChapterViews();
-        hasMorePages = data.posts.length === IMGCHEST_EXPECTED_POSTS_PER_PAGE;
-        if (hasMorePages) currentPage++;
-      } else {
-        hasMorePages = false;
-      }
-    } catch (error) {
-      console.error(`[Views] Error fetching page ${currentPage}:`, error);
-      hasMorePages = false;
+    if (Array.isArray(data.posts)) {
+      data.posts.forEach(post => {
+        if (post.id && typeof post.views !== 'undefined') {
+          imgChestPostViewsCache.set(post.id, post.views);
+        }
+      });
     }
-    if (hasMorePages) await new Promise(resolve => setTimeout(resolve, 300));
+
+    allImgChestViewsPreloadedAttempted = true;
+    updateAllVisibleChapterViews();
+
+  } catch (error) {
+    console.error(`[Views] Error fetching all pages combined:`, error);
+  } finally {
+    isLoadingImgChestViews = false;
   }
-  allImgChestViewsPreloadedAttempted = true;
-  isLoadingImgChestViews = false;
-  updateAllVisibleChapterViews();
 }
+
 
 function updateAllVisibleChapterViews() {
   qsa('.detail-chapter-views[data-imgchest-id]').forEach(viewElement => {
@@ -152,7 +140,7 @@ function renderMangaView(seriesData, seriesSlug) {
   document.title = `BigSolo – ${seriesData.title}`;
 
   displayGroupedChapters(seriesData, seriesSlug);
-  preloadAllImgChestViewsIncrementally();
+  preloadAllImgChestViewsOnce();
 
   const sortButton = qs('#sort-volumes-btn');
   if (sortButton && !sortButton.dataset.listenerAttached) {
