@@ -73,7 +73,7 @@ export async function onRequest(context) {
   const payload = JSON.stringify({ posts: allPosts });
   console.log(`[IMG_CHEST] Finished fetching ${allPosts.length} posts.`);
 
-  // 💾 3. Stocker dans Cloudflare KV
+  // 3. Stocker dans Cloudflare KV
   try {
     await env.IMG_CHEST_CACHE.put(cacheKey, payload, { expirationTtl: 3600 });
     console.log(`[IMG_CHEST] KV PUT SUCCESS → Key "${cacheKey}" stored for 1h`);
