@@ -1,0 +1,6 @@
+name = "bigsolo-functions"
+compatibility_date = "2025-07-13"
+
+[[kv_namespaces]]
+binding = "IMG_CHEST_CACHE"
+id = "24632818ff5d495e8ec68eb26dd49136"

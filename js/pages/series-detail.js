@@ -187,10 +187,10 @@ function renderEpisodesListView(seriesData, seriesSlug) {
   }
 
   const episodesViewHtml = `
-    ${generateAnimeHeader(seriesData, {
-    primaryInfoWrapperClasses: 'no-bottom-margin',
-    additionalMetadataClasses: 'no-top-margin'
-  })}
+    ${generateAnimeHeader(seriesData, { 
+        primaryInfoWrapperClasses: 'no-bottom-margin',
+        additionalMetadataClasses: 'no-top-margin' 
+    })}
     ${navTabsHtml}
     <div class="episodes-main-header">
         <h3 class="section-title">Liste des Épisodes</h3>
@@ -417,19 +417,18 @@ function generateNavTabs(seriesData, seriesSlug, activeTab) {
 
 // --- Fonctions de Tri et de Gestion des Chapitres ---
 
-// MODIFICATION #1 : La fonction reçoit maintenant la base64Url pour construire l'URL complète
-function renderChaptersListForVolume(chaptersToRender, seriesSlug, base64Url) {
+function renderChaptersListForVolume(chaptersToRender, seriesSlug) {
   return chaptersToRender.map(c => {
     const isLicensed = c.licencied && c.licencied.length > 0 && (!c.groups || c.groups.Big_herooooo === '');
     const chapterClass = isLicensed ? 'detail-chapter-item licensed-chapter-item' : 'detail-chapter-item';
-
-    let externalUrl = '';
+    let clickAction = '';
+    let dataHref = '';
     let viewsHtml = '';
 
     if (!isLicensed && c.groups && c.groups.Big_herooooo) {
-      // Construction de l'URL Cubari complète
-      externalUrl = `https://cubari.moe/read/gist/${base64Url}/${String(c.chapter).replaceAll(".", "-")}/1/`;
-
+      const chapterNumberForLink = String(c.chapter).replaceAll(".", "-");
+      dataHref = `/series-detail/${seriesSlug}/${chapterNumberForLink}`;
+      clickAction = `data-internal-redirect-href="${dataHref}"`;
       if (c.groups.Big_herooooo.includes('/proxy/api/imgchest/chapter/')) {
         const parts = c.groups.Big_herooooo.split('/');
         const imgchestPostId = parts[parts.length - 1];
@@ -438,7 +437,7 @@ function renderChaptersListForVolume(chaptersToRender, seriesSlug, base64Url) {
     }
     const collabHtml = c.collab ? `<span class="detail-chapter-collab">${c.collab}</span>` : '';
     return `
-      <div class="${chapterClass}" data-external-url="${externalUrl}" role="link" tabindex="0">
+      <div class="${chapterClass}" ${clickAction} ${dataHref ? `data-href="${dataHref}"` : ''} role="link" tabindex="0">
         <div class="chapter-main-info">
           <span class="detail-chapter-number">Chapitre ${c.chapter}</span>
           <span class="detail-chapter-title">${c.title || 'Titre inconnu'}</span>
@@ -503,8 +502,7 @@ function displayGroupedChapters(seriesData, seriesSlug) {
     if (licenseDetails) {
       volumeHeaderContent += `<div class="volume-license-details"><span class="volume-license-text">Ce volume est disponible en format papier, vous pouvez le commander</span><a href="${licenseDetails[0]}" target="_blank" rel="noopener noreferrer" class="volume-license-link">juste ici !</a>${licenseDetails[1] ? `<span class="volume-release-date">${licenseDetails[1]}</span>` : ''}</div>`;
     }
-    // On passe seriesData.base64Url pour que les liens soient corrects
-    html += `<div class="volume-group"><div class="volume-header ${isActiveByDefault ? 'active' : ''}" data-volume="${volKey}">${volumeHeaderContent}<i class="fas fa-chevron-down volume-arrow ${isActiveByDefault ? 'rotated' : ''}"></i></div><div class="volume-chapters-list">${renderChaptersListForVolume(chaptersInVolume, seriesSlug, seriesData.base64Url)}</div></div>`;
+    html += `<div class="volume-group"><div class="volume-header ${isActiveByDefault ? 'active' : ''}" data-volume="${volKey}">${volumeHeaderContent}<i class="fas fa-chevron-down volume-arrow ${isActiveByDefault ? 'rotated' : ''}"></i></div><div class="volume-chapters-list">${renderChaptersListForVolume(chaptersInVolume, seriesSlug)}</div></div>`;
   });
   chaptersContainer.innerHTML = html;
   updateAllVisibleChapterViews();
@@ -543,10 +541,6 @@ export async function initSeriesDetailPage() {
   let episodeNumber = null;
   let chapterNumber = null;
 
-  // L'URL d'un chapitre ne déclenche plus de vue "chapter_redirect"
-  // car la redirection se fera côté client directement.
-  // Le middleware intercepte toujours l'URL pour servir series-detail.html,
-  // mais le JS ne fera rien de spécial, la page du manga s'affichera par défaut.
   if (pathSegments.length > 2) {
     if (pathSegments[2] === 'episodes') {
       view = 'episodes_list';
@@ -555,9 +549,8 @@ export async function initSeriesDetailPage() {
         episodeNumber = pathSegments[3];
       }
     } else {
-      // C'est probablement une URL de chapitre, mais on affiche la page manga par défaut.
-      // L'utilisateur a probablement cliqué sur "précédent" après avoir été sur Cubari.
-      view = 'manga';
+      view = 'chapter_redirect';
+      chapterNumber = pathSegments[2];
     }
   }
 
@@ -566,6 +559,13 @@ export async function initSeriesDetailPage() {
     currentSeriesData = allSeries.find(s => slugify(s.title) === seriesSlug);
 
     if (currentSeriesData) {
+      if (view === 'chapter_redirect' && chapterNumber) {
+        seriesDetailSection.innerHTML = `<p class="loading-message">Redirection vers le chapitre ${chapterNumber}...</p>`;
+        const chapterUrl = `https://cubari.moe/read/gist/${currentSeriesData.base64Url}/${String(chapterNumber).replaceAll(".", "-")}/1/`;
+        window.location.href = chapterUrl;
+        return;
+      }
+
       if (view === 'manga') {
         renderMangaView(currentSeriesData, seriesSlug);
       } else if (view === 'episodes_list') {
@@ -582,14 +582,13 @@ export async function initSeriesDetailPage() {
     seriesDetailSection.innerHTML = "<p>Erreur lors du chargement des détails de la série.</p>";
   }
 
-  // MODIFICATION #2 : L'écouteur d'événements est simplifié
-  document.body.addEventListener('click', function (event) {
-    let targetElement = event.target.closest('.detail-chapter-item[data-external-url]');
+  document.body.addEventListener('click', async function (event) {
+    let targetElement = event.target.closest('.detail-chapter-item[data-internal-redirect-href]');
     if (targetElement) {
       event.preventDefault();
-      const externalUrl = targetElement.getAttribute('data-external-url');
-      if (externalUrl) {
-        window.open(externalUrl, '_blank'); // Ouvre dans un nouvel onglet
+      const prettyUrlPath = targetElement.getAttribute('data-internal-redirect-href');
+      if (prettyUrlPath) {
+        window.location.pathname = prettyUrlPath;
       }
     }
   });
