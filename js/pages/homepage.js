@@ -20,10 +20,18 @@ function truncateText(text, maxLength) {
 
 function renderChapterCard(chapter) {
   if (!chapter || !chapter.url || !chapter.serieCover || !chapter.serieTitle || !chapter.title || !chapter.chapter || typeof chapter.last_updated_ts === 'undefined') return '';
+  
+  // Logique conditionnelle pour l'URL de l'image de la carte chapitre
+  const chapterImageUrl = chapter.serieCover
+    ? (chapter.serieCover.includes('comick.pictures')
+        ? `${chapter.serieCover.slice(0, -4)}-m.jpg` // Utilise la miniature pour Comick
+        : chapter.serieCover) // Utilise l'URL originale pour les autres
+    : 'img/placeholder_preview.png';
+
   return `
     <div class="chapter-card" onclick="window.open('${chapter.url}', '_blank')">
       <div class="chapter-cover">
-        <img src="${chapter.serieCover ? `${chapter.serieCover.slice(0, -4)}-m.jpg` : 'img/placeholder_preview.png'}" 
+        <img src="${chapterImageUrl}" 
              alt="${chapter.serieTitle} – Cover" loading="lazy">
         ${maybeNewBadge(chapter.last_updated_ts, parseDateToTimestamp)}
       </div>
@@ -93,14 +101,23 @@ function renderSeriesCard(series) {
     tagsHtml = `<div class="tags series-tags">${series.tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>`;
   }
 
-  // MODIFICATION ICI pour utiliser la "pretty URL"
   const seriesSlug = slugify(series.title);
-  const detailPageUrl = `/series-detail/${seriesSlug}`; // Format: /series-detail/slug-de-la-serie
+  const detailPageUrl = `/series-detail/${seriesSlug}`;
+
+  // On détermine l'URL de l'image de manière conditionnelle.
+  const imageUrl = series.cover
+    ? (series.cover.includes('comick.pictures')
+        // Si c'est une URL comick, on crée la miniature
+        ? `${series.cover.slice(0, -4)}-s.jpg`
+        // Sinon, on utilise l'URL telle quelle
+        : series.cover)
+    // Fallback si series.cover n'existe pas
+    : 'img/placeholder_preview.png';
 
   return `
     <div class="series-card" onclick="window.location.href='${detailPageUrl}'">
       <div class="series-cover">
-        <img src="${series.cover ? `${series.cover.slice(0, -4)}-s.jpg` : 'img/placeholder_preview.png'}" 
+        <img src="${imageUrl}" 
              alt="${series.title} – Cover" loading="lazy">
       </div>
       <div class="series-info">
@@ -132,12 +149,12 @@ export async function initHomepage() {
     }
 
     if (seriesGridOngoing) {
-      const onGoingSeries = allSeries.filter(s => s && !s.completed && !s.os);
+      const onGoingSeries = allSeries.filter(s => s && !s.os);
       seriesGridOngoing.innerHTML = onGoingSeries.length > 0
         ? onGoingSeries.map(renderSeriesCard).join("")
         : "<p>Aucune série en cours.</p>";
       qsa('.series-card .series-tags', seriesGridOngoing).forEach(container => {
-        limitVisibleTags(container, 3, "plusN"); // ou "ellipsis"
+        limitVisibleTags(container, 3, "plusN");
       });
     }
 
@@ -147,7 +164,7 @@ export async function initHomepage() {
         ? oneShots.map(renderSeriesCard).join("")
         : "<p>Aucun one-shot.</p>";
       qsa('.series-card .series-tags', seriesGridOneShot).forEach(container => {
-        limitVisibleTags(container, 3, "plusN"); // ou "ellipsis"
+        limitVisibleTags(container, 3, "plusN");
       });
     }
 
@@ -155,7 +172,7 @@ export async function initHomepage() {
       const allChaptersForHomepage = allSeries.filter(s => s && s.chapters)
         .flatMap(s =>
           Object.entries(s.chapters).map(([cn, cd]) => {
-            if (typeof cd === 'object' && cd !== null && cd.groups && cd.groups.Big_herooooo !== '') { // S'assurer qu'il y a un lien de lecture
+            if (typeof cd === 'object' && cd !== null && cd.groups && cd.groups.Big_herooooo !== '') {
               return {
                 ...cd,
                 serieTitle: s.title,
