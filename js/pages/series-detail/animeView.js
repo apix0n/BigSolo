@@ -151,7 +151,7 @@ export function renderEpisodePlayerView(seriesData, seriesSlug, episodeNumber) {
   
     let embedUrl = '';
     if (currentEpisode.type === 'vidmoly' && currentEpisode.id) {
-      embedUrl = `https://vidmoly.to/embed-${currentEpisode.id}.html`;
+      embedUrl = `https://vidmoly.net/embed-${currentEpisode.id}.html`;
     }
   
     if (!embedUrl) {

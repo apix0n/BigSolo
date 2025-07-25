@@ -1,0 +1,15 @@
+{
+  "name": "bigsolo-site",
+  "description": "Le site de Big_Herooooo pour les sorties de Big_Herooooo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "workers-og": "^0.0.27"
+  }
+}
