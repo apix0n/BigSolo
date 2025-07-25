@@ -1,4 +1,4 @@
-// js/pages/series-detail/animeView.js
+// js/pages/series-detail/animeView.v2.js
 import { qs } from '../../utils/domUtils.js';
 import { timeAgo } from '../../utils/dateUtils.js';
 import { generateNavTabs, generateAnimeHeader } from './components.js';
