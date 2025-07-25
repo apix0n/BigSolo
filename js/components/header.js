@@ -1,9 +1,9 @@
 import { qs, qsa, slugify } from '../utils/domUtils.js';
 
 const mainNavLinksConfig = [
-  { text: "Accueil", href: "/index.html", icon: "fas fa-home", id: "home" },
-  { text: "Fan-Arts", href: "/galerie.html", icon: "fa-solid fa-palette", id: "gallery" },
-  { text: "À propos", href: "/presentation.html", icon: "fas fa-user", id: "about" }
+  { text: "Accueil", href: "/", icon: "fas fa-home", id: "home" },
+  { text: "Fan-Arts", href: "/galerie", icon: "fa-solid fa-palette", id: "gallery" },
+  { text: "À propos", href: "/presentation", icon: "fas fa-user", id: "about" }
 ];
 
 const subNavTitlesConfig = {
@@ -85,13 +85,11 @@ function getSubNavLinksForPage(pageId) {
                 const currentView = getCurrentSeriesViewFromPath();
                 
                 if (currentView === 'anime') {
-                    // Pour la vue anime, on ne montre pas le lien vers la galerie de couvertures
                     baseLinks = [
                         { text: "Informations", href: `#series-detail-section`, id: "series-info" },
                         { text: "Épisodes", href: `#chapters-list-section`, id: "series-episodes" }
                     ];
-                } else { // 'manga' view
-                    // Pour la vue manga, on montre le lien
+                } else {
                     baseLinks = [
                         { text: "Informations", href: `#series-detail-section`, id: "series-info" },
                         coversLink,
@@ -222,20 +220,28 @@ function initAnchorLinks() {
 }
 
 function updateActiveNavLinks() {
-    const currentPath = window.location.pathname.replace(/\/index\.html$/, '/') || '/';
+    // Normalise un chemin : supprime ".html", et transforme "/index.html" en "/"
+    const normalizePath = (p) => p.replace(/\/index\.html$/, '/').replace(/\.html$/, '');
+
+    const currentPath = normalizePath(window.location.pathname);
     const navLinks = qsa('#desktop-nav-main a, #mobile-nav-main a');
 
     navLinks.forEach(a => {
         const linkHref = a.getAttribute('href');
-        const linkPath = (linkHref.startsWith('/') ? linkHref : `/${linkHref}`).replace(/\/index\.html$/, '/');
-        
-        if (linkPath === currentPath) {
-            a.classList.add('active-nav-link');
-        } else {
-            a.classList.remove('active-nav-link');
+        if (linkHref) {
+            const linkPath = normalizePath(linkHref);
+            // La page d'accueil ('/') est active même si on est sur une sous-page qui n'a pas son propre bouton de nav
+            if (linkPath === '/' && currentPath === '/') {
+                 a.classList.add('active-nav-link');
+            } else if (linkPath !== '/' && currentPath.startsWith(linkPath)) {
+                a.classList.add('active-nav-link');
+            } else {
+                a.classList.remove('active-nav-link');
+            }
         }
     });
 }
+
 
 function setupMobileMenuInteractions() {
   const hamburgerBtn = qs(".hamburger-menu-btn");

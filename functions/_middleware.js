@@ -37,18 +37,18 @@ function generateMetaTags(meta) {
 export async function onRequest(context) {
     const { request, env, next } = context;
     const url = new URL(request.url);
-    const pathname = url.pathname;
+    const pathname = url.pathname.endsWith('/') ? url.pathname.slice(0, -1) : url.pathname; // remove trailing slash
 
     // --- Redirection pour les anciennes URLs ---
-    if (pathname.startsWith('/series-detail/')) {
-        const slugWithPotentialSubpaths = pathname.substring('/series-detail/'.length);
-        const newUrl = new URL(`/${slugWithPotentialSubpaths}`, url.origin);
+    if (pathname.startsWith('/series-detail')) {
+        const slugWithPotentialSubpaths = pathname.substring('/series-detail'.length);
+        const newUrl = new URL(slugWithPotentialSubpaths, url.origin);
         return Response.redirect(newUrl.toString(), 301);
     }
 
     // --- Définition des métadonnées pour les pages statiques ---
     const staticPageMeta = {
-        '/': {
+        '': { // Corresponds to the root path "/"
             title: 'BigSolo – Accueil',
             description: 'Retrouvez toutes les sorties de Big_herooooo en un seul et unique endroit !',
             htmlFile: '/index.html'
@@ -67,6 +67,11 @@ export async function onRequest(context) {
             title: 'BigSolo – Galerie',
             description: 'Découvrez toutes les colorisations et fan-arts de la communauté !',
             htmlFile: '/galerie.html'
+        },
+        '/presentation': {
+            title: 'BigSolo – Questions & Réponses',
+            description: 'Les réponses de BigSolo à vos questions sur son parcours dans le scantrad.',
+            htmlFile: '/presentation.html'
         },
         '/presentation.html': {
             title: 'BigSolo – Questions & Réponses',
@@ -88,38 +93,34 @@ export async function onRequest(context) {
 
     // --- Gestion de la galerie de colorisation détaillée ---
     const galleryPattern = /^\/galerie\/(\d+)\/?$/;
-    if (galleryPattern.test(pathname)) {
-        // La logique existante est déjà bonne pour ça, on la garde.
+    if (galleryPattern.test(url.pathname)) { // use original pathname here
+        // La logique existante est déjà bonne pour ça, on la laisse passer au middleware suivant s'il y en a un ou à la logique d'assets.
         return next();
     }
     
     // --- Gestion des slugs de séries ---
     const knownPrefixes = ['/css/', '/js/', '/img/', '/data/', '/includes/', '/functions/', '/api/'];
-    if (!knownPrefixes.some(prefix => pathname.startsWith(prefix))) {
-        const pathSegments = pathname.split('/').filter(Boolean);
+    if (!knownPrefixes.some(prefix => url.pathname.startsWith(prefix))) {
+        const pathSegments = url.pathname.split('/').filter(Boolean);
         const seriesSlug = pathSegments[0];
 
         if (seriesSlug) {
             try {
-                // Étape 1: Trouver le fichier JSON correspondant au slug
                 const config = await env.ASSETS.fetch(new URL('/data/config.json', url.origin)).then(res => res.json());
                 const seriesFiles = config.LOCAL_SERIES_FILES || [];
                 const filename = seriesFiles.find(f => slugify(f.replace('.json', '')) === seriesSlug);
 
                 if (filename) {
-                    // Étape 2: Récupérer les données de la série
                     const seriesData = await env.ASSETS.fetch(new URL(`/data/series/${filename}`, url.origin)).then(res => res.json());
-                    
                     let metaData = {};
                     let baseHtmlFile = '/series-detail.html';
 
-                    // Étape 3: Déterminer la vue (détail ou couvertures) et préparer les métadonnées
                     if (pathSegments.length > 1 && pathSegments[1] === 'cover') {
                         baseHtmlFile = '/series-covers.html';
                         metaData = {
                             title: `BigSolo – Couvertures de ${seriesData.title}`,
                             description: `Découvrez toutes les couvertures de la série ${seriesData.title} !`,
-                            image: seriesData.cover // On peut utiliser la cover principale comme image de partage
+                            image: seriesData.cover
                         };
                     } else {
                         metaData = {
@@ -129,7 +130,6 @@ export async function onRequest(context) {
                         };
                     }
 
-                    // Étape 4: Servir le HTML de base en y injectant les balises meta
                     const assetUrl = new URL(baseHtmlFile, url.origin);
                     const response = await env.ASSETS.fetch(assetUrl);
                     let html = await response.text();
@@ -139,11 +139,9 @@ export async function onRequest(context) {
                 }
             } catch (error) {
                 console.error(`Error processing series slug "${seriesSlug}":`, error);
-                // En cas d'erreur, on continue pour laisser Cloudflare Pages servir une éventuelle page 404
             }
         }
     }
 
-    // Pour toute autre requête (fichiers css, js, etc.), laisser Cloudflare Pages gérer
     return next();
 }
