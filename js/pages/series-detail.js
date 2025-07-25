@@ -2,7 +2,7 @@
 import { fetchSeriesDataBySlug } from '../utils/fetchUtils.js';
 import { slugify, qs } from '../utils/domUtils.js';
 import { renderMangaView } from './series-detail/mangaView.js';
-import { renderEpisodesListView, renderEpisodePlayerView } from './series-detail/animeView.v2.js';
+import { renderEpisodesListView, renderEpisodePlayerView } from './series-detail/animeView.js';
 
 export async function initSeriesDetailPage() {
   const seriesDetailSection = qs("#series-detail-section");
