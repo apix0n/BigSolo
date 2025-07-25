@@ -43,7 +43,13 @@
 
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="/css/layout.css" />
-  <link rel="stylesheet" href="/css/components.css" />
+  <link rel="stylesheet" href="/css/components/header.css" />
+  <link rel="stylesheet" href="/css/components/mobile-menu.css" />
+  <link rel="stylesheet" href="/css/components/general.css" />
+  <link rel="stylesheet" href="/css/components/cards.css" />
+  <link rel="stylesheet" href="/css/components/carousel.css" />
+  <link rel="stylesheet" href="/css/components/gallery-lightbox.css" />
+  <link rel="stylesheet" href="/css/components/accordion.css" />
   <link rel="stylesheet" href="/css/pages/galerie.css" />
 
   <script src="/js/theme-init.js"></script>
@@ -57,27 +63,29 @@
 
   <main>
     <section class="gallery-section">
-      <h1 class="section-title page-title">Galerie des Colorisations</h1>
+      <!-- Titre mis à jour pour inclure le compteur -->
+      <h1 class="section-title page-title">Galerie des Colorisations <span id="colo-total-count"></span></h1>
 
+      <!-- Contrôles mis à jour -->
       <div class="gallery-controls">
         <div class="gallery-sort-filter">
-          <label for="sort-order">Trier par :</label>
-          <select id="sort-order" name="sort-order">
-            <option value="date_desc">Date (plus récentes)</option>
-            <option value="date_asc">Date (plus anciennes)</option>
-            <option value="chapitre_desc">Chapitre (décroissant)</option>
-            <option value="chapitre_asc">Chapitre (croissant)</option>
-          </select>
-        </div>
-        <div class="gallery-sort-filter">
-          <label for="filter-artist">Artiste :</label>
-          <select id="filter-artist" name="filter-artist">
-            <option value="all">Tous les artistes</option>
-          </select>
+          <label for="custom-artist-filter">Artiste :</label>
+          <!-- Nouveau menu déroulant custom -->
+          <div id="custom-artist-filter" class="custom-dropdown">
+            <button class="custom-dropdown-toggle" type="button" aria-haspopup="listbox" aria-expanded="false">
+                <span id="custom-filter-text">Tous les artistes</span>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+            </button>
+            <div class="custom-dropdown-menu" id="custom-artist-options" role="listbox" aria-multiselectable="true">
+                <!-- Les options des artistes seront injectées ici par le JS -->
+                <div class="dropdown-loader">Chargement...</div>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="gallery-grid" id="gallery-grid-container">
+        <!-- Les cartes de colorisation seront injectées ici par le JS -->
       </div>
     </section>
   </main>

@@ -4,14 +4,8 @@ import { slugify, maybeNewBadge, qs, qsa, limitVisibleTags } from '../utils/domU
 import { timeAgo, parseDateToTimestamp } from '../utils/dateUtils.js';
 import { initCarousel } from '../components/carousel.js';
 
-/**
- * Tronque un texte à une longueur maximale et ajoute "..." si nécessaire.
- * @param {string} text - Le texte à tronquer.
- * @param {number} maxLength - La longueur maximale avant troncature (incluant les "...").
- * @returns {string} Le texte tronqué ou original.
- */
 function truncateText(text, maxLength) {
-  if (typeof text !== 'string') return ''; // Gère le cas où text n'est pas une chaîne
+  if (typeof text !== 'string') return '';
   if (text.length > maxLength) {
     return text.substring(0, maxLength - 3) + "...";
   }
@@ -21,15 +15,14 @@ function truncateText(text, maxLength) {
 function renderChapterCard(chapter) {
   if (!chapter || !chapter.url || !chapter.serieCover || !chapter.serieTitle || !chapter.title || !chapter.chapter || typeof chapter.last_updated_ts === 'undefined') return '';
   
-  // Logique conditionnelle pour l'URL de l'image de la carte chapitre
   const chapterImageUrl = chapter.serieCover
     ? (chapter.serieCover.includes('comick.pictures')
-        ? `${chapter.serieCover.slice(0, -4)}-m.jpg` // Utilise la miniature pour Comick
-        : chapter.serieCover) // Utilise l'URL originale pour les autres
+        ? `${chapter.serieCover.slice(0, -4)}-m.jpg`
+        : chapter.serieCover)
     : 'img/placeholder_preview.png';
 
   return `
-    <div class="chapter-card" onclick="window.open('${chapter.url}', '_blank')">
+    <a href="${chapter.url}" target="_blank" class="chapter-card" rel="noopener noreferrer">
       <div class="chapter-cover">
         <img src="${chapterImageUrl}" 
              alt="${chapter.serieTitle} – Cover" loading="lazy">
@@ -41,11 +34,12 @@ function renderChapterCard(chapter) {
         <div class="chapter-number">Chapitre ${chapter.chapter}</div>
         <div class="chapter-time"><i class="fas fa-clock"></i> ${timeAgo(chapter.last_updated_ts)}</div>
       </div>
-    </div>`;
+    </a>`;
 }
 
 function renderSeriesCard(series) {
   if (!series || !series.chapters || !series.title || !series.cover) return '';
+  
   const chaptersArray = Object.entries(series.chapters)
     .map(([chapNum, chapData]) => ({
       chapter: chapNum,
@@ -53,14 +47,14 @@ function renderSeriesCard(series) {
       last_updated_ts: parseDateToTimestamp(chapData.last_updated || 0),
       url: chapData.groups && chapData.groups.Big_herooooo !== '' ? `https://cubari.moe/read/gist/${series.base64Url}/${chapNum.replaceAll(".", "-")}/1/` : null
     }))
-    .filter(chap => chap.url) // Garder seulement les chapitres avec une URL valide pour les "derniers chapitres"
+    .filter(chap => chap.url)
     .sort((a, b) => b.last_updated_ts - a.last_updated_ts);
 
   let latestChapterAsButton = '', latestThreeChaptersHtml = '';
   if (chaptersArray.length > 0) {
     const latestChap = chaptersArray[0];
     const chapterTitleMobile = latestChap.title || 'Titre inconnu';
-    const truncatedTitleMobile = truncateText(chapterTitleMobile, 25); // Ajuste 25 selon tes besoins
+    const truncatedTitleMobile = truncateText(chapterTitleMobile, 25);
 
     latestChapterAsButton = `
       <div class="series-latest-chapters-container-mobile">
@@ -102,20 +96,16 @@ function renderSeriesCard(series) {
   }
 
   const seriesSlug = slugify(series.title);
-  const detailPageUrl = `/series-detail/${seriesSlug}`;
+  const detailPageUrl = `/${seriesSlug}`;
 
-  // On détermine l'URL de l'image de manière conditionnelle.
   const imageUrl = series.cover
     ? (series.cover.includes('comick.pictures')
-        // Si c'est une URL comick, on crée la miniature
         ? `${series.cover.slice(0, -4)}-s.jpg`
-        // Sinon, on utilise l'URL telle quelle
         : series.cover)
-    // Fallback si series.cover n'existe pas
     : 'img/placeholder_preview.png';
 
   return `
-    <div class="series-card" onclick="window.location.href='${detailPageUrl}'">
+    <a href="${detailPageUrl}" class="series-card">
       <div class="series-cover">
         <img src="${imageUrl}" 
              alt="${series.title} – Cover" loading="lazy">
@@ -128,9 +118,8 @@ function renderSeriesCard(series) {
         ${latestChapterAsButton}
         ${latestThreeChaptersHtml}
       </div>
-    </div>`;
+    </a>`;
 }
-
 
 export async function initHomepage() {
   const latestContainer = qs(".latest-chapters");

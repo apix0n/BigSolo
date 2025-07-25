@@ -52,38 +52,52 @@ async function initCommonComponents() {
 
 async function routeAndInitPage() {
   const path = window.location.pathname;
-  const bodyId = document.body.id; // L'ID du body peut aussi aider à router
+  const bodyId = document.body.id; // L'ID du body est la méthode de routage la plus fiable
   console.log(`Routing for path: "${path}", bodyId: "${bodyId}"`);
 
-  // Priorité aux routes plus spécifiques
-  if ((path.startsWith('/series-detail/') && path.endsWith('/cover')) || bodyId === 'seriescoverspage') {
-    console.log("Initializing series covers page.");
-    const { initSeriesCoversPage } = await import('./pages/series-covers.js');
-    await initSeriesCoversPage();
-    initMainScrollObserver(); // Si applicable
-  } else if (path.startsWith('/series-detail/') || path.includes('series-detail.html') || bodyId === 'seriesdetailpage') {
-    console.log("Initializing series detail page.");
-    const { initSeriesDetailPage } = await import('./pages/series-detail.js');
-    await initSeriesDetailPage();
-    initMainScrollObserver();
-  } else if (path.includes('index.html') || path === '/' || bodyId === 'homepage') {
-    console.log("Initializing homepage.");
-    const { initHomepage } = await import('./pages/homepage.js');
-    await initHomepage();
-    initMainScrollObserver();
-  } else if (path.includes('galerie.html') || bodyId === 'galeriepage') {
-    console.log("Initializing galerie page.");
-    const { initGaleriePage } = await import('./pages/galerie.js');
-    await initGaleriePage();
-    initMainScrollObserver();
-  } else if (path.includes('presentation.html') || bodyId === 'presentationpage') {
-    console.log("Initializing presentation page.");
-    const { initPresentationPage } = await import('./pages/presentation.js');
-    initPresentationPage();
-    initMainScrollObserver();
-  } else {
-    console.log('Aucune logique JS spécifique pour cette page ou route non reconnue:', path);
-    initMainScrollObserver();
+  // Le routage se base maintenant principalement sur bodyId, qui est défini dans le fichier HTML servi
+  // par le middleware. C'est plus robuste que de parser l'URL qui est maintenant dynamique.
+  switch (bodyId) {
+    case 'homepage':
+      console.log("Initializing homepage.");
+      const { initHomepage } = await import('./pages/homepage.js');
+      await initHomepage();
+      initMainScrollObserver();
+      break;
+    
+    case 'galeriepage':
+      console.log("Initializing galerie page.");
+      const { initGaleriePage } = await import('./pages/galerie.js');
+      await initGaleriePage();
+      initMainScrollObserver();
+      break;
+
+    case 'presentationpage':
+      console.log("Initializing presentation page.");
+      const { initPresentationPage } = await import('./pages/presentation.js');
+      initPresentationPage();
+      initMainScrollObserver();
+      break;
+
+    case 'seriescoverspage':
+      console.log("Initializing series covers page.");
+      const { initSeriesCoversPage } = await import('./pages/series-covers.js');
+      await initSeriesCoversPage();
+      initMainScrollObserver();
+      break;
+
+    case 'seriesdetailpage':
+      console.log("Initializing series detail page.");
+      const { initSeriesDetailPage } = await import('./pages/series-detail.js');
+      await initSeriesDetailPage();
+      // L'observer est appelé à l'intérieur de la logique de rendu, pas besoin de l'appeler ici
+      break;
+
+    default:
+      console.log('Aucune logique JS spécifique pour cet ID de body ou route non reconnue:', bodyId, path);
+      // Fallback au cas où une page n'a pas d'ID mais a des éléments à animer
+      initMainScrollObserver();
+      break;
   }
 }
 

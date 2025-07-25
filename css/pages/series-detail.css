@@ -378,7 +378,6 @@ body.dark .detail-episode-item {
   color: var(--clr-primary);
 }
 
-
 /* --- Styles pour les infos Anime --- */
 .anime-additional-metadata {
   line-height: 1.6;
@@ -461,6 +460,59 @@ body.dark .detail-episode-item {
   font-size: 0.7rem;
   color: var(--clr-text-sub);
 }
+
+
+/* --- STYLES POUR LES BOUTONS DE LECTURE --- */
+#reading-actions-container {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.reading-action-button {
+  padding: 0.8rem 1.8rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  transition: all 0.2s ease-in-out;
+  border: 2px solid transparent;
+}
+
+.reading-action-button.continue {
+  background-color: rgba(var(--clr-primary-rgb), 0.15);
+  color: var(--clr-primary);
+  border-color: var(--clr-primary);
+  color:white;
+}
+
+.reading-action-button.continue:hover {
+  background-color: rgba(var(--clr-primary-rgb), 0.25);
+}
+
+.reading-action-button.start {
+  background-color: transparent;
+  color: var(--clr-primary);
+  border-color: var(--clr-primary);
+}
+
+.reading-action-button.start:hover {
+  background-color: rgba(var(--clr-primary-rgb), 0.1);
+}
+
+.reading-action-button.disabled {
+  background-color: rgba(var(--clr-text-rgb), 0.2);
+  color: rgba(var(--clr-text-rgb), 0.6);
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* --- FIN DES STYLES --- */
 
 
 /* --- Styles responsives --- */
@@ -561,22 +613,17 @@ body.dark .detail-episode-item {
     margin-top: 0.8rem;
   }
 
-  /* --- Styles pour les boutons compacts sur mobile --- */
   .inline-song-info-desktop {
     display: none;
   }
 
   .inline-song-info-mobile {
     display: flex;
-    align-items: baseline;
-    gap: 0.4rem;
   }
 
   .inline-songs-container {
     flex-direction: row;
-    flex-wrap: wrap;
     gap: 0.5rem;
-    margin-bottom: 0;
     margin-top: 0.8rem;
   }
 
@@ -591,21 +638,13 @@ body.dark .detail-episode-item {
 
   .inline-song-info-mobile .inline-song-type {
     font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: none;
   }
 
   .inline-song-info-mobile .inline-song-title {
     font-size: 0.75rem;
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
     max-width: 120px;
-    /* Réduction pour garantir une seule ligne */
   }
 
-  /* --- Styles communs au responsive --- */
   .detail-navigation-tabs {
     gap: 0;
     justify-content: space-around;
@@ -614,8 +653,6 @@ body.dark .detail-episode-item {
   .detail-nav-button {
     font-size: 0.9rem;
     padding: 0.7rem 0.5rem;
-    flex-grow: 1;
-    text-align: center;
   }
 
   .detail-episode-item {
@@ -625,7 +662,6 @@ body.dark .detail-episode-item {
 
   .player-header {
     text-align: center;
-    margin-bottom: 1.5rem;
   }
 
   .player-episode-main-title {
@@ -639,13 +675,19 @@ body.dark .detail-episode-item {
 
   .detail-meta-flex-prefix {
     flex: 0 0 140px;
-    /* Garde une largeur fixe pour l'alignement */
-    margin-right: 0.5em;
-    /* Les propriétés de troncature ont été retirées */
   }
 
-  .detail-meta-flex-suffix {
+  /* CORRECTION : Mise à jour pour l'affichage mobile des boutons */
+  #reading-actions-container {
+    flex-wrap: nowrap;
+    /* Force les boutons à rester sur une seule ligne */
+  }
+
+  .reading-action-button {
     flex-grow: 1;
-    /* Les propriétés de troncature ont été retirées pour permettre le retour à la ligne */
+    /* Les deux boutons se partagent l'espace disponible */
+    width: auto;
+    padding: 0.7rem 1rem;
+    font-size: 0.7rem;
   }
 }
