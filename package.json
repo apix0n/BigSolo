@@ -3,13 +3,18 @@
   "description": "Le site de Big_Herooooo pour les sorties de Big_Herooooo",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "generate-og": "node generate-og-images.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "satori": "^0.10.13",
+    "satori-html": "^0.3.2",
     "workers-og": "^0.0.27"
   }
 }
