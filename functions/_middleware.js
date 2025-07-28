@@ -17,7 +17,15 @@ function generateMetaTags(meta) {
   if (meta.isSeries) {
       const ogUrl = new URL('/api/og-image-generator', url);
       ogUrl.searchParams.set('title', title.replace('BigSolo – ', ''));
-      ogUrl.searchParams.set('cover', imageUrl);
+
+      // --- MODIFICATION : S'assurer que l'URL de la couverture est la version small "-s" ---
+      let coverForOg = imageUrl;
+      if (coverForOg.includes('comick.pictures') && !coverForOg.endsWith('-s.jpg')) {
+        coverForOg = coverForOg.replace('.jpg', '-s.jpg');
+      }
+      ogUrl.searchParams.set('cover', coverForOg);
+      // --- FIN DE LA MODIFICATION ---
+
       if(author) ogUrl.searchParams.set('author', author);
       finalImageUrl = ogUrl.toString();
   }
@@ -53,7 +61,6 @@ export async function onRequest(context) {
         return next();
     }
 
-    // Mise à jour pour inclure explicitement l'image de la page d'accueil
     const staticPageMeta = {
         '': { title: 'BigSolo – Accueil', description: 'Retrouvez toutes les sorties de Big_herooooo en un seul et unique endroit !', htmlFile: '/index.html', image: '/img/banner.jpg' },
         '/index.html': { title: 'BigSolo – Accueil', description: 'Retrouvez toutes les sorties de Big_herooooo en un seul et unique endroit !', htmlFile: '/index.html', image: '/img/banner.jpg' },
@@ -123,13 +130,11 @@ export async function onRequest(context) {
                     let metaData = {};
                     let baseHtmlFile = '/series-detail.html';
 
-                    // --- NOUVELLE LOGIQUE DE ROUTAGE POUR LES IMAGES OG ---
                     const isEpisodePage = pathSegments.includes('episodes');
                     const isCoverPage = pathSegments.includes('cover');
 
                     if (isEpisodePage) {
-                        // C'est une page d'épisodes, on utilise la couverture de l'anime
-                        const animeCover = seriesData.anime?.[0]?.cover_an || seriesData.cover; // Fallback sur la cover manga si cover_an n'existe pas
+                        const animeCover = seriesData.anime?.[0]?.cover_an || seriesData.cover;
                         metaData = {
                             title: `BigSolo – Épisodes de ${seriesData.title}`,
                             description: seriesData.anime?.[0]?.description || seriesData.description,
@@ -139,7 +144,6 @@ export async function onRequest(context) {
                         };
                         baseHtmlFile = '/series-detail.html';
                     } else if (isCoverPage) {
-                        // C'est la page de la galerie des couvertures
                         baseHtmlFile = '/series-covers.html';
                         metaData = {
                             title: `BigSolo – Couvertures de ${seriesData.title}`,
@@ -149,7 +153,6 @@ export async function onRequest(context) {
                             author: seriesData.author || seriesData.artist
                         };
                     } else {
-                        // C'est la page de détail principale (manga)
                         metaData = {
                             title: `BigSolo – ${seriesData.title}`,
                             description: seriesData.description,
@@ -159,8 +162,7 @@ export async function onRequest(context) {
                         };
                         baseHtmlFile = '/series-detail.html';
                     }
-                    // --- FIN DE LA NOUVELLE LOGIQUE ---
-
+                    
                     const assetUrl = new URL(baseHtmlFile, url.origin);
                     const response = await env.ASSETS.fetch(assetUrl);
                     let html = await response.text();
