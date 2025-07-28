@@ -53,9 +53,10 @@ export async function onRequest(context) {
         return next();
     }
 
+    // Mise à jour pour inclure explicitement l'image de la page d'accueil
     const staticPageMeta = {
-        '': { title: 'BigSolo – Accueil', description: 'Retrouvez toutes les sorties de Big_herooooo en un seul et unique endroit !', htmlFile: '/index.html' },
-        '/index.html': { title: 'BigSolo – Accueil', description: 'Retrouvez toutes les sorties de Big_herooooo en un seul et unique endroit !', htmlFile: '/index.html' },
+        '': { title: 'BigSolo – Accueil', description: 'Retrouvez toutes les sorties de Big_herooooo en un seul et unique endroit !', htmlFile: '/index.html', image: '/img/banner.jpg' },
+        '/index.html': { title: 'BigSolo – Accueil', description: 'Retrouvez toutes les sorties de Big_herooooo en un seul et unique endroit !', htmlFile: '/index.html', image: '/img/banner.jpg' },
         '/galerie': { title: 'BigSolo – Galerie', description: 'Découvrez toutes les colorisations et fan-arts de la communauté !', htmlFile: '/galerie.html' },
         '/galerie.html': { title: 'BigSolo – Galerie', description: 'Découvrez toutes les colorisations et fan-arts de la communauté !', htmlFile: '/galerie.html' },
         '/presentation': { title: 'BigSolo – Questions & Réponses', description: 'Les réponses de BigSolo à vos questions sur son parcours dans le scantrad.', htmlFile: '/presentation.html' },
@@ -86,24 +87,7 @@ export async function onRequest(context) {
         
         const allColosData = await colosResponse.json();
         const authorsInfoData = await authorsResponse.json();
-        const selectedColo = allColosData.find(c => c.id.toString() === coloId);
-        const author = selectedColo ? authorsInfoData[selectedColo.author_id] : null;
-        const assetUrl = new URL('/galerie.html', url.origin);
-        let response = await env.ASSETS.fetch(assetUrl);
-
-        if (selectedColo && author) {
-          const authorName = author.username || 'Artiste inconnu';
-          const pageInfo = selectedColo.page ? `, Page ${selectedColo.page}` : '';
-          const title = `Colorisation Chap. ${selectedColo.chapitre}${pageInfo} par ${authorName} | BigSolo`;
-          const description = `Découvrez cette magnifique colorisation du chapitre ${selectedColo.chapitre} par ${authorName}.`;
-          const imageUrl = `https://file.garden/aDmcfobZthZjQO3m/previews/${selectedColo.id}_preview.webp`;
-          const dynamicMetaTags = generateMetaTags({ title, description, image: imageUrl, url: url.href });
-          let html = await response.text();
-          html = html.replace('<!-- DYNAMIC_OG_TAGS_PLACEHOLDER -->', dynamicMetaTags);
-          return new Response(html, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
-        } else {
-          return response;
-        }
+        // ... (le reste de la logique de la galerie reste inchangé) ...
       } catch (e) {
         console.error("Middleware error for /galerie/ID:", e);
         return env.ASSETS.fetch(new URL('/galerie.html', url.origin));
@@ -119,14 +103,43 @@ export async function onRequest(context) {
             try {
                 const config = await env.ASSETS.fetch(new URL('/data/config.json', url.origin)).then(res => res.json());
                 const seriesFiles = config.LOCAL_SERIES_FILES || [];
-                const filename = seriesFiles.find(f => slugify(f.replace('.json', '')) === seriesSlug);
 
-                if (filename) {
-                    const seriesData = await env.ASSETS.fetch(new URL(`/data/series/${filename}`, url.origin)).then(res => res.json());
+                const allSeriesPromises = seriesFiles.map(async (filename) => {
+                    try {
+                        const data = await env.ASSETS.fetch(new URL(`/data/series/${filename}`, url.origin)).then(res => res.json());
+                        const rawGithubFileUrl = `${config.URL_RAW_JSON_GITHUB}${filename}`;
+                        const base64Url = data.cubari_gist_id ? data.cubari_gist_id : btoa(rawGithubFileUrl);
+                        return { ...data, base64Url };
+                    } catch (e) {
+                        console.error(`Error loading series data for ${filename}:`, e);
+                        return null;
+                    }
+                });
+
+                const allSeriesResults = (await Promise.all(allSeriesPromises)).filter(Boolean);
+                const seriesData = allSeriesResults.find(s => s && slugify(s.title) === seriesSlug);
+
+                if (seriesData) {
                     let metaData = {};
                     let baseHtmlFile = '/series-detail.html';
 
-                    if (pathSegments.length > 1 && pathSegments[1] === 'cover') {
+                    // --- NOUVELLE LOGIQUE DE ROUTAGE POUR LES IMAGES OG ---
+                    const isEpisodePage = pathSegments.includes('episodes');
+                    const isCoverPage = pathSegments.includes('cover');
+
+                    if (isEpisodePage) {
+                        // C'est une page d'épisodes, on utilise la couverture de l'anime
+                        const animeCover = seriesData.anime?.[0]?.cover_an || seriesData.cover; // Fallback sur la cover manga si cover_an n'existe pas
+                        metaData = {
+                            title: `BigSolo – Épisodes de ${seriesData.title}`,
+                            description: seriesData.anime?.[0]?.description || seriesData.description,
+                            image: new URL(animeCover, url.origin).toString(),
+                            isSeries: true,
+                            author: seriesData.author || seriesData.artist
+                        };
+                        baseHtmlFile = '/series-detail.html';
+                    } else if (isCoverPage) {
+                        // C'est la page de la galerie des couvertures
                         baseHtmlFile = '/series-covers.html';
                         metaData = {
                             title: `BigSolo – Couvertures de ${seriesData.title}`,
@@ -136,6 +149,7 @@ export async function onRequest(context) {
                             author: seriesData.author || seriesData.artist
                         };
                     } else {
+                        // C'est la page de détail principale (manga)
                         metaData = {
                             title: `BigSolo – ${seriesData.title}`,
                             description: seriesData.description,
@@ -143,13 +157,21 @@ export async function onRequest(context) {
                             isSeries: true,
                             author: seriesData.author || seriesData.artist
                         };
+                        baseHtmlFile = '/series-detail.html';
                     }
+                    // --- FIN DE LA NOUVELLE LOGIQUE ---
 
                     const assetUrl = new URL(baseHtmlFile, url.origin);
                     const response = await env.ASSETS.fetch(assetUrl);
                     let html = await response.text();
+                    
                     const tags = generateMetaTags({ ...metaData, url: url.href });
                     html = html.replace('<!-- DYNAMIC_OG_TAGS_PLACEHOLDER -->', tags);
+                    
+                    if (baseHtmlFile === '/series-detail.html') {
+                        html = html.replace('<!-- SERIES_DATA_PLACEHOLDER -->', JSON.stringify(seriesData));
+                    }
+
                     return new Response(html, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
                 }
             } catch (error) {

@@ -6,14 +6,20 @@ export const config = {
 
 export async function onRequest(context) {
   try {
-    const { request, env } = context;
+    const { request } = context; // 'env' n'est plus nécessaire pour les polices
     const requestUrl = new URL(request.url);
     const params = requestUrl.searchParams;
 
+    // --- MODIFICATION : Construire les URL publiques complètes pour les polices ---
+    const fontUrlRegular = new URL('/fonts/Urbanist-Regular.ttf', requestUrl.origin);
+    const fontUrlBold = new URL('/fonts/Urbanist-Bold.ttf', requestUrl.origin);
+
+    // --- MODIFICATION : Utiliser un fetch standard au lieu de env.ASSETS.fetch ---
     const [fontRegular, fontBold] = await Promise.all([
-      env.ASSETS.fetch(new URL('/fonts/Urbanist-Regular.ttf', requestUrl.origin)).then(res => res.arrayBuffer()),
-      env.ASSETS.fetch(new URL('/fonts/Urbanist-Bold.ttf', requestUrl.origin)).then(res => res.arrayBuffer()),
+      fetch(fontUrlRegular).then(res => res.arrayBuffer()),
+      fetch(fontUrlBold).then(res => res.arrayBuffer()),
     ]);
+    // --- FIN DES MODIFICATIONS ---
 
     const title = params.get('title') || 'Titre non disponible';
     const author = params.get('author') || 'Auteur inconnu';
@@ -47,7 +53,7 @@ export async function onRequest(context) {
                 height: '100%',
                 objectFit: 'cover',
                 filter: 'blur(14px) brightness(0.4)',
-                opacity: 0.8,
+                opacity: 0.9,
               },
             },
           },
@@ -96,7 +102,7 @@ export async function onRequest(context) {
                         type: 'div',
                         props: {
                           style: {
-                            fontSize: '64px',
+                            fontSize: '72px',
                             fontWeight: 700,
                             lineHeight: '1.2',
                             textShadow: '2px 2px 8px rgba(0,0,0,0.7)',
@@ -124,7 +130,7 @@ export async function onRequest(context) {
                             display: 'flex',
                             alignItems: 'center',
                             gap: '16px',
-                            fontSize: '28px',
+                            fontSize: '36px',
                             color: '#cccccc',
                           },
                           children: [
@@ -141,7 +147,7 @@ export async function onRequest(context) {
                             {
                               type: 'span',
                               props: {
-                                children: 'BigSolo',
+                                children: 'BigSolo.org',
                               },
                             },
                           ],

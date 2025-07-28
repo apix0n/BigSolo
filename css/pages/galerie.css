@@ -14,6 +14,8 @@
 .gallery-controls {
   position: relative; /* Établit un contexte d'empilement */
   z-index: 10;        /* Assure que les contrôles sont au-dessus de la grille */
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 
