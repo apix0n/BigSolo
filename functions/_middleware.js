@@ -14,13 +14,13 @@ function generateMetaTags(meta) {
   const author = meta.author || '';
 
   let finalImageUrl = imageUrl;
-  // if (meta.isSeries) {
-  //     const ogUrl = new URL('/api/og-image-generator', url);
-  //     ogUrl.searchParams.set('title', title.replace('BigSolo – ', ''));
-  //     ogUrl.searchParams.set('cover', imageUrl);
-  //     if(author) ogUrl.searchParams.set('author', author);
-  //     finalImageUrl = ogUrl.toString();
-  // }
+  if (meta.isSeries) {
+      const ogUrl = new URL('/api/og-image-generator', url);
+      ogUrl.searchParams.set('title', title.replace('BigSolo – ', ''));
+      ogUrl.searchParams.set('cover', imageUrl);
+      if(author) ogUrl.searchParams.set('author', author);
+      finalImageUrl = ogUrl.toString();
+  }
 
   return `
     <title>${title}</title>
@@ -49,9 +49,9 @@ export async function onRequest(context) {
         return Response.redirect(newUrl.toString(), 301);
     }
     
-    // if (pathname.startsWith('/api/og-image-generator')) {
-    //     return next();
-    // }
+    if (pathname.startsWith('/api/og-image-generator')) {
+        return next();
+    }
 
     const staticPageMeta = {
         '': { title: 'BigSolo – Accueil', description: 'Retrouvez toutes les sorties de Big_herooooo en un seul et unique endroit !', htmlFile: '/index.html' },
