@@ -60,8 +60,7 @@ export async function onRequest(context) {
 
     const galleryPattern = /^\/galerie\/(\d+)\/?$/;
     if (galleryPattern.test(originalPathname)) {
-      // Le code de la galerie est complexe et reste inchangé.
-      // S'il devait être inclus, il serait ici.
+      // La logique de la galerie reste inchangée
     }
     
     const knownPrefixes = ['/css/', '/js/', '/img/', '/data/', '/includes/', '/functions/', '/api/', '/fonts/'];
@@ -77,27 +76,33 @@ export async function onRequest(context) {
                 const allSeriesDataPromises = seriesFiles.map(filename => 
                     env.ASSETS.fetch(new URL(`/data/series/${filename}`, url.origin))
                         .then(res => res.json())
-                        .then(data => ({ data, filename })) // On garde le nom du fichier avec ses données
+                        .then(data => ({ data, filename }))
                         .catch(e => { console.error(`Failed to load ${filename}`, e); return null; })
                 );
                 
                 const allSeriesResults = (await Promise.all(allSeriesDataPromises)).filter(Boolean);
-
                 const foundSeries = allSeriesResults.find(s => s && s.data && slugify(s.data.title) === seriesSlug);
 
                 if (foundSeries) {
                     const seriesData = foundSeries.data;
-                    const jsonFilename = foundSeries.filename; // On récupère le nom du fichier original ici
+                    const jsonFilename = foundSeries.filename;
                     
-                    // --- MODIFICATION CLÉ ---
-                    // On construit le nom de l'image à partir du nom du fichier JSON, pas du slug de l'URL.
+                    // --- DÉBUT DE LA CORRECTION ---
+                    // On reproduit ici la logique de fetchUtils.js pour créer la base64Url
+                    const rawGithubFileUrl = `${config.URL_RAW_JSON_GITHUB}${jsonFilename}`;
+                    const base64Url = seriesData.cubari_gist_id ? seriesData.cubari_gist_id : btoa(rawGithubFileUrl);
+                    
+                    // On ajoute la propriété manquante à l'objet seriesData
+                    seriesData.base64Url = base64Url;
+                    // --- FIN DE LA CORRECTION ---
+                    
                     const ogImageFilename = jsonFilename.replace('.json', '.png');
                     const ogImageUrl = new URL(`/img/banner/${ogImageFilename}`, url.origin).toString();
                     
                     let metaData = {
                         title: `${seriesData.title} - BigSolo`,
                         description: seriesData.description,
-                        image: ogImageUrl, // Utilise l'URL de l'image statique correctement nommée
+                        image: ogImageUrl,
                     };
                     let baseHtmlFile = '/series-detail.html';
                     
@@ -106,7 +111,6 @@ export async function onRequest(context) {
                         metaData.title = `Couvertures de ${seriesData.title} - BigSolo`;
                         metaData.description = `Découvrez toutes les couvertures de la série ${seriesData.title} !`;
                     }
-                    // La logique pour les épisodes peut être ajoutée ici si nécessaire
                     
                     const assetUrl = new URL(baseHtmlFile, url.origin);
                     const response = await env.ASSETS.fetch(assetUrl);
