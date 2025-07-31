@@ -71,6 +71,13 @@ body {
   line-height: 1.55;
 }
 
+/* --- AJOUT POUR LE LECTEUR --- */
+body#readerpage {
+  /* Empêche le scroll de la page principale quand le lecteur est ouvert */
+  overflow: hidden;
+}
+
+
 img {
   display: block;
   max-width: 100%;

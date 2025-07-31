@@ -2,8 +2,14 @@
 
 function slugify(text) {
   if (!text) return "";
-  return text.toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim()
-    .replace(/\s+/g, "_").replace(/[^\w-]+/g, "").replace(/--+/g, "_");
+  return text.toString()
+    .normalize("NFD")                 // Sépare les caractères de leurs accents (ex: "é" -> "e" + "´")
+    .replace(/[\u0300-\u036f]/g, "") // Supprime les accents et diacritiques
+    .toLowerCase()
+    .trim()
+    .replace(/[\s\u3000]+/g, "_")   // Remplace les espaces (normaux et idéographiques) par un underscore
+    .replace(/[^\w-]+/g, "")          // Supprime les caractères non autorisés
+    .replace(/--+/g, "_");            // Nettoie les tirets multiples (au cas où)
 }
 
 function generateMetaTags(meta) {
@@ -33,17 +39,28 @@ export async function onRequest(context) {
     const originalPathname = url.pathname;
     const pathname = originalPathname.endsWith('/') && originalPathname.length > 1 ? originalPathname.slice(0, -1) : originalPathname;
 
+    // Redirection legacy (si besoin)
     if (pathname.startsWith('/series-detail')) {
         const slugWithPotentialSubpaths = pathname.substring('/series-detail'.length);
         const newUrl = new URL(slugWithPotentialSubpaths, url.origin);
         return Response.redirect(newUrl.toString(), 301);
     }
 
+    // --- GESTION SPÉCIFIQUE DES URLS DE LA GALERIE ---
+    if (pathname.startsWith('/galerie')) {
+        const metaData = { title: 'Galerie - BigSolo', description: 'Découvrez toutes les colorisations et fan-arts de la communauté !', htmlFile: '/galerie.html' };
+        const assetUrl = new URL(metaData.htmlFile, url.origin);
+        const response = await env.ASSETS.fetch(assetUrl);
+        let html = await response.text();
+        const tags = generateMetaTags({ ...metaData, url: url.href });
+        html = html.replace('<!-- DYNAMIC_OG_TAGS_PLACEHOLDER -->', tags);
+        return new Response(html, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
+    }
+
+    // Gestion des pages statiques
     const staticPageMeta = {
         '': { title: 'Accueil - BigSolo', description: 'Retrouvez toutes les sorties de Big_herooooo en un seul et unique endroit !', htmlFile: '/index.html', image: '/img/banner.jpg' },
         '/index.html': { title: 'Accueil - BigSolo', description: 'Retrouvez toutes les sorties de Big_herooooo en un seul et unique endroit !', htmlFile: '/index.html', image: '/img/banner.jpg' },
-        '/galerie': { title: 'Galerie - BigSolo', description: 'Découvrez toutes les colorisations et fan-arts de la communauté !', htmlFile: '/galerie.html' },
-        '/galerie.html': { title: 'Galerie - BigSolo', description: 'Découvrez toutes les colorisations et fan-arts de la communauté !', htmlFile: '/galerie.html' },
         '/presentation': { title: 'Questions & Réponses - BigSolo', description: 'Les réponses de BigSolo à vos questions sur son parcours dans le scantrad.', htmlFile: '/presentation.html' },
         '/presentation.html': { title: 'Questions & Réponses - BigSolo', description: 'Les réponses de BigSolo à vos questions sur son parcours dans le scantrad.', htmlFile: '/presentation.html' },
     };
@@ -58,74 +75,97 @@ export async function onRequest(context) {
         return new Response(html, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
     }
 
-    const galleryPattern = /^\/galerie\/(\d+)\/?$/;
-    if (galleryPattern.test(originalPathname)) {
-      // Le code de la galerie est complexe et reste inchangé.
-      // S'il devait être inclus, il serait ici.
-    }
-    
+    // Ignorer les assets connus pour ne pas faire de traitement inutile
     const knownPrefixes = ['/css/', '/js/', '/img/', '/data/', '/includes/', '/functions/', '/api/', '/fonts/'];
-    if (!knownPrefixes.some(prefix => originalPathname.startsWith(prefix))) {
+    if (knownPrefixes.some(prefix => originalPathname.startsWith(prefix))) {
+        return next();
+    }
+
+    // --- LOGIQUE DE ROUTAGE DYNAMIQUE POUR LES SÉRIES ET LE LECTEUR ---
+    try {
         const pathSegments = originalPathname.split('/').filter(Boolean);
+        if (pathSegments.length === 0) return next(); // C'est la page d'accueil, déjà gérée
+
         const seriesSlug = pathSegments[0];
+        
+        // Charger la config et les données de toutes les séries une seule fois
+        const config = await env.ASSETS.fetch(new URL('/data/config.json', url.origin)).then(res => res.json());
+        const seriesFiles = config.LOCAL_SERIES_FILES || [];
+        const allSeriesDataPromises = seriesFiles.map(filename => 
+            env.ASSETS.fetch(new URL(`/data/series/${filename}`, url.origin))
+                .then(res => res.json().then(data => ({ data, filename })))
+                .catch(e => { console.error(`Failed to load ${filename}`, e); return null; })
+        );
+        const allSeriesResults = (await Promise.all(allSeriesDataPromises)).filter(Boolean);
+        const foundSeries = allSeriesResults.find(s => s && s.data && slugify(s.data.title) === seriesSlug);
 
-        if (seriesSlug) {
-            try {
-                const config = await env.ASSETS.fetch(new URL('/data/config.json', url.origin)).then(res => res.json());
-                const seriesFiles = config.LOCAL_SERIES_FILES || [];
+        if (!foundSeries) return next(); // Laisser Cloudflare Pages gérer la 404
 
-                const allSeriesDataPromises = seriesFiles.map(filename => 
-                    env.ASSETS.fetch(new URL(`/data/series/${filename}`, url.origin))
-                        .then(res => res.json())
-                        .then(data => ({ data, filename })) // On garde le nom du fichier avec ses données
-                        .catch(e => { console.error(`Failed to load ${filename}`, e); return null; })
-                );
+        const seriesData = foundSeries.data;
+        const jsonFilename = foundSeries.filename;
+        const ogImageFilename = jsonFilename.replace('.json', '.png');
+        const ogImageUrl = new URL(`/img/banner/${ogImageFilename}`, url.origin).toString();
+        
+        // ROUTE 1: LECTEUR DE CHAPITRE (ex: /nom-de-serie/123)
+        if (pathSegments.length === 2 && !isNaN(parseFloat(pathSegments[1])) && pathSegments[1] !== 'cover') {
+            const chapterNumber = pathSegments[1];
+            if (seriesData.chapters[chapterNumber]) {
+                const metaData = {
+                    title: `${seriesData.title} - Chapitre ${chapterNumber} | BigSolo`,
+                    description: `Lisez le chapitre ${chapterNumber} de ${seriesData.title}. ${seriesData.description}`,
+                    image: ogImageUrl,
+                };
                 
-                const allSeriesResults = (await Promise.all(allSeriesDataPromises)).filter(Boolean);
+                const assetUrl = new URL('/reader.html', url.origin);
+                let html = await env.ASSETS.fetch(assetUrl).then(res => res.text());
+                
+                const tags = generateMetaTags({ ...metaData, url: url.href });
+                html = html.replace('<!-- DYNAMIC_OG_TAGS_PLACEHOLDER -->', tags);
 
-                const foundSeries = allSeriesResults.find(s => s && s.data && slugify(s.data.title) === seriesSlug);
+                const readerPayload = { series: seriesData, chapterNumber: chapterNumber };
+                html = html.replace('<!-- READER_DATA_PLACEHOLDER -->', JSON.stringify(readerPayload));
 
-                if (foundSeries) {
-                    const seriesData = foundSeries.data;
-                    const jsonFilename = foundSeries.filename; // On récupère le nom du fichier original ici
-                    
-                    // --- MODIFICATION CLÉ ---
-                    // On construit le nom de l'image à partir du nom du fichier JSON, pas du slug de l'URL.
-                    const ogImageFilename = jsonFilename.replace('.json', '.png');
-                    const ogImageUrl = new URL(`/img/banner/${ogImageFilename}`, url.origin).toString();
-                    
-                    let metaData = {
-                        title: `${seriesData.title} - BigSolo`,
-                        description: seriesData.description,
-                        image: ogImageUrl, // Utilise l'URL de l'image statique correctement nommée
-                    };
-                    let baseHtmlFile = '/series-detail.html';
-                    
-                    if (pathSegments.length > 1 && pathSegments[1] === 'cover') {
-                        baseHtmlFile = '/series-covers.html';
-                        metaData.title = `Couvertures de ${seriesData.title} - BigSolo`;
-                        metaData.description = `Découvrez toutes les couvertures de la série ${seriesData.title} !`;
-                    }
-                    // La logique pour les épisodes peut être ajoutée ici si nécessaire
-                    
-                    const assetUrl = new URL(baseHtmlFile, url.origin);
-                    const response = await env.ASSETS.fetch(assetUrl);
-                    let html = await response.text();
-                    
-                    const tags = generateMetaTags({ ...metaData, url: url.href });
-                    html = html.replace('<!-- DYNAMIC_OG_TAGS_PLACEHOLDER -->', tags);
-                    
-                    if (baseHtmlFile === '/series-detail.html') {
-                        html = html.replace('<!-- SERIES_DATA_PLACEHOLDER -->', JSON.stringify(seriesData));
-                    }
-
-                    return new Response(html, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
-                }
-            } catch (error) {
-                console.error(`Error processing series slug "${seriesSlug}":`, error);
+                return new Response(html, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
             }
         }
+
+        // ROUTE 2: GALERIE DE COUVERTURES (ex: /nom-de-serie/cover)
+        if (pathSegments.length > 1 && pathSegments[1] === 'cover') {
+            const metaData = {
+                title: `Couvertures de ${seriesData.title} - BigSolo`,
+                description: `Découvrez toutes les couvertures de la série ${seriesData.title} !`,
+                image: ogImageUrl,
+            };
+            const assetUrl = new URL('/series-covers.html', url.origin);
+            let html = await env.ASSETS.fetch(assetUrl).then(res => res.text());
+            
+            const tags = generateMetaTags({ ...metaData, url: url.href });
+            html = html.replace('<!-- DYNAMIC_OG_TAGS_PLACEHOLDER -->', tags);
+            // Pas de données à injecter pour cette page, le JS s'en charge.
+            return new Response(html, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
+        }
+
+        // ROUTE 3: PAGE DE DÉTAIL DE LA SÉRIE (ex: /nom-de-serie)
+        if (pathSegments.length === 1) {
+            const metaData = {
+                title: `${seriesData.title} - BigSolo`,
+                description: seriesData.description,
+                image: ogImageUrl,
+            };
+            const assetUrl = new URL('/series-detail.html', url.origin);
+            let html = await env.ASSETS.fetch(assetUrl).then(res => res.text());
+            
+            const tags = generateMetaTags({ ...metaData, url: url.href });
+            html = html.replace('<!-- DYNAMIC_OG_TAGS_PLACEHOLDER -->', tags);
+            html = html.replace('<!-- SERIES_DATA_PLACEHOLDER -->', JSON.stringify(seriesData));
+
+            return new Response(html, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
+        }
+
+    } catch (error) {
+        console.error(`Error during dynamic routing for "${originalPathname}":`, error);
     }
 
+    // Si aucune route ne correspond, on passe la main
     return next();
 }

@@ -52,11 +52,9 @@ async function initCommonComponents() {
 
 async function routeAndInitPage() {
   const path = window.location.pathname;
-  const bodyId = document.body.id; // L'ID du body est la méthode de routage la plus fiable
+  const bodyId = document.body.id;
   console.log(`Routing for path: "${path}", bodyId: "${bodyId}"`);
 
-  // Le routage se base maintenant principalement sur bodyId, qui est défini dans le fichier HTML servi
-  // par le middleware. C'est plus robuste que de parser l'URL qui est maintenant dynamique.
   switch (bodyId) {
     case 'homepage':
       console.log("Initializing homepage.");
@@ -90,12 +88,17 @@ async function routeAndInitPage() {
       console.log("Initializing series detail page.");
       const { initSeriesDetailPage } = await import('./pages/series-detail.js');
       await initSeriesDetailPage();
-      // L'observer est appelé à l'intérieur de la logique de rendu, pas besoin de l'appeler ici
+      break;
+
+    case 'readerpage':
+      console.log("Initializing Manga Reader page.");
+      const { initMangaReader } = await import('./pages/series-detail/MangaReader.js');
+      await initMangaReader();
+      // Pas de scroll observer ici car le lecteur gère son propre affichage.
       break;
 
     default:
       console.log('Aucune logique JS spécifique pour cet ID de body ou route non reconnue:', bodyId, path);
-      // Fallback au cas où une page n'a pas d'ID mais a des éléments à animer
       initMainScrollObserver();
       break;
   }

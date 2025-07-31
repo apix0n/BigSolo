@@ -434,6 +434,10 @@
 			"title": "L'amour d'une mère",
 			"volume": "4",
 			"last_updated": "1662940800",
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t04-9782384963904/",
+				"02/07/2025"
+			],
 			"groups": {
 				"Big_herooooo": "/proxy/api/imgchest/chapter/9rydmwvo6yk"
 			}
@@ -442,6 +446,10 @@
 			"title": "Un groupe d'étude à six",
 			"volume": "4",
 			"last_updated": "1662940800",
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t04-9782384963904/",
+				"02/07/2025"
+			],
 			"groups": {
 				"Big_herooooo": "/proxy/api/imgchest/chapter/ej7mwxgrayd"
 			}
@@ -450,6 +458,10 @@
 			"title": "De l'autre coté du rideau",
 			"volume": "4",
 			"last_updated": "1673481600",
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t04-9782384963904/",
+				"02/07/2025"
+			],
 			"groups": {
 				"Big_herooooo": "/proxy/api/imgchest/chapter/ne7bdm8dj45"
 			}
@@ -458,6 +470,10 @@
 			"title": "Soucis de juillet",
 			"volume": "4",
 			"last_updated": "1674345600",
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t04-9782384963904/",
+				"02/07/2025"
+			],
 			"groups": {
 				"Big_herooooo": "/proxy/api/imgchest/chapter/md7own6wr4p"
 			}
@@ -467,6 +483,10 @@
 			"volume": "4",
 			"last_updated": "1682726400",
 			"collab": "BlueSolo",
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t04-9782384963904/",
+				"02/07/2025"
+			],
 			"groups": {
 				"Big_herooooo": "/proxy/api/imgchest/chapter/wl7lgvegqyx"
 			}
@@ -476,6 +496,10 @@
 			"volume": "4",
 			"last_updated": "1682726400",
 			"collab": "BlueSolo",
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t04-9782384963904/",
+				"02/07/2025"
+			],
 			"groups": {
 				"Big_herooooo": "/proxy/api/imgchest/chapter/vj4jkarkx78"
 			}
@@ -485,6 +509,10 @@
 			"volume": "4",
 			"last_updated": "1682726400",
 			"collab": "BlueSolo",
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t04-9782384963904/",
+				"02/07/2025"
+			],
 			"groups": {
 				"Big_herooooo": "/proxy/api/imgchest/chapter/ljyqxlnxn42"
 			}
@@ -494,6 +522,10 @@
 			"volume": "4",
 			"last_updated": "1682726400",
 			"collab": "BlueSolo",
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t04-9782384963904/",
+				"02/07/2025"
+			],
 			"groups": {
 				"Big_herooooo": "/proxy/api/imgchest/chapter/ej7mwxglnyd"
 			}
@@ -1610,6 +1642,14 @@
 				"Big_herooooo": "/proxy/api/imgchest/chapter/m9yx86mgk7q"
 			}
 		},
+		"159": {
+			"title": "Découverte",
+			"volume": "",
+			"last_updated": "1753909200",
+			"groups": {
+				"Big_herooooo": "/proxy/api/imgchest/chapter/bp455abdn45"
+			}
+		},
 		"2.5": {
 			"title": "La Cliente Régulière",
 			"volume": "",
@@ -1670,6 +1710,10 @@
 			"title": "Subaru veut lui dire",
 			"volume": "4",
 			"last_updated": "1707868800",
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t04-9782384963904/",
+				"02/07/2025"
+			],
 			"groups": {
 				"Big_herooooo": "/proxy/api/imgchest/chapter/5xy2a9wa97l"
 			}
@@ -1686,6 +1730,10 @@
 			"title": "Extra volume 4",
 			"volume": "4",
 			"last_updated": "1707868800",
+			"licencied": [
+				"https://www.nobi-nobi.fr/livre/bloom-t04-9782384963904/",
+				"02/07/2025"
+			],
 			"groups": {
 				"Big_herooooo": "/proxy/api/imgchest/chapter/6eyr9jpmgyp"
 			}

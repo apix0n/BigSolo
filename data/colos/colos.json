@@ -1153,5 +1153,27 @@
         "instagram": "https://www.instagram.com/p/DMlWbHVNODT/?igsh=aThqc25ieDB2bnhi",
         "tiktok": null,
         "reddit": null
+    },
+    {
+        "id": 110,
+        "author_id": "907607995452653618",
+        "chapitre": 100.0,
+        "page": 19,
+        "date": "2025-07-29 00:00:00",
+        "twitter": "https://x.com/carla_tssr/status/1950212204231373136?s=46",
+        "instagram": "https://www.instagram.com/p/DMsj0Z2tpCX/?igsh=Z2dzM3F4ZjhqN3dr",
+        "tiktok": null,
+        "reddit": null
+    },
+    {
+        "id": 111,
+        "author_id": "907607995452653618",
+        "chapitre": 137.0,
+        "page": 20,
+        "date": "2025-07-29 00:00:00",
+        "twitter": "https://x.com/carla_tssr/status/1950293634731167843?s=46",
+        "instagram": "https://www.instagram.com/p/DMtHy2etjJP/?igsh=MXRoaGFxZ3VkdTI0cA==",
+        "tiktok": "https://vm.tiktok.com/ZNdHHoe1m/",
+        "reddit": null
     }
 ]

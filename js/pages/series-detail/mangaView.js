@@ -52,19 +52,20 @@ function renderReadingActions(seriesData, seriesSlug) {
         }
     }
 
-    const lastChapterUrl = `https://cubari.moe/read/gist/${seriesData.base64Url}/${String(lastChapter).replaceAll(".", "-")}/1/`;
-    const nextChapterUrl = nextChapter ? `https://cubari.moe/read/gist/${seriesData.base64Url}/${String(nextChapter).replaceAll(".", "-")}/1/` : null;
+    // MODIFIÉ : Liens internes pour les boutons
+    const lastChapterUrl = `/${seriesSlug}/${String(lastChapter).replaceAll(".", "-")}`;
+    const nextChapterUrl = nextChapter ? `/${seriesSlug}/${String(nextChapter).replaceAll(".", "-")}` : null;
 
     let buttonsHtml = '';
     
     if (nextChapterUrl) {
-        buttonsHtml += `<a href="${nextChapterUrl}" target="_blank" class="reading-action-button continue" rel="noopener noreferrer"><i class="fas fa-play"></i> Continuer (Ch. ${nextChapter})</a>`;
+        buttonsHtml += `<a href="${nextChapterUrl}" class="reading-action-button continue"><i class="fas fa-play"></i> Continuer (Ch. ${nextChapter})</a>`;
     } else if (lastReadChapter && lastReadChapter === lastChapter) {
         buttonsHtml += `<span class="reading-action-button disabled"><i class="fas fa-check"></i> À jour</span>`;
     }
 
     if (!lastReadChapter || lastReadChapter !== lastChapter) {
-         buttonsHtml += `<a href="${lastChapterUrl}" target="_blank" class="reading-action-button start" rel="noopener noreferrer"><i class="fas fa-fast-forward"></i> Dernier Chapitre (Ch. ${lastChapter})</a>`;
+         buttonsHtml += `<a href="${lastChapterUrl}" class="reading-action-button start"><i class="fas fa-fast-forward"></i> Dernier Chapitre (Ch. ${lastChapter})</a>`;
     }
 
     container.innerHTML = buttonsHtml;
@@ -80,9 +81,10 @@ function renderChaptersListForVolume(chaptersToRender, seriesSlug, series) {
       let viewsHtml = '';
   
       if (!isLicensed && c.groups && c.groups.Big_herooooo) {
-        const chapterNumberForLink = String(c.chapter).replaceAll(".", "-");
-        href = `https://cubari.moe/read/gist/${series.base64Url}/${chapterNumberForLink}/1/`;
-
+        // --- MODIFICATION PRINCIPALE ICI ---
+        // Le lien pointe maintenant vers le lecteur interne
+        href = `/${seriesSlug}/${String(c.chapter).replaceAll(".", "-")}`;
+        
         if (c.groups.Big_herooooo.includes('/proxy/api/imgchest/chapter/')) {
           const parts = c.groups.Big_herooooo.split('/');
           const imgchestPostId = parts[parts.length - 1];
@@ -91,8 +93,9 @@ function renderChaptersListForVolume(chaptersToRender, seriesSlug, series) {
       }
       const collabHtml = c.collab ? `<span class="detail-chapter-collab">${c.collab}</span>` : '';
       
+      // On retire target="_blank" pour que le lien s'ouvre dans le même onglet
       return `
-        <a ${href ? `href="${href}" target="_blank"` : ''} class="${chapterClass}" rel="noopener noreferrer" data-chapter-number="${c.chapter}">
+        <a ${href ? `href="${href}"` : ''} class="${chapterClass}" data-chapter-number="${c.chapter}">
           <div class="chapter-main-info">
             <span class="detail-chapter-number">Chapitre ${c.chapter}</span>
             <span class="detail-chapter-title">${c.title || 'Titre inconnu'}</span>
@@ -142,20 +145,16 @@ function displayGroupedChapters(seriesData, seriesSlug) {
         const isAHorsSerie = a === 'hors_serie';
         const isBHorsSerie = b === 'hors_serie';
         
-        // --- LOGIQUE DE TRI MISE À JOUR ---
         if (isAHorsSerie || isBHorsSerie) {
             if (isAHorsSerie && !isBHorsSerie) {
-                // Si a est "hors_serie" : le mettre en premier si desc, en dernier si asc
                 return currentVolumeSortOrder === 'desc' ? -1 : 1;
             }
             if (!isAHorsSerie && isBHorsSerie) {
-                // Si b est "hors_serie" : le mettre en premier si desc, en dernier si asc
                 return currentVolumeSortOrder === 'desc' ? 1 : -1;
             }
-            return 0; // Les deux sont "hors_serie", pas de changement
+            return 0;
         }
         
-        // Tri numérique normal pour les volumes
         const numA = parseFloat(String(a).replace(',', '.'));
         const numB = parseFloat(String(b).replace(',', '.'));
         return currentVolumeSortOrder === 'desc' ? numB - numA : numA - numB;

@@ -14,15 +14,15 @@ function truncateText(text, maxLength) {
 
 function renderChapterCard(chapter) {
   if (!chapter || !chapter.url || !chapter.serieCover || !chapter.serieTitle || !chapter.title || !chapter.chapter || typeof chapter.last_updated_ts === 'undefined') return '';
-  
+
   const chapterImageUrl = chapter.serieCover
     ? (chapter.serieCover.includes('comick.pictures')
-        ? `${chapter.serieCover.slice(0, -4)}-m.jpg`
-        : chapter.serieCover)
+      ? `${chapter.serieCover.slice(0, -4)}-m.jpg`
+      : chapter.serieCover)
     : 'img/placeholder_preview.png';
 
   return `
-    <a href="${chapter.url}" target="_blank" class="chapter-card" rel="noopener noreferrer">
+    <a href="${chapter.url}" class="chapter-card">
       <div class="chapter-cover">
         <img src="${chapterImageUrl}" 
              alt="${chapter.serieTitle} – Cover" loading="lazy">
@@ -39,13 +39,15 @@ function renderChapterCard(chapter) {
 
 function renderSeriesCard(series) {
   if (!series || !series.chapters || !series.title || !series.cover) return '';
-  
+
+  const seriesSlug = slugify(series.title);
+
   const chaptersArray = Object.entries(series.chapters)
     .map(([chapNum, chapData]) => ({
       chapter: chapNum,
       ...chapData,
       last_updated_ts: parseDateToTimestamp(chapData.last_updated || 0),
-      url: chapData.groups && chapData.groups.Big_herooooo !== '' ? `https://cubari.moe/read/gist/${series.base64Url}/${chapNum.replaceAll(".", "-")}/1/` : null
+      url: chapData.groups && chapData.groups.Big_herooooo !== '' ? `/${seriesSlug}/${String(chapNum).replaceAll(".", "-")}` : null
     }))
     .filter(chap => chap.url)
     .sort((a, b) => b.last_updated_ts - a.last_updated_ts);
@@ -56,28 +58,30 @@ function renderSeriesCard(series) {
     const chapterTitleMobile = latestChap.title || 'Titre inconnu';
     const truncatedTitleMobile = truncateText(chapterTitleMobile, 25);
 
+    // CORRECTION : La carte mobile est maintenant une balise <a>
     latestChapterAsButton = `
       <div class="series-latest-chapters-container-mobile">
-        <div class="series-chapter-item" ${latestChap.url ? `onclick="event.stopPropagation(); window.open('${latestChap.url}', '_blank')"` : ''}>
+        <a href="${latestChap.url}" class="series-chapter-item">
           <div class="series-chapter-item-main-info-mobile">
             <span class="chapter-number-small">Ch. ${latestChap.chapter}</span>
             <span class="chapter-title-small" title="${chapterTitleMobile}">${truncatedTitleMobile}</span>
           </div>
           <span class="chapter-date-small-mobile">${timeAgo(latestChap.last_updated_ts)}</span>
-        </div>
+        </a>
       </div>`;
 
+    // CORRECTION : Les chapitres desktop sont maintenant des balises <a>
     latestThreeChaptersHtml = `
       <div class="series-latest-chapters-container-desktop">
         ${chaptersArray.slice(0, 3).map(chap => {
       const chapterTitleDesktop = chap.title || 'Titre inconnu';
       const truncatedTitleDesktop = truncateText(chapterTitleDesktop, 30);
       return `
-            <div class="series-chapter-item-desktop" ${chap.url ? `onclick="event.stopPropagation(); window.open('${chap.url}', '_blank')"` : ''}>
+            <a href="${chap.url}" class="series-chapter-item-desktop">
               <span class="chapter-number-desktop">Ch. ${chap.chapter}</span>
               <span class="chapter-title-desktop" title="${chapterTitleDesktop}">${truncatedTitleDesktop}</span>
               <span class="chapter-date-desktop">${timeAgo(chap.last_updated_ts)}</span>
-            </div>`;
+            </a>`;
     }).join('')}
       </div>`;
   }
@@ -95,17 +99,17 @@ function renderSeriesCard(series) {
     tagsHtml = `<div class="tags series-tags">${series.tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>`;
   }
 
-  const seriesSlug = slugify(series.title);
   const detailPageUrl = `/${seriesSlug}`;
 
   const imageUrl = series.cover
     ? (series.cover.includes('comick.pictures')
-        ? `${series.cover.slice(0, -4)}-s.jpg`
-        : series.cover)
+      ? `${series.cover.slice(0, -4)}-s.jpg`
+      : series.cover)
     : 'img/placeholder_preview.png';
 
+  // CORRECTION : La carte principale est une <div> avec un data-url.
   return `
-    <a href="${detailPageUrl}" class="series-card">
+    <div class="series-card" data-url="${detailPageUrl}">
       <div class="series-cover">
         <img src="${imageUrl}" 
              alt="${series.title} – Cover" loading="lazy">
@@ -118,8 +122,27 @@ function renderSeriesCard(series) {
         ${latestChapterAsButton}
         ${latestThreeChaptersHtml}
       </div>
-    </a>`;
+    </div>`;
 }
+
+// CORRECTION : Nouvelle fonction pour rendre les cartes cliquables
+function makeSeriesCardsClickable() {
+  qsa('.series-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      // Si l'utilisateur clique sur un lien de chapitre (maintenant une balise <a>), on ne fait rien.
+      // Le navigateur suivra le lien du chapitre normalement.
+      if (e.target.closest('.series-chapter-item, .series-chapter-item-desktop')) {
+        return;
+      }
+      // Sinon, on navigue vers la page de détail de la série.
+      const url = card.dataset.url;
+      if (url) {
+        window.location.href = url;
+      }
+    });
+  });
+}
+
 
 export async function initHomepage() {
   const latestContainer = qs(".latest-chapters");
@@ -159,8 +182,9 @@ export async function initHomepage() {
 
     if (latestContainer) {
       const allChaptersForHomepage = allSeries.filter(s => s && s.chapters)
-        .flatMap(s =>
-          Object.entries(s.chapters).map(([cn, cd]) => {
+        .flatMap(s => {
+          const seriesSlug = slugify(s.title);
+          return Object.entries(s.chapters).map(([cn, cd]) => {
             if (typeof cd === 'object' && cd !== null && cd.groups && cd.groups.Big_herooooo !== '') {
               return {
                 ...cd,
@@ -168,12 +192,12 @@ export async function initHomepage() {
                 serieCover: s.cover,
                 chapter: cn,
                 last_updated_ts: parseDateToTimestamp(cd.last_updated || 0),
-                url: `https://cubari.moe/read/gist/${s.base64Url}/${cn.replaceAll(".", "-")}/1/`
+                url: `/${seriesSlug}/${String(cn).replaceAll(".", "-")}`
               };
             }
             return null;
-          })
-        )
+          });
+        })
         .filter(Boolean)
         .sort((a, b) => b.last_updated_ts - a.last_updated_ts)
         .slice(0, 15);
@@ -191,6 +215,9 @@ export async function initHomepage() {
         if (nextBtn) nextBtn.style.display = 'none';
       }
     }
+
+    // CORRECTION : On appelle la nouvelle fonction après avoir généré le HTML.
+    makeSeriesCardsClickable();
 
   } catch (error) {
     console.error("🚨 Erreur lors de l'initialisation de la page d'accueil:", error);

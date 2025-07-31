@@ -1,16 +1,17 @@
 import os
 import sys
 
-def generer_resume_repertoire(chemin_racine, fichier_sortie, fichiers_a_ignorer, extensions_a_ignorer, dossiers_a_ignorer):
+def generer_resume_repertoire(chemin_racine, fichier_sortie, fichiers_a_ignorer, extensions_a_ignorer, dossiers_a_ignorer, extensions_polices):
     """
-    Parcourt un répertoire de manière récursive et écrit sa structure ainsi que
-    le contenu de chaque fichier, en ignorant certains éléments.
+    Parcourt un répertoire, écrit sa structure et le contenu des fichiers,
+    mais écrit uniquement le nom des fichiers de police.
 
     :param chemin_racine: Le chemin du répertoire à analyser.
     :param fichier_sortie: Le nom du fichier texte où enregistrer le résumé.
     :param fichiers_a_ignorer: Une liste de noms de fichiers à ignorer.
     :param extensions_a_ignorer: Un tuple d'extensions de fichiers à ignorer.
     :param dossiers_a_ignorer: Une liste de noms de dossiers à ignorer.
+    :param extensions_polices: Un tuple d'extensions de polices à traiter différemment.
     """
     try:
         with open(fichier_sortie, 'w', encoding='utf-8') as f_out:
@@ -25,10 +26,7 @@ def generer_resume_repertoire(chemin_racine, fichier_sortie, fichiers_a_ignorer,
                 return
 
             for dossier_actuel, sous_dossiers, fichiers in os.walk(chemin_racine):
-                # --- MODIFICATION CLÉ ---
-                # Exclut les dossiers spécifiés.
-                # On modifie la liste `sous_dossiers` en place pour que os.walk
-                # ne les parcoure pas du tout. C'est très efficace.
+                # Exclut les dossiers spécifiés pour que os.walk ne les parcoure pas.
                 sous_dossiers[:] = [d for d in sous_dossiers if d not in dossiers_a_ignorer]
 
                 profondeur = dossier_actuel.replace(chemin_racine, '').count(os.sep)
@@ -40,7 +38,6 @@ def generer_resume_repertoire(chemin_racine, fichier_sortie, fichiers_a_ignorer,
 
                 indentation_fichier = ' ' * 4 * (profondeur + 1)
                 
-                # Trie les fichiers pour un ordre cohérent
                 fichiers.sort()
 
                 for nom_fichier in fichiers:
@@ -52,18 +49,25 @@ def generer_resume_repertoire(chemin_racine, fichier_sortie, fichiers_a_ignorer,
 
                     chemin_complet_fichier = os.path.join(dossier_actuel, nom_fichier)
                     
-                    f_out.write(f"\n{indentation_fichier}Fichier : {nom_fichier}\n")
-                    f_out.write(f"{indentation_fichier}{'-' * (len(nom_fichier) + 10)}\n")
-                    
-                    try:
-                        with open(chemin_complet_fichier, 'r', encoding='utf-8', errors='ignore') as f_in:
-                            contenu = f_in.read()
-                            for ligne in contenu.splitlines():
-                                f_out.write(f"{indentation_fichier}  {ligne}\n")
-                    except Exception as e:
-                        f_out.write(f"{indentation_fichier}  --> ERREUR : Impossible de lire le contenu. Raison : {e}\n")
-                    
-                    f_out.write(f"{indentation_fichier}{'-' * (len(nom_fichier) + 10)}\n\n")
+                    # --- MODIFICATION CLÉ ---
+                    # Vérifie si le fichier est une police d'écriture.
+                    if nom_fichier.lower().endswith(extensions_polices):
+                        # Si c'est une police, n'écrit que son nom et passe au suivant.
+                        f_out.write(f"\n{indentation_fichier}Fichier (police) : {nom_fichier}\n")
+                    else:
+                        # Sinon, traite le fichier normalement en écrivant son contenu.
+                        f_out.write(f"\n{indentation_fichier}Fichier : {nom_fichier}\n")
+                        f_out.write(f"{indentation_fichier}{'-' * (len(nom_fichier) + 10)}\n")
+                        
+                        try:
+                            with open(chemin_complet_fichier, 'r', encoding='utf-8', errors='ignore') as f_in:
+                                contenu = f_in.read()
+                                for ligne in contenu.splitlines():
+                                    f_out.write(f"{indentation_fichier}  {ligne}\n")
+                        except Exception as e:
+                            f_out.write(f"{indentation_fichier}  --> ERREUR : Impossible de lire le contenu. Raison : {e}\n")
+                        
+                        f_out.write(f"{indentation_fichier}{'-' * (len(nom_fichier) + 10)}\n\n")
 
         print(f"\nRésumé terminé ! Le fichier '{fichier_sortie}' a été créé avec succès.")
 
@@ -80,11 +84,22 @@ if __name__ == "__main__":
     
     # Listes d'éléments à ignorer
     fichiers_ignores = [nom_du_fichier_resume, "summary.py"]
-    extensions_ignorees = ('.jpg', '.jpeg', '.png', '.gif', '.svg', '.ico', '.webp')
+    extensions_binaires_ignorees = ('.jpg', '.jpeg', '.png', '.gif', '.svg', '.ico', '.webp')
     
     # --- AJOUT IMPORTANT ---
     # Liste des dossiers à ignorer complètement
-    dossiers_ignores = ['.git', '__pycache__', 'node_modules', 'venv', '.vscode']
+    dossiers_ignores = ['.git', '__pycache__', 'node_modules', '.wrangler', 'venv', '.vscode']
+    
+    # --- NOUVEAU ---
+    # Liste des extensions de polices à traiter spécifiquement
+    extensions_de_polices = ('.ttf', '.otf', '.woff', '.woff2')
     
     # Appelle la fonction principale pour générer le résumé
-    generer_resume_repertoire(chemin_du_projet, nom_du_fichier_resume, fichiers_ignores, extensions_ignorees, dossiers_ignores)
+    generer_resume_repertoire(
+        chemin_du_projet, 
+        nom_du_fichier_resume, 
+        fichiers_ignores, 
+        extensions_binaires_ignorees, 
+        dossiers_ignores,
+        extensions_de_polices  # Nouvel argument
+    )

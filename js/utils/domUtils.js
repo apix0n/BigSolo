@@ -29,8 +29,14 @@ export async function loadComponent(placeholder, url) {
  */
 export function slugify(text) {
   if (!text) return "";
-  return text.toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim()
-    .replace(/\s+/g, "_").replace(/[^\w-]+/g, "").replace(/--+/g, "_");
+  return text.toString()
+    .normalize("NFD")                 // Sépare les caractères de leurs accents (ex: "é" -> "e" + "´")
+    .replace(/[\u0300-\u036f]/g, "") // Supprime les accents et diacritiques
+    .toLowerCase()
+    .trim()
+    .replace(/[\s\u3000]+/g, "_")   // Remplace les espaces (normaux et idéographiques) par un underscore
+    .replace(/[^\w-]+/g, "")          // Supprime les caractères non autorisés
+    .replace(/--+/g, "_");            // Nettoie les tirets multiples
 }
 
 /**
