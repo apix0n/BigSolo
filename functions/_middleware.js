@@ -1,24 +1,24 @@
 // functions/_middleware.js
 
 function slugify(text) {
-  if (!text) return "";
-  return text.toString()
-    .normalize("NFD")                 // Sépare les caractères de leurs accents (ex: "é" -> "e" + "´")
-    .replace(/[\u0300-\u036f]/g, "") // Supprime les accents et diacritiques
-    .toLowerCase()
-    .trim()
-    .replace(/[\s\u3000]+/g, "_")   // Remplace les espaces (normaux et idéographiques) par un underscore
-    .replace(/[^\w-]+/g, "")          // Supprime les caractères non autorisés
-    .replace(/--+/g, "_");            // Nettoie les tirets multiples (au cas où)
+    if (!text) return "";
+    return text.toString()
+        .normalize("NFD")                 // Sépare les caractères de leurs accents (ex: "é" -> "e" + "´")
+        .replace(/[\u0300-\u036f]/g, "") // Supprime les accents et diacritiques
+        .toLowerCase()
+        .trim()
+        .replace(/[\s\u3000]+/g, "_")   // Remplace les espaces (normaux et idéographiques) par un underscore
+        .replace(/[^\w-]+/g, "")          // Supprime les caractères non autorisés
+        .replace(/--+/g, "_");            // Nettoie les tirets multiples (au cas où)
 }
 
 function generateMetaTags(meta) {
-  const title = meta.title || 'BigSolo';
-  const description = meta.description || 'Retrouvez toutes les sorties de Big_herooooo en un seul et unique endroit !';
-  const imageUrl = meta.image || new URL('/img/banner.jpg', meta.url).toString();
-  const url = meta.url || 'https://bigsolo.org';
+    const title = meta.title || 'BigSolo';
+    const description = meta.description || 'Retrouvez toutes les sorties de Big_herooooo en un seul et unique endroit !';
+    const imageUrl = meta.image || new URL('/img/banner.jpg', meta.url).toString();
+    const url = meta.url || 'https://bigsolo.org';
 
-  return `
+    return `
     <title>${title}</title>
     <meta name="description" content="${description}">
     <meta property="og:title" content="${title}" />
@@ -87,11 +87,11 @@ export async function onRequest(context) {
         if (pathSegments.length === 0) return next(); // C'est la page d'accueil, déjà gérée
 
         const seriesSlug = pathSegments[0];
-        
+
         // Charger la config et les données de toutes les séries une seule fois
         const config = await env.ASSETS.fetch(new URL('/data/config.json', url.origin)).then(res => res.json());
         const seriesFiles = config.LOCAL_SERIES_FILES || [];
-        const allSeriesDataPromises = seriesFiles.map(filename => 
+        const allSeriesDataPromises = seriesFiles.map(filename =>
             env.ASSETS.fetch(new URL(`/data/series/${filename}`, url.origin))
                 .then(res => res.json().then(data => ({ data, filename })))
                 .catch(e => { console.error(`Failed to load ${filename}`, e); return null; })
@@ -105,9 +105,11 @@ export async function onRequest(context) {
         const jsonFilename = foundSeries.filename;
         const ogImageFilename = jsonFilename.replace('.json', '.png');
         const ogImageUrl = new URL(`/img/banner/${ogImageFilename}`, url.origin).toString();
-        
-        // ROUTE 1: LECTEUR DE CHAPITRE (ex: /nom-de-serie/123)
-        if (pathSegments.length === 2 && !isNaN(parseFloat(pathSegments[1])) && pathSegments[1] !== 'cover') {
+
+        // ROUTE 1: LECTEUR DE CHAPITRE (ex: /nom-de-serie/123 ou /nom-de-serie/123/5)
+        const isChapterRoute = (pathSegments.length === 2 || pathSegments.length === 3) && !isNaN(parseFloat(pathSegments[1]));
+
+        if (isChapterRoute) {
             const chapterNumber = pathSegments[1];
             if (seriesData.chapters[chapterNumber]) {
                 const metaData = {
@@ -115,10 +117,10 @@ export async function onRequest(context) {
                     description: `Lisez le chapitre ${chapterNumber} de ${seriesData.title}. ${seriesData.description}`,
                     image: ogImageUrl,
                 };
-                
+
                 const assetUrl = new URL('/reader.html', url.origin);
                 let html = await env.ASSETS.fetch(assetUrl).then(res => res.text());
-                
+
                 const tags = generateMetaTags({ ...metaData, url: url.href });
                 html = html.replace('<!-- DYNAMIC_OG_TAGS_PLACEHOLDER -->', tags);
 
@@ -138,7 +140,7 @@ export async function onRequest(context) {
             };
             const assetUrl = new URL('/series-covers.html', url.origin);
             let html = await env.ASSETS.fetch(assetUrl).then(res => res.text());
-            
+
             const tags = generateMetaTags({ ...metaData, url: url.href });
             html = html.replace('<!-- DYNAMIC_OG_TAGS_PLACEHOLDER -->', tags);
             // Pas de données à injecter pour cette page, le JS s'en charge.
@@ -154,7 +156,7 @@ export async function onRequest(context) {
             };
             const assetUrl = new URL('/series-detail.html', url.origin);
             let html = await env.ASSETS.fetch(assetUrl).then(res => res.text());
-            
+
             const tags = generateMetaTags({ ...metaData, url: url.href });
             html = html.replace('<!-- DYNAMIC_OG_TAGS_PLACEHOLDER -->', tags);
             html = html.replace('<!-- SERIES_DATA_PLACEHOLDER -->', JSON.stringify(seriesData));

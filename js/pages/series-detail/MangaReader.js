@@ -22,6 +22,7 @@ let state = {
 let dom = {};
 let domImages = [];
 let scrollTimeout = null;
+let urlUpdateTimeout = null;
 
 function truncateText(text, maxLength) {
     if (!text || text.length <= maxLength) return text;
@@ -43,37 +44,61 @@ export async function initMangaReader() {
 
         document.title = `${state.seriesData.title} - Ch. ${state.currentChapter.number} | BigSolo`;
 
-        // --- CORRECTION ET AMÉLIORATION : Logique des réglages par défaut ---
         const savedSettingsExist = localStorage.getItem('bigsolo_reader_settings_v5');
-
-        // 1. On charge toujours les réglages sauvegardés s'ils existent
         loadSettings();
-
-        // 2. Si AUCUN réglage n'existe (première visite), on applique les défauts selon l'appareil
         if (!savedSettingsExist) {
-            if (window.innerWidth > 992) { // Ordinateur
+            if (window.innerWidth > 992) {
                 state.settings.mode = 'single';
                 state.settings.fit = 'height';
                 state.settings.direction = 'ltr';
-            } else { // Mobile
+            } else {
                 state.settings.mode = 'webtoon';
                 state.settings.fit = 'width';
                 state.settings.direction = 'ltr';
             }
         }
-        // --- FIN DE LA CORRECTION ---
 
         await setupUI();
-        fetchAndLoadPages();
+        const initialPageNumber = getInitialPageNumberFromUrl();
+        fetchAndLoadPages(initialPageNumber);
         bindEvents();
-
-        if (window.location.hash === '#last') {
-            // Le positionnement se fera quand les images seront chargées
-        }
 
     } catch (error) {
         handleError(`Impossible de charger le lecteur: ${error.message}`);
     }
+}
+
+function getInitialPageNumberFromUrl() {
+    if (window.location.hash === '#last') {
+        return 'last';
+    }
+    const pathSegments = window.location.pathname.split('/').filter(Boolean);
+    if (pathSegments.length === 3) {
+        const pageNumber = parseInt(pathSegments[2], 10);
+        if (!isNaN(pageNumber) && pageNumber > 0) {
+            return pageNumber;
+        }
+    }
+    return 1;
+}
+
+function updateUrlForCurrentPage() {
+    clearTimeout(urlUpdateTimeout);
+    urlUpdateTimeout = setTimeout(() => {
+        const seriesSlug = slugify(state.seriesData.title);
+        const chapterNumber = state.currentChapter.number;
+
+        const currentSpread = state.spreads[state.currentSpreadIndex];
+        if (!currentSpread || currentSpread.length === 0) return;
+
+        const firstPageIndexInSpread = currentSpread[0];
+        const pageNumberForUrl = firstPageIndexInSpread + 1;
+
+        const newPath = `/${seriesSlug}/${chapterNumber}/${pageNumberForUrl}`;
+        if (window.location.pathname !== newPath) {
+            history.replaceState({ page: pageNumberForUrl }, "", newPath);
+        }
+    }, 150);
 }
 
 function handleError(message) {
@@ -229,7 +254,7 @@ function setupSidebarControls() {
     updateActiveButtons();
 }
 
-async function fetchAndLoadPages() {
+async function fetchAndLoadPages(initialPageNumber = 1) {
     const loadingMessage = `<p id="reader-loading-msg">Chargement des informations...</p>`;
     dom.viewerContainer.innerHTML = `<div class="reader-viewer">${loadingMessage}</div>`;
 
@@ -242,18 +267,28 @@ async function fetchAndLoadPages() {
         if (!Array.isArray(pagesData) || pagesData.length === 0) throw new Error("Aucune page retournée par l'API.");
         state.pages = pagesData.map(p => p.link);
 
-        // Initialiser avec des objets Image vides
         domImages = state.pages.map(src => {
             const img = new Image();
             img.addEventListener('contextmenu', e => e.preventDefault());
             return img;
         });
 
-        // Calculer les spreads et rendre la structure initiale
         calculateSpreads();
+
+        let finalInitialIndex = 0;
+        if (initialPageNumber === 'last') {
+            finalInitialIndex = state.spreads.length - 1;
+        } else if (typeof initialPageNumber === 'number' && initialPageNumber > 0) {
+            const pageIndex = initialPageNumber - 1;
+            const targetSpreadIndex = state.pageToSpreadMap[pageIndex];
+            if (targetSpreadIndex !== undefined) {
+                finalInitialIndex = targetSpreadIndex;
+            }
+        }
+        state.currentSpreadIndex = finalInitialIndex;
+
         render(true);
 
-        // Charger les images progressivement
         let loadedCount = 0;
         const loadingMsgElement = qs('#reader-loading-msg');
         if (loadingMsgElement) loadingMsgElement.textContent = `Chargement... (0 / ${domImages.length})`;
@@ -264,12 +299,12 @@ async function fetchAndLoadPages() {
                 if (loadingMsgElement) loadingMsgElement.textContent = `Chargement... (${loadedCount} / ${domImages.length})`;
                 if (loadedCount === domImages.length) {
                     loadingMsgElement?.remove();
-                    // Recalculer les spreads avec les dimensions réelles pour le mode double page
                     calculateSpreads();
-                    render(true); // Re-rendre avec les bonnes dimensions
-                    if (window.location.hash === '#last') {
-                        goToSpread(state.spreads.length - 1, true);
+                    if (typeof initialPageNumber === 'number') {
+                        finalInitialIndex = state.pageToSpreadMap[initialPageNumber - 1] ?? 0;
                     }
+                    render(true);
+                    goToSpread(finalInitialIndex, true);
                 }
             };
             img.onerror = () => {
@@ -282,7 +317,7 @@ async function fetchAndLoadPages() {
                     render(true);
                 }
             };
-            img.src = state.pages[index]; // Déclenche le chargement
+            img.src = state.pages[index];
         });
 
     } catch (error) {
@@ -345,7 +380,6 @@ function renderViewer() {
     if (isLandscapeSpread) viewer.classList.add('single-landscape-spread');
     if (state.settings.stretchSmallPages) viewer.classList.add('stretch');
 
-    // CORRECTION : Applique la classe au conteneur pour gérer l'overflow
     dom.viewerContainer.className = `reader-viewer-container ${state.settings.mode}-mode`;
     dom.viewerContainer.innerHTML = '';
 
@@ -410,10 +444,13 @@ function renderViewer() {
 
     dom.viewerContainer.appendChild(viewer);
 }
+
 function updateUIOnPageChange() {
     renderProgressBar();
     updateControlsState();
+    updateUrlForCurrentPage();
 }
+
 function renderProgressBar() {
     dom.progressBar.className = `reader-progress-bar ${state.settings.direction}-mode`;
     if (state.spreads.length === 0) return;
@@ -439,9 +476,16 @@ function updateMobileHeader() {
         dom.mobileChapterInfo.textContent = truncateText(chapterTitle, 25);
     }
     if (dom.mobilePageInfo) {
-        const pageNum = (state.settings.mode === 'webtoon' ? (state.spreads[state.currentSpreadIndex]?.[0] ?? 0) : state.currentSpreadIndex) + 1;
-        const totalPages = state.spreads.length;
-        dom.mobilePageInfo.textContent = `Pg. ${pageNum} / ${totalPages}`;
+        const currentSpread = state.spreads[state.currentSpreadIndex] || [];
+        const firstPageInSpread = currentSpread.length > 0 ? currentSpread[0] + 1 : 0;
+        const lastPageInSpread = currentSpread.length > 0 ? currentSpread[currentSpread.length - 1] + 1 : 0;
+
+        let pageText = `Pg. ${firstPageInSpread}`;
+        if (lastPageInSpread > firstPageInSpread) {
+            pageText += `-${lastPageInSpread}`;
+        }
+
+        dom.mobilePageInfo.textContent = `${pageText} / ${state.pages.length}`;
     }
 }
 
@@ -456,7 +500,6 @@ function updateActiveButtons() {
 
     const isWebtoon = state.settings.mode === 'webtoon';
     dom.modeOptionsGroup.classList.toggle('visible', !isWebtoon);
-    // NOUVEAU : Gère l'animation du sous-menu "double page"
     dom.modeOptionsGroup.classList.toggle('double-mode-active', state.settings.mode === 'double');
 
     dom.customFitControls.classList.toggle('visible', state.settings.fit === 'custom');
@@ -469,7 +512,6 @@ function goToPage(pageIndex, isInitializing = false) {
         if (targetImage) {
             const behavior = isInitializing ? 'auto' : 'smooth';
             targetImage.scrollIntoView({ behavior, block: 'start' });
-            // CORRECTION : Met à jour l'état manuellement car le scroll peut être asynchrone
             if (!isInitializing) {
                 state.currentSpreadIndex = pageIndex;
                 updateUIOnPageChange();
@@ -483,7 +525,6 @@ function goToPage(pageIndex, isInitializing = false) {
 function goToSpread(spreadIndex, isInitializing = false) {
     state.currentSpreadIndex = Math.max(0, Math.min(spreadIndex, state.spreads.length - 1));
 
-    // CORRECTION : Déclenche le scroll en mode webtoon
     if (state.settings.mode === 'webtoon') {
         const pageIndex = state.spreads[state.currentSpreadIndex]?.[0];
         if (pageIndex !== undefined && domImages[pageIndex]) {
@@ -497,7 +538,7 @@ function goToSpread(spreadIndex, isInitializing = false) {
 function changeSpread(delta) {
     const isLastSpread = state.currentSpreadIndex >= state.spreads.length - 1;
     if (delta > 0 && isLastSpread) navigateToChapter(1);
-    else if (delta < 0 && state.currentSpreadIndex === 0) navigateToChapter(-1);
+    else if (delta < 0 && state.currentSpreadIndex === 0) navigateToChapter(-1, true);
     else goToSpread(state.currentSpreadIndex + delta);
 }
 function navigateToChapter(delta, goToLastPage = false) {
@@ -528,6 +569,8 @@ function updateFitButton() {
     if (currentFit === 'custom') btn.innerHTML = `<i class="fas fa-ruler-combined"></i> Personnalisé`;
     else btn.innerHTML = `<i class="${icons[currentFit]}"></i> ${text[currentFit]}`;
 }
+
+// ↓↓↓ SECTION MODIFIÉE ↓↓↓
 function bindEvents() {
     document.addEventListener('keydown', handleKeyDown);
 
@@ -558,21 +601,38 @@ function bindEvents() {
             const group = button.closest('.setting-options');
             const setting = group.dataset.setting;
             const value = button.dataset.value;
-            state.settings[setting] = (value === 'true') ? true : (value === 'false' ? false : value);
 
-            if (setting === 'direction') {
-                dom.sidebar.classList.remove('ltr-mode', 'rtl-mode');
-                dom.sidebar.classList.add(`${value}-mode`);
-            }
-            if (setting === 'mode' || setting === 'doublePageOffset') {
+            // Logique pour conserver la page actuelle lors du changement de mode
+            if (setting === 'mode') {
+                const currentSpread = state.spreads[state.currentSpreadIndex];
+                const currentPageIndex = currentSpread ? currentSpread[0] : 0;
+
+                state.settings.mode = value;
                 calculateSpreads();
-                if (value === 'webtoon' && dom.viewerContainer.scrollTop > 0) {
-                    dom.viewerContainer.scrollTop = 0;
+
+                const newSpreadIndex = state.pageToSpreadMap[currentPageIndex];
+                if (newSpreadIndex !== undefined) {
+                    state.currentSpreadIndex = newSpreadIndex;
+                }
+            } else {
+                state.settings[setting] = (value === 'true') ? true : (value === 'false' ? false : value);
+                if (setting === 'direction') {
+                    dom.sidebar.classList.remove('ltr-mode', 'rtl-mode');
+                    dom.sidebar.classList.add(`${value}-mode`);
+                }
+                if (setting === 'doublePageOffset') {
+                    calculateSpreads();
                 }
             }
 
             saveSettings();
             render();
+
+            // Si le nouveau mode est webtoon, forcer le scroll vers la bonne page
+            if (setting === 'mode' && state.settings.mode === 'webtoon') {
+                // Utiliser 'true' pour un saut instantané (auto) au lieu d'un scroll doux
+                goToSpread(state.currentSpreadIndex, true);
+            }
         }
     });
 
@@ -584,7 +644,6 @@ function bindEvents() {
         else if (zone > 0.65) changeSpread(state.settings.direction === 'ltr' ? 1 : -1);
     });
 
-    // CORRECTION FINALE : L'écouteur est sur 'window' pour desktop et sur le conteneur pour mobile.
     const scrollTarget = window.innerWidth > 992 ? window : dom.viewerContainer;
     scrollTarget.addEventListener('scroll', handleWebtoonScroll, { passive: true });
 
@@ -615,6 +674,8 @@ function bindEvents() {
     dom.customHeightInput.value = state.settings.customMaxHeight;
     updateSliderStates();
 }
+// ↑↑↑ FIN DE LA SECTION MODIFIÉE ↑↑↑
+
 function handleKeyDown(e) {
     if (state.isModalOpen) return;
     const isLtr = state.settings.direction === 'ltr';
@@ -629,14 +690,12 @@ function handleWebtoonScroll() {
     }
 
     scrollTimeout = window.requestAnimationFrame(() => {
-        // CORRECTION : Le point de déclenchement est maintenant fixe par rapport à la fenêtre (viewport)
         const triggerPoint = window.innerHeight * 0.2;
         let closestImageIndex = -1;
         let minDistance = Infinity;
 
         domImages.forEach((img, index) => {
             const rect = img.getBoundingClientRect();
-            // On vérifie si l'image est visible dans le viewport
             if (rect.bottom > 0 && rect.top < window.innerHeight) {
                 const distance = Math.abs(rect.top - triggerPoint);
                 if (distance < minDistance) {
@@ -713,7 +772,7 @@ function populateChapterSelect() {
     if (!menu || !textSpan) return;
 
     const fullTitle = `Ch. ${state.currentChapter.number} - ${state.currentChapter.title}`;
-    textSpan.textContent = truncateText(fullTitle, 20);
+    textSpan.textContent = truncateText(fullTitle, 28);
     menu.innerHTML = state.allChapterKeys.slice().sort((a, b) => parseFloat(b) - parseFloat(a)).map(key => {
         const data = state.seriesData.chapters[key];
         const itemTitle = `Ch. ${key} - ${data.title}`;
@@ -725,20 +784,32 @@ function populatePageSelect() {
     const textSpan = qs('#page-dropdown .page-text');
     if (!menu || !textSpan) return;
 
-    const isWebtoon = state.settings.mode === 'webtoon';
-    const pageNum = (isWebtoon ? (state.spreads[state.currentSpreadIndex]?.[0] ?? 0) : state.currentSpreadIndex) + 1;
-    const totalPages = state.spreads.length;
-    textSpan.textContent = `${pageNum} / ${totalPages}`;
+    const currentSpread = state.spreads[state.currentSpreadIndex] || [];
+    const firstPageInSpread = currentSpread.length > 0 ? currentSpread[0] + 1 : 0;
+    const lastPageInSpread = currentSpread.length > 0 ? currentSpread[currentSpread.length - 1] + 1 : 0;
 
-    const pageItems = state.spreads;
+    let pageText = `${firstPageInSpread}`;
+    if (lastPageInSpread > firstPageInSpread) {
+        pageText += `-${lastPageInSpread}`;
+    }
 
-    menu.innerHTML = pageItems.map((_, i) => {
+    textSpan.textContent = `${pageText} / ${state.pages.length}`;
+
+    menu.innerHTML = state.spreads.map((spread, i) => {
         const isActive = i === state.currentSpreadIndex;
-        const pageLabel = `Page ${i + 1}`;
-        const dataAttr = isWebtoon ? `data-page-index="${i}"` : `data-spread-index="${i}"`;
+
+        const firstPage = spread[0] + 1;
+        const lastPage = spread[spread.length - 1] + 1;
+        let pageLabel = `Page ${firstPage}`;
+        if (lastPage > firstPage) {
+            pageLabel += `-${lastPage}`;
+        }
+
+        const dataAttr = `data-spread-index="${i}"`;
         return `<div class="dropdown-item ${isActive ? 'active' : ''}" ${dataAttr}>${pageLabel}</div>`;
     }).join('');
 }
+
 function preloadImages() {
     const nextSpreadIndex = state.currentSpreadIndex + 1;
     if (nextSpreadIndex < state.spreads.length) {
