@@ -1,5 +1,4 @@
 // js/pages/series-detail.js
-// SUPPRESSION : import { fetchSeriesDataBySlug } from '../utils/fetchUtils.js';
 import { slugify, qs } from '../utils/domUtils.js';
 import { renderMangaView } from './series-detail/mangaView.js';
 import { renderEpisodesListView, renderEpisodePlayerView } from './series-detail/animeView.js';
@@ -9,14 +8,12 @@ export async function initSeriesDetailPage() {
   if (!seriesDetailSection) return;
 
   try {
-    // --- NOUVELLE LOGIQUE : LIRE LES DONNÉES DEPUIS LE HTML ---
     const dataPlaceholder = qs("#series-data-placeholder");
     if (!dataPlaceholder || !dataPlaceholder.textContent || dataPlaceholder.textContent.includes("SERIES_DATA_PLACEHOLDER")) {
         throw new Error("Les données de la série n'ont pas été injectées dans la page.");
     }
     const currentSeriesData = JSON.parse(dataPlaceholder.textContent);
     const seriesSlug = slugify(currentSeriesData.title);
-    // --- FIN DE LA NOUVELLE LOGIQUE ---
 
     if (!currentSeriesData) {
       seriesDetailSection.innerHTML = `<p>Données de la série non valides.</p>`;
@@ -26,9 +23,6 @@ export async function initSeriesDetailPage() {
 
     const initialPath = window.location.pathname;
 
-    /**
-     * Le routeur principal de la page.
-     */
     function handleRouting(path) {
         const segments = path.split('/').filter(p => p !== '');
         let view = 'manga';
@@ -58,25 +52,37 @@ export async function initSeriesDetailPage() {
                 renderEpisodePlayerView(currentSeriesData, seriesSlug, subViewIdentifier);
                 break;
             case 'chapter_redirect':
-                seriesDetailSection.innerHTML = `<p class="loading-message">Redirection vers le chapitre ${subViewIdentifier}...</p>`;
-                const chapterUrl = `https://cubari.moe/read/gist/${currentSeriesData.base64Url}/${String(subViewIdentifier).replaceAll(".", "-")}/1/`;
-                window.location.href = chapterUrl;
+                // Redirection gérée par le lecteur interne maintenant
+                window.location.href = `/${seriesSlug}/${subViewIdentifier}`;
                 break;
         }
     }
 
     // --- GESTION DES ÉVÉNEMENTS DE NAVIGATION ---
     seriesDetailSection.addEventListener('click', (e) => {
-        const navLink = e.target.closest('a.detail-nav-button');
-        if (!navLink) return;
-        if (navLink.classList.contains('active')) {
-            e.preventDefault();
+        const link = e.target.closest('a');
+        if (!link) return;
+
+        const href = link.getAttribute('href');
+        // On ne gère que les liens internes qui ne commencent pas par #
+        if (!href || href.startsWith('#') || link.target === '_blank') {
             return;
         }
-        e.preventDefault();
-        const path = navLink.getAttribute('href');
-        history.pushState({ path }, '', path);
-        handleRouting(path);
+
+        // Si le lien a une des classes gérées pour la navigation SPA
+        const isSpaLink = link.classList.contains('detail-nav-button') || 
+                          link.classList.contains('player-episode-item') || 
+                          link.classList.contains('episode-nav-button') ||
+                          link.classList.contains('detail-episode-item');
+        
+        if (isSpaLink) {
+            e.preventDefault();
+            if (href !== window.location.pathname) {
+                history.pushState({ path: href }, '', href);
+                handleRouting(href);
+                window.scrollTo(0, 0);
+            }
+        }
     });
 
     window.addEventListener('popstate', () => {

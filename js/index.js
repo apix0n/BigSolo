@@ -19,13 +19,13 @@ async function initCommonComponents() {
   } else {
     console.warn("Placeholder #main-mobile-menu-overlay not found. Cannot load mobile menu.");
   }
-  
+
   if (loadPromises.length > 0) {
     try {
-        await Promise.all(loadPromises);
-        console.log("Common components (header/menu) loaded.");
+      await Promise.all(loadPromises);
+      console.log("Common components (header/menu) loaded.");
     } catch (error) {
-        console.error("Error loading one or more common components:", error);
+      console.error("Error loading one or more common components:", error);
     }
   }
 
@@ -38,15 +38,15 @@ async function initCommonComponents() {
   }
 
   if (mobileMenuPlaceholder && mobileMenuPlaceholder.innerHTML.trim() !== '') {
-      if (typeof setupMobileMenuInteractions === 'function') {
-        try {
-          setupMobileMenuInteractions();
-        } catch (e) {
-            console.error("Error setting up mobile menu interactions:", e);
-        }
-      } else {
-        console.error("setupMobileMenuInteractions is not available or was not loaded correctly.");
+    if (typeof setupMobileMenuInteractions === 'function') {
+      try {
+        setupMobileMenuInteractions();
+      } catch (e) {
+        console.error("Error setting up mobile menu interactions:", e);
       }
+    } else {
+      console.error("setupMobileMenuInteractions is not available or was not loaded correctly.");
+    }
   }
 }
 
@@ -62,7 +62,7 @@ async function routeAndInitPage() {
       await initHomepage();
       initMainScrollObserver();
       break;
-    
+
     case 'galeriepage':
       console.log("Initializing galerie page.");
       const { initGaleriePage } = await import('./pages/galerie.js');
@@ -92,7 +92,8 @@ async function routeAndInitPage() {
 
     case 'readerpage':
       console.log("Initializing Manga Reader page.");
-      const { initMangaReader } = await import('./pages/series-detail/MangaReader.js');
+      // MODIFIÉ : L'import pointe maintenant vers le nouveau point d'entrée 'reader.js'
+      const { initMangaReader } = await import('./pages/series-detail/MangaReader/reader.js');
       await initMangaReader();
       // Pas de scroll observer ici car le lecteur gère son propre affichage.
       break;

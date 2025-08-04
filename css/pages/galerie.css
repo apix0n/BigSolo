@@ -13,16 +13,15 @@
 /* --- CORRECTION Z-INDEX --- */
 .gallery-controls {
   position: relative; /* Établit un contexte d'empilement */
-  z-index: 10;        /* Assure que les contrôles sont au-dessus de la grille */
+  z-index: 10; /* Assure que les contrôles sont au-dessus de la grille */
   margin-top: 0.5rem;
   margin-bottom: 1.5rem;
 }
 
-
 /* --- STYLES POUR LE MENU DÉROULANT CUSTOM --- */
 
 .custom-dropdown {
-  position: relative; 
+  position: relative;
   display: inline-block;
   min-width: 220px;
   font-family: inherit;
@@ -114,7 +113,7 @@
   align-items: center;
   width: 100%;
   cursor: pointer;
-  
+
   /* Ajout d'une position relative pour positionner l'icône de la checkbox */
   position: relative;
   padding-left: 28px; /* Espace pour l'icône */
@@ -137,12 +136,12 @@
   font-family: "Font Awesome 6 Free"; /* Utilise la police Font Awesome */
   font-weight: 400; /* Poids pour les icônes 'regular' */
   color: rgba(var(--clr-text-rgb), 0.4);
-  
+
   font-size: 18px;
   line-height: 1;
   text-align: center;
   transition: color 0.2s ease;
-  
+
   /* Positionnement absolu à l'intérieur du label */
   position: absolute;
   left: 0;
@@ -155,10 +154,11 @@
 .custom-dropdown-option input[type="checkbox"]:checked + label::before {
   content: "\f14a"; /* Code unicode pour fa-solid fa-square-check */
   font-weight: 900; /* Poids pour les icônes 'solid' */
-  color: var(--clr-primary); /* Couleur principale du thème appliquée à l'icône */
+  color: var(
+    --clr-primary
+  ); /* Couleur principale du thème appliquée à l'icône */
 }
 /* --- FIN DES STYLES CHECKBOX --- */
-
 
 .custom-dropdown-option .artist-pfp {
   width: 32px;
@@ -226,12 +226,12 @@
   .custom-dropdown {
     min-width: 180px; /* Réduit la largeur minimale du conteneur */
   }
-  
+
   .custom-dropdown-toggle {
     padding: 0.5rem 0.8rem;
     font-size: 0.85rem;
   }
-  
+
   .custom-dropdown-menu {
     min-width: 240px; /* Ajuste la largeur du menu ouvert */
     max-height: 400px; /* Votre modification */
@@ -240,21 +240,21 @@
   .custom-dropdown-option {
     padding: 0.6rem 0.8rem;
   }
-  
+
   .custom-dropdown-option label {
     padding-left: 26px; /* Ajuste l'espace pour l'icône mobile */
   }
-  
+
   .custom-dropdown-option label::before {
     margin: 0; /* Margin gérée par le padding du label */
   }
-  
+
   .custom-dropdown-option .artist-pfp {
     width: 28px;
     height: 28px;
     margin-right: 0.6rem;
   }
-  
+
   .custom-dropdown-option .artist-name {
     font-size: 0.9em;
   }
