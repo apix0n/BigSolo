@@ -77,6 +77,15 @@ body#readerpage #main-header {
   align-items: center;
   min-height: 0;
 }
+
+/* --- RÈGLE CSS AJOUTÉE --- */
+.reader-viewer.double-mode.single-landscape-spread img {
+  grid-column: 1 / -1; /* Fait en sorte que l'image s'étende sur les deux colonnes de la grille */
+  width: 100%;
+  justify-self: center; /* Centre l'image horizontalement */
+}
+/* --- FIN DE L'AJOUT --- */
+
 .reader-viewer.double-mode img {
   justify-self: end;
 }
@@ -565,7 +574,6 @@ body#readerpage #main-header {
     backdrop-filter: blur(8px);
     color: var(--clr-text-dark);
     padding: 0.6rem 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     min-height: 60px;
   }
   #mobile-settings-toggle i {

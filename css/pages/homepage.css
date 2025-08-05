@@ -1,0 +1,386 @@
+/* css/pages/homepage.css */
+
+#hero-section {
+  padding: 0;
+  margin-bottom: 4rem;
+}
+
+.hero-carousel {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  border-radius: 14px;
+  overflow: hidden;
+  background-color: var(--clr-bg-card);
+}
+
+.hero-carousel-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+  display: flex;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+  z-index: 1;
+}
+
+.hero-slide.active {
+  opacity: 1;
+  visibility: visible;
+  z-index: 2;
+}
+
+.hero-slide::before {
+  content: "";
+  position: absolute;
+  top: -5%;
+  left: -5%;
+  width: 110%;
+  height: 110%;
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  filter: blur(12px) brightness(0.4);
+  z-index: -1;
+}
+
+.hero-slide::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 75%;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.85) 20%,
+    rgba(0, 0, 0, 0.5) 60%,
+    transparent 100%
+  );
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.hero-slide-content {
+  display: grid;
+  grid-template-columns: 55% 45%;
+  align-items: stretch;
+  width: 100%;
+  height: 100%;
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 0 5%;
+  position: relative;
+  z-index: 3;
+}
+
+.hero-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  align-self: start;
+}
+
+.hero-info .recommended-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--clr-accent);
+  margin-bottom: 0.5rem;
+}
+
+.hero-info .hero-series-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 0.8rem;
+  color: var(--hero-color, #fff);
+  transition: color 0.3s ease;
+}
+
+.hero-info .hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.hero-info .hero-tags .tag {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.hero-info .hero-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  max-width: 90%;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.hero-info .hero-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.hero-info .hero-cta-button {
+  background: rgba(var(--hero-color-rgb), 0.15);
+  color: var(--hero-color, #fff);
+  border: 2px solid var(--hero-color, #fff);
+  text-decoration: none;
+  padding: 0.7rem 1.8rem;
+  border-radius: 8px;
+  font-weight: 700;
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    background-color 0.2s ease, color 0.2s ease;
+}
+
+.hero-info .hero-cta-button-anime {
+  background: var(--hero-color, var(--clr-primary));
+  color: #fff;
+  border: 2px solid transparent;
+  text-decoration: none;
+  padding: 0.7rem 1.8rem;
+  border-radius: 8px;
+  font-weight: 700;
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    background-color 0.3s ease;
+}
+
+.hero-info .hero-cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background-color: var(--hero-color, #fff);
+  color: #fff;
+}
+
+.hero-info .hero-cta-button-anime:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  filter: brightness(1.1);
+}
+
+.hero-info .hero-latest-info {
+  font-weight: 500;
+  padding: 0.8rem 0;
+}
+.hero-info .hero-latest-info .status {
+  opacity: 0.8;
+  margin-left: 0.5rem;
+}
+
+.hero-image {
+  position: absolute;
+  right: 0;
+  bottom: -30px;
+  width: 45%;
+  height: 105%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.hero-image img {
+  max-height: 100%;
+  max-width: 100%;
+  height: auto;
+  width: auto;
+  object-fit: contain;
+  object-position: bottom center;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+}
+
+/* Navigation */
+.hero-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.3);
+  border: none;
+  color: #fff;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+}
+.hero-carousel-arrow:hover {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+.hero-carousel-arrow.prev {
+  left: 20px;
+}
+.hero-carousel-arrow.next {
+  right: 20px;
+}
+
+.hero-carousel-nav {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.8rem;
+  z-index: 10;
+}
+
+.hero-nav-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.hero-nav-dot.active {
+  background-color: #fff;
+  transform: scale(1.2);
+}
+
+/* --- SECTION RESPONSIVE MODIFIÉE --- */
+@media (max-width: 992px) {
+  .hero-carousel {
+    height: 450px;
+    min-height: 0;
+  }
+
+  /* CORRECTION : On réactive le fond flou sur mobile */
+  .hero-slide::before {
+    display: block;
+  }
+
+  /* CORRECTION : On réactive le dégradé pour la lisibilité */
+  .hero-slide::after {
+    opacity: 1;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 10%, transparent 50%),
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 10%, transparent 40%);
+  }
+
+  .hero-slide-content {
+    display: block;
+    grid-template-columns: none;
+    padding: 0;
+  }
+
+  /* CORRECTION : L'image du personnage est positionnée par-dessus le fond */
+  .hero-image {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 65%;
+    height: 80%;
+    align-items: flex-end;
+    justify-content: flex-end;
+    z-index: 2; /* Au-dessus du fond flou, mais sous le texte */
+  }
+
+  .hero-image img {
+    max-height: 100%;
+    max-width: 100%;
+    object-position: bottom right;
+  }
+
+  /* Les infos restent au-dessus de tout */
+  .hero-info {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    padding: 1.5rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    text-align: left;
+    background: none; /* On retire l'effet glassmorphism, le dégradé suffit */
+    backdrop-filter: none;
+  }
+
+  .hero-info-top {
+    /* Conteneur pour le titre et les tags */
+  }
+
+  .hero-info .recommended-title,
+  .hero-info .hero-description,
+  .hero-info .hero-latest-info {
+    display: none;
+  }
+
+  .hero-info .hero-series-title {
+    font-size: 2.2rem;
+    margin-bottom: 0.8rem;
+    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5); /* On peut remettre une ombre légère si besoin */
+  }
+
+  .hero-info .hero-tags {
+    margin-bottom: 1.2rem;
+  }
+
+  .hero-info .hero-actions {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .hero-info .hero-actions a {
+    flex-grow: 1;
+    text-align: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-carousel {
+    height: 400px;
+  }
+  .hero-info {
+    padding: 1.2rem;
+  }
+  .hero-info .hero-series-title {
+    font-size: 1.8rem;
+  }
+  .hero-info .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-carousel-arrow {
+    width: 36px;
+    height: 36px;
+  }
+  .hero-carousel-arrow.prev {
+    left: 10px;
+  }
+  .hero-carousel-arrow.next {
+    right: 10px;
+  }
+  .hero-carousel-nav {
+    bottom: 15px;
+  }
+  .hero-nav-dot {
+    width: 10px;
+    height: 10px;
+  }
+}

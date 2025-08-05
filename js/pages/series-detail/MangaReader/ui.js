@@ -236,20 +236,10 @@ export function renderViewer() {
           img.style.maxHeight = `${state.settings.customMaxHeight}px`;
       }
     });
-    if (pageIndices.length === 1 && state.settings.doublePageOffset) {
-      const placeholder = document.createElement("div");
-      const image = domImages[pageIndices[0]];
-      if (image) {
-        if (pageIndices[0] === 0)
-          state.settings.direction === "ltr"
-            ? viewer.append(placeholder, image)
-            : viewer.append(image, placeholder);
-        else
-          state.settings.direction === "ltr"
-            ? viewer.append(image, placeholder)
-            : viewer.append(placeholder, image);
-      }
-    } else {
+
+    // --- BLOC DE LOGIQUE CORRIGÉ ---
+    // Cas 1: C'est une planche de deux pages standards (portrait)
+    if (pageIndices.length === 2) {
       const page1 = domImages[pageIndices[0]];
       const page2 = domImages[pageIndices[1]];
       if (state.settings.direction === "rtl") {
@@ -260,6 +250,26 @@ export function renderViewer() {
         if (page2) viewer.appendChild(page2);
       }
     }
+    // Cas 2: C'est une planche d'une seule page
+    else if (pageIndices.length === 1) {
+      const image = domImages[pageIndices[0]];
+      if (image) {
+        // Sous-cas 2a: C'est une image paysage. Elle doit prendre toute la place.
+        if (isLandscapeSpread) {
+          viewer.appendChild(image);
+        }
+        // Sous-cas 2b: C'est une page portrait seule (début/fin de chapitre). Elle a besoin d'un placeholder.
+        else {
+          const placeholder = document.createElement("div");
+          if (state.settings.direction === "rtl") {
+            viewer.append(placeholder, image);
+          } else {
+            viewer.append(image, placeholder);
+          }
+        }
+      }
+    }
+    // --- FIN DU BLOC DE LOGIQUE CORRIGÉ ---
   } else {
     const image = domImages[state.spreads[state.currentSpreadIndex][0]];
     if (image) {
