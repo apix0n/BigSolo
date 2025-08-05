@@ -1,4 +1,4 @@
-/* css/components/interactions.css */
+/* css/components/interactions.css (Version Corrigée pour le Thème Clair/Sombre) */
 
 /* --- Section Interactions dans le lecteur --- */
 .chapter-interactions-container {
@@ -12,7 +12,8 @@
 
 #reader-viewer-container + .chapter-interactions-container {
   padding: 1.5rem 5%;
-  background-color: var(--clr-bg-card-dark);
+  /* MODIFIÉ : Utilise la variable de thème globale */
+  background-color: var(--clr-bg-card);
 }
 
 .chapter-like-button {
@@ -21,9 +22,10 @@
   font-size: 1rem;
   font-weight: 700;
   border-radius: 8px;
-  border: 2px solid #5d5d5f;
-  background-color: rgba(255, 255, 255, 0.05);
-  color: var(--clr-text-sub-dark);
+  /* MODIFIÉ : Bordure et fond basés sur le thème */
+  border: 2px solid rgba(var(--clr-text-rgb), 0.2);
+  background-color: rgba(var(--clr-text-rgb), 0.05);
+  color: var(--clr-text-sub);
   cursor: pointer;
   transition: all 0.2s ease;
   margin-bottom: 1.5rem;
@@ -36,14 +38,15 @@
 
 .chapter-like-button:hover {
   border-color: var(--clr-text-sub);
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(var(--clr-text-rgb), 0.1);
   color: var(--clr-text-sub);
 }
 
 .chapter-like-button.liked {
-  border-color: #ff4757;
-  background-color: rgba(255, 71, 87, 0.1);
-  color: #ff4757;
+  /* MODIFIÉ : Utilise la variable d'accentuation pour la cohérence */
+  border-color: var(--clr-accent);
+  background-color: rgba(var(--clr-accent-rgb), 0.1);
+  color: var(--clr-accent);
 }
 
 /* --- Section des commentaires --- */
@@ -53,7 +56,6 @@
   overflow: hidden;
 }
 
-/* NOUVEAU : Styles pour le floutage des spoilers */
 .comments-section.spoiler-hidden::before {
   content: "Afficher les commentaires (Risque de spoil)";
   position: absolute;
@@ -61,13 +63,15 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(21, 23, 26, 0.85);
+  /* MODIFIÉ : Fond semi-transparent basé sur le fond de la carte */
+  background-color: rgba(var(--clr-bg-card-rgb-val, 24, 26, 29), 0.85);
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
   font-weight: 600;
-  color: var(--clr-text-dark);
+  /* MODIFIÉ : Utilise la variable de thème globale */
+  color: var(--clr-text);
   cursor: pointer;
   z-index: 2;
   padding: 1rem;
@@ -79,12 +83,12 @@
   filter: blur(8px);
   pointer-events: none;
 }
-/* FIN NOUVEAU */
 
 .comments-section-header {
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--clr-text-sub-dark);
+  /* MODIFIÉ : Utilise la variable de thème globale */
+  color: var(--clr-text-sub);
   padding-bottom: 0.5rem;
 }
 
@@ -94,9 +98,10 @@
   max-height: 120px;
   padding: 0.8rem;
   border-radius: 6px;
-  border: 1px solid #5d5d5f;
-  background-color: rgba(0, 0, 0, 0.2);
-  color: var(--clr-text-dark);
+  /* MODIFIÉ : Bordure, fond et couleur basés sur le thème */
+  border: 1px solid rgba(var(--clr-text-rgb), 0.2);
+  background-color: rgba(var(--clr-text-rgb), 0.08);
+  color: var(--clr-text);
   font-family: inherit;
   font-size: 0.9rem;
   resize: vertical;
@@ -119,8 +124,9 @@
 }
 
 .comment-form-actions button[type="submit"] {
-  background-color: var(--clr-primary-dark);
-  color: #fff;
+  /* MODIFIÉ : Utilise la variable de thème globale */
+  background-color: var(--clr-primary);
+  color: #fff; /* Le blanc reste approprié ici */
 }
 
 .comment-form-actions .chapter-like-button {
@@ -137,7 +143,8 @@
 
 .comment-form p.form-message {
   font-size: 0.85rem;
-  color: var(--clr-text-sub-dark);
+  /* MODIFIÉ : Utilise la variable de thème globale */
+  color: var(--clr-text-sub);
   margin-top: 0.3rem;
   text-align: left;
 }
@@ -154,21 +161,21 @@
   gap: 0.8rem;
 }
 
-/* MODIFIÉ : Le conteneur .comment-avatar peut maintenant contenir une image */
 .comment-avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background-color: var(--clr-primary-dark);
-  color: #fff;
+  /* MODIFIÉ : Utilise la variable de thème globale */
+  background-color: var(--clr-primary);
+  color: #fff; /* Le blanc reste approprié ici */
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   flex-shrink: 0;
-  /* NOUVEAU : Styles pour quand c'est une image */
   object-fit: cover;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* MODIFIÉ : Bordure basée sur le thème */
+  border: 1px solid rgba(var(--clr-text-rgb), 0.1);
 }
 
 .comment-content {
@@ -184,12 +191,14 @@
 
 .comment-username {
   font-weight: 700;
-  color: var(--clr-text-dark);
+  /* MODIFIÉ : Utilise la variable de thème globale */
+  color: var(--clr-text);
 }
 
 .comment-timestamp {
   font-size: 0.75rem;
-  color: var(--clr-text-sub-dark);
+  /* MODIFIÉ : Utilise la variable de thème globale */
+  color: var(--clr-text-sub);
 }
 
 .comment-text {
@@ -206,7 +215,8 @@
 .comment-like-button {
   background: none;
   border: none;
-  color: var(--clr-text-sub-dark);
+  /* MODIFIÉ : Utilise la variable de thème globale */
+  color: var(--clr-text-sub);
   cursor: pointer;
   font-size: 0.8rem;
 }
@@ -216,5 +226,6 @@
 }
 
 .comment-like-button.liked {
-  color: #ff4757;
+  /* MODIFIÉ : Utilise la variable d'accentuation pour la cohérence */
+  color: var(--clr-accent);
 }

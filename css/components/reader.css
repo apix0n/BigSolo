@@ -1,6 +1,8 @@
-/* css/components/reader.css (Version Finale Corrigée) */
+/* css/components/reader.css (Version Corrigée pour le Thème Clair/Sombre) */
 body#readerpage {
   overflow: hidden;
+  /* NOUVEAU : On s'assure que le fond de la page est bien celui du thème */
+  background-color: var(--clr-bg);
 }
 body#readerpage main {
   padding: 0;
@@ -10,42 +12,52 @@ body#readerpage #main-header {
   top: 0;
   z-index: 1030;
 }
-/* MODIFIÉ : Largeur de la sidebar augmentée */
+
 #manga-reader-root {
   display: grid;
   grid-template-columns: 360px 1fr;
   align-items: start;
+  /* NOUVEAU : La couleur de fond globale du lecteur est liée au thème */
+  background-color: var(--clr-bg);
 }
+
 .reader-controls-sidebar {
   position: sticky;
   top: 70px;
   height: calc(100vh - 70px);
-  background-color: var(--clr-bg-card-dark);
+  /* MODIFIÉ : Utilisation de la variable de thème pour le fond */
+  background-color: var(--clr-bg-card);
   padding: 0 1.5rem 1.5rem;
   overflow-y: auto;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  /* MODIFIÉ : Utilisation de la variable de thème pour la bordure */
+  border-right: 1px solid rgba(var(--clr-text-rgb), 0.1);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   scrollbar-width: thin;
-  scrollbar-color: rgba(var(--clr-primary-rgb), 0.7) rgba(0, 0, 0, 0.2);
+  /* NOUVEAU : Styles de scrollbar qui s'adaptent au thème */
+  scrollbar-color: rgba(var(--clr-primary-rgb), 0.7)
+    rgba(var(--clr-text-rgb), 0.05);
 }
+
 .reader-controls-sidebar::-webkit-scrollbar {
   width: 8px;
 }
 .reader-controls-sidebar::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(var(--clr-text-rgb), 0.05);
 }
 .reader-controls-sidebar::-webkit-scrollbar-thumb {
   background-color: rgba(var(--clr-primary-rgb), 0.7);
   border-radius: 4px;
-  border: 2px solid var(--clr-bg-card-dark);
+  border: 2px solid var(--clr-bg-card); /* Utilise la couleur de fond de la sidebar */
 }
 .reader-controls-sidebar::-webkit-scrollbar-thumb:hover {
   background-color: rgba(var(--clr-primary-rgb), 1);
 }
+
 .reader-viewer-container {
-  background-color: #111;
+  /* NOUVEAU : On définit une couleur de fond pour le mode clair */
+  background-color: #e9ecef;
   min-height: calc(100vh - 60px);
   -webkit-user-select: none;
   user-select: none;
@@ -53,6 +65,12 @@ body#readerpage #main-header {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
+
+/* NOUVEAU : On surcharge la couleur de fond pour le mode sombre */
+body.dark .reader-viewer-container {
+  background-color: #111;
+}
+
 .reader-viewer {
   display: flex;
   justify-content: center;
@@ -77,15 +95,11 @@ body#readerpage #main-header {
   align-items: center;
   min-height: 0;
 }
-
-/* --- RÈGLE CSS AJOUTÉE --- */
 .reader-viewer.double-mode.single-landscape-spread img {
-  grid-column: 1 / -1; /* Fait en sorte que l'image s'étende sur les deux colonnes de la grille */
+  grid-column: 1 / -1;
   width: 100%;
-  justify-self: center; /* Centre l'image horizontalement */
+  justify-self: center;
 }
-/* --- FIN DE L'AJOUT --- */
-
 .reader-viewer.double-mode img {
   justify-self: end;
 }
@@ -131,16 +145,18 @@ body#readerpage #main-header {
   content: "";
   display: block;
 }
-/* MODIFIÉ : Position de la barre de progression ajustée */
+
 .reader-progress-bar {
   position: fixed;
   bottom: 0;
   left: 360px;
   right: 0;
   height: 22px;
-  background-color: rgba(18, 20, 23, 0.85);
+  /* MODIFIÉ : Fond semi-transparent basé sur le fond de la page */
+  background-color: rgba(var(--clr-bg-card-rgb-val, 24, 26, 29), 0.85);
   backdrop-filter: blur(8px);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  /* MODIFIÉ : Bordure basée sur la couleur du texte */
+  border-top: 1px solid rgba(var(--clr-text-rgb), 0.1);
   display: flex;
   align-items: center;
   padding: 0 5px;
@@ -153,25 +169,27 @@ body#readerpage #main-header {
 .progress-tick {
   flex-grow: 1;
   height: 6px;
-  background-color: rgba(255, 255, 255, 0.2);
+  /* MODIFIÉ : Couleur de la tick basée sur la couleur du texte */
+  background-color: rgba(var(--clr-text-rgb), 0.2);
   border-radius: 1px;
   cursor: pointer;
 }
 .progress-tick:hover {
-  background-color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(var(--clr-text-rgb), 0.4);
 }
 .progress-tick.read {
   background-color: rgba(var(--clr-primary-rgb), 0.5);
 }
 .progress-tick.current {
-  background-color: var(--clr-primary-dark);
+  background-color: var(--clr-primary);
   height: 10px;
 }
 .reader-info-box {
   position: sticky;
   top: 0;
   z-index: 1;
-  background-color: var(--clr-bg-card-dark);
+  /* MODIFIÉ : Utilise la variable de thème */
+  background-color: var(--clr-bg-card);
   padding-top: 1.5rem;
   padding-bottom: 1rem;
   margin-bottom: 0.5rem;
@@ -183,7 +201,8 @@ body#readerpage #main-header {
   gap: 0.5rem 1.2rem;
   margin-top: 0.8rem;
   font-size: 0.85rem;
-  color: var(--clr-text-sub-dark);
+  /* MODIFIÉ : Utilise la variable de thème */
+  color: var(--clr-text-sub);
 }
 .reader-stats-box .stat-item {
   display: flex;
@@ -193,18 +212,20 @@ body#readerpage #main-header {
 .reader-chapter-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #fff;
+  /* MODIFIÉ : Utilise la variable de thème */
+  color: var(--clr-text);
 }
 .reader-series-title a {
   font-size: 1rem;
   font-weight: 500;
-  color: var(--clr-primary-dark);
+  /* MODIFIÉ : Utilise la variable de thème */
+  color: var(--clr-primary);
   text-decoration: none;
 }
 .reader-series-title a:hover {
   text-decoration: underline;
 }
-/* ... (Le reste des styles jusqu'à la section Mobile Header reste identique) ... */
+
 .control-group {
   margin-bottom: 1rem;
   position: relative;
@@ -217,7 +238,8 @@ body#readerpage #main-header {
   display: block;
   font-weight: 600;
   margin-bottom: 0.8rem;
-  color: var(--clr-text-sub-dark);
+  /* MODIFIÉ : Utilise la variable de thème */
+  color: var(--clr-text-sub);
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -225,7 +247,8 @@ body#readerpage #main-header {
 .setting-options {
   display: flex;
   gap: 0.5rem;
-  background-color: rgba(0, 0, 0, 0.2);
+  /* MODIFIÉ : Fond basé sur la couleur du texte */
+  background-color: rgba(var(--clr-text-rgb), 0.08);
   border-radius: 8px;
   padding: 0.3rem;
 }
@@ -234,7 +257,8 @@ body#readerpage #main-header {
   padding: 0.55rem;
   border: none;
   background-color: transparent;
-  color: var(--clr-text-dark);
+  /* MODIFIÉ : Utilise la variable de thème */
+  color: var(--clr-text);
   font-weight: 600;
   border-radius: 6px;
   cursor: pointer;
@@ -246,8 +270,8 @@ body#readerpage #main-header {
   font-size: 0.82rem;
 }
 .setting-options button.active {
-  background-color: var(--clr-primary-dark);
-  color: #fff;
+  background-color: var(--clr-primary);
+  color: #fff; /* Le blanc reste bon ici pour le contraste */
 }
 .fit-control-group .setting-options {
   flex-grow: 1;
@@ -255,20 +279,22 @@ body#readerpage #main-header {
 .nav-controls {
   display: flex;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.2);
+  /* MODIFIÉ : Fond basé sur la couleur du texte */
+  background-color: rgba(var(--clr-text-rgb), 0.08);
   border-radius: 8px;
   padding: 0.3rem;
 }
 .nav-controls button {
   background: none;
   border: none;
-  color: var(--clr-text-dark);
+  /* MODIFIÉ : Utilise la variable de thème */
+  color: var(--clr-text);
   border-radius: 6px;
   padding: 0.6rem;
   flex-shrink: 0;
 }
 .nav-controls button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(var(--clr-text-rgb), 0.1);
 }
 .reader-controls-sidebar.rtl-mode .nav-controls {
   flex-direction: row-reverse;
@@ -296,7 +322,8 @@ body#readerpage #main-header {
   align-items: center;
   width: 100%;
   padding: 0.6rem 0.8rem;
-  color: #fff;
+  /* MODIFIÉ : Utilise la variable de thème */
+  color: var(--clr-text);
   font-size: 0.9rem;
   text-align: left;
   cursor: pointer;
@@ -319,10 +346,11 @@ body#readerpage #main-header {
   top: calc(100% + 4px);
   left: 0;
   width: 100%;
-  background-color: var(--clr-bg-card-dark);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* MODIFIÉ : Utilise la variable de thème */
+  background-color: var(--clr-bg-card);
+  border: 1px solid rgba(var(--clr-text-rgb), 0.1);
   border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   z-index: 100;
   max-height: 300px;
   overflow-y: auto;
@@ -347,8 +375,9 @@ body#readerpage #main-header {
   background-color: rgba(var(--clr-primary-rgb), 0.1);
 }
 .dropdown-item.active {
-  background-color: var(--clr-primary-dark);
+  background-color: var(--clr-primary);
   font-weight: 700;
+  color: #fff; /* Le blanc est ok ici */
 }
 #page-dropdown {
   max-width: 140px;
@@ -367,21 +396,21 @@ body#readerpage #main-header {
 }
 .dropdown-menu {
   scrollbar-width: thin;
-  scrollbar-color: var(--clr-primary-dark) rgba(0, 0, 0, 0.2);
+  scrollbar-color: var(--clr-primary) rgba(var(--clr-text-rgb), 0.05);
 }
 .dropdown-menu::-webkit-scrollbar {
   width: 8px;
 }
 .dropdown-menu::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(var(--clr-text-rgb), 0.05);
   border-radius: 4px;
 }
 .dropdown-menu::-webkit-scrollbar-thumb {
-  background-color: var(--clr-primary-dark);
+  background-color: var(--clr-primary);
   border-radius: 4px;
 }
 .sub-control-group {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(var(--clr-text-rgb), 0.08);
   border-radius: 8px;
   margin: 0 0 1.5rem 0;
   padding: 0 1rem;
@@ -423,7 +452,8 @@ body#readerpage #main-header {
   cursor: pointer;
   font-weight: 600;
   font-size: 0.9rem;
-  color: #f2f2f7;
+  /* MODIFIÉ : Utilise la variable de thème */
+  color: var(--clr-text);
   text-transform: none;
   letter-spacing: normal;
 }
@@ -440,7 +470,8 @@ body#readerpage #main-header {
   width: 20px;
   height: 20px;
   background-color: transparent;
-  border: 2px solid #5d5d5f;
+  /* MODIFIÉ : Utilise la variable de thème pour la bordure */
+  border: 2px solid var(--clr-text-sub);
   border-radius: 5px;
   transition: background-color 0.2s ease, border-color 0.2s ease;
 }
@@ -455,8 +486,8 @@ body#readerpage #main-header {
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 .sub-control-group input[type="checkbox"]:checked + .custom-checkbox-box {
-  background-color: var(--clr-primary-dark);
-  border-color: var(--clr-primary-dark);
+  background-color: var(--clr-primary);
+  border-color: var(--clr-primary);
 }
 .sub-control-group
   input[type="checkbox"]:checked
@@ -475,7 +506,8 @@ body#readerpage #main-header {
   appearance: none;
   flex-grow: 1;
   height: 3px;
-  background: #48484a;
+  /* MODIFIÉ : Utilise une couleur basée sur le thème */
+  background: rgba(var(--clr-text-rgb), 0.2);
   border-radius: 2px;
   outline: none;
   transition: opacity 0.2s ease;
@@ -485,7 +517,7 @@ body#readerpage #main-header {
   appearance: none;
   width: 16px;
   height: 16px;
-  background: var(--clr-primary-dark);
+  background: var(--clr-primary);
   cursor: pointer;
   border-radius: 50%;
   border: none;
@@ -497,14 +529,14 @@ body#readerpage #main-header {
 .modal-slider-container input[type="range"]::-moz-range-track {
   width: 100%;
   height: 3px;
-  background: #48484a;
+  background: rgba(var(--clr-text-rgb), 0.2);
   border-radius: 2px;
   border: none;
 }
 .modal-slider-container input[type="range"]::-moz-range-thumb {
   width: 16px;
   height: 16px;
-  background: var(--clr-primary-dark);
+  background: var(--clr-primary);
   cursor: pointer;
   border-radius: 50%;
   border: none;
@@ -513,7 +545,8 @@ body#readerpage #main-header {
   width: 55px;
   background: transparent;
   border: none;
-  color: #f2f2f7;
+  /* MODIFIÉ : Utilise la variable de thème */
+  color: var(--clr-text);
   padding: 0;
   text-align: right;
   font-weight: 600;
@@ -526,7 +559,7 @@ body#readerpage #main-header {
   margin: 0;
 }
 .modal-slider-container .slider-unit {
-  color: #a0a0a5;
+  color: var(--clr-text-sub);
   font-size: 0.9rem;
 }
 .modal-slider-container input:disabled {
@@ -537,7 +570,7 @@ body#readerpage #main-header {
   transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
 }
 .modal-slider-container input:disabled::-webkit-slider-thumb {
-  background-color: #5d5d5f;
+  background-color: var(--clr-text-sub);
 }
 #reader-mobile-header {
   display: none;
@@ -549,7 +582,7 @@ body#readerpage #main-header {
   display: flex;
   gap: 0.8rem;
   font-size: 0.85rem;
-  color: var(--clr-text-sub-dark);
+  color: var(--clr-text-sub);
   flex-shrink: 0;
 }
 .mobile-header-stats .stat-item {
@@ -570,11 +603,12 @@ body#readerpage #main-header {
     left: 0;
     right: 0;
     z-index: 1025;
-    background-color: rgba(18, 20, 23, 0.9);
+    background-color: rgba(var(--clr-bg-card-rgb-val), 0.9);
     backdrop-filter: blur(8px);
-    color: var(--clr-text-dark);
+    color: var(--clr-text);
     padding: 0.6rem 1rem;
     min-height: 60px;
+    border-bottom: 1px solid rgba(var(--clr-text-rgb), 0.1);
   }
   #mobile-settings-toggle i {
     transition: transform 0.3s ease-in-out;
@@ -585,7 +619,7 @@ body#readerpage #main-header {
   #mobile-settings-toggle {
     background: none;
     border: none;
-    color: var(--clr-text-dark);
+    color: var(--clr-text);
     font-size: 1.6rem;
     padding: 0.5rem;
     cursor: pointer;
@@ -600,7 +634,7 @@ body#readerpage #main-header {
   }
   .mobile-header-series-link {
     text-decoration: none;
-    color: var(--clr-text-dark);
+    color: var(--clr-text);
   }
   .mobile-header-series {
     font-size: 1rem;
@@ -615,7 +649,7 @@ body#readerpage #main-header {
     align-items: center;
     flex-wrap: wrap;
     font-size: 0.85rem;
-    color: var(--clr-text-sub-dark);
+    color: var(--clr-text-sub);
     gap: 0.2rem 0.8rem;
   }
   .mobile-header-chapter {
@@ -648,7 +682,7 @@ body#readerpage #main-header {
   .reader-viewer-container:not(.webtoon-mode)
     + #webtoon-interactions-placeholder {
     padding: 1rem;
-    background: var(--clr-bg-card-dark);
+    background: var(--clr-bg-card);
   }
   .reader-viewer-container:not(.webtoon-mode)
     + #webtoon-interactions-placeholder
