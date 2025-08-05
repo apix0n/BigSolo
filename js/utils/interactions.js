@@ -2,7 +2,45 @@
 
 const ACTION_QUEUE_KEY = "bigsolo_action_queue";
 
-// --- Gestion de la file d'attente ---
+// --- DÉBUT DE LA LOGIQUE DE DÉTECTION DE NAVIGATION ---
+
+// Ce drapeau nous aidera à savoir si l'utilisateur clique sur un lien
+// interne au site ou s'il quitte vraiment le site.
+let isInternalNavigation = false;
+
+// On ajoute un écouteur d'événements sur l'ensemble du document pour intercepter
+// tous les clics. Le 'true' final (phase de capture) assure qu'il s'exécute
+// avant que le navigateur ne commence à suivre le lien.
+document.addEventListener(
+  "click",
+  (event) => {
+    // On vérifie si la cible du clic est un lien <a> ou est à l'intérieur d'un lien.
+    const link = event.target.closest("a");
+
+    // Si ce n'est pas un lien ou qu'il n'a pas de destination (href), on ne fait rien.
+    if (!link || !link.href) {
+      return;
+    }
+
+    // C'est la vérification clé : on compare le nom de domaine du lien cliqué
+    // avec le nom de domaine de la page actuelle. Si c'est le même, c'est une navigation interne.
+    if (link.hostname === window.location.hostname) {
+      // On lève le drapeau pour indiquer une navigation interne.
+      isInternalNavigation = true;
+
+      // Par sécurité, on remet le drapeau à false après un court instant.
+      // Cela gère le cas où la navigation serait annulée (ex: Ctrl+clic pour ouvrir dans un nouvel onglet).
+      setTimeout(() => {
+        isInternalNavigation = false;
+      }, 500);
+    }
+  },
+  true
+);
+
+// --- FIN DE LA LOGIQUE DE DÉTECTION ---
+
+// --- Gestion de la file d'attente (inchangée) ---
 
 function getActionQueue() {
   try {
@@ -33,7 +71,18 @@ export function queueAction(seriesSlug, action) {
   saveActionQueue(queue);
 }
 
+// --- Logique d'envoi de la file d'attente (MODIFIÉE) ---
+
 function sendActionQueue() {
+  // On vérifie le drapeau AVANT de faire quoi que ce soit.
+  // Si c'est une navigation interne, on arrête tout.
+  if (isInternalNavigation) {
+    console.log(
+      "Navigation interne détectée. L'envoi de la file d'attente est reporté."
+    );
+    return;
+  }
+
   const queue = getActionQueue();
   const seriesSlugs = Object.keys(queue);
 
@@ -42,14 +91,18 @@ function sendActionQueue() {
   for (const seriesSlug of seriesSlugs) {
     const actions = queue[seriesSlug];
     if (actions.length > 0) {
+      console.log(
+        `Envoi de ${actions.length} action(s) pour la série ${seriesSlug} lors de la fermeture de la page.`
+      );
       try {
-        fetch("/api/log-action", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ seriesSlug, actions }),
-          keepalive: true,
+        // On utilise navigator.sendBeacon. C'est la méthode la plus fiable
+        // pour envoyer des données juste avant qu'une page ne se ferme.
+        const blob = new Blob([JSON.stringify({ seriesSlug, actions })], {
+          type: "application/json",
         });
+        navigator.sendBeacon("/api/log-action", blob);
 
+        // On vide la file d'attente de manière optimiste.
         const currentQueue = getActionQueue();
         delete currentQueue[seriesSlug];
         saveActionQueue(currentQueue);
@@ -65,7 +118,7 @@ function sendActionQueue() {
 
 window.addEventListener("pagehide", sendActionQueue);
 
-// --- Gestion de l'état local de l'utilisateur ---
+// --- Gestion de l'état local de l'utilisateur (inchangée) ---
 
 export function getLocalInteractionState(key) {
   try {
@@ -93,7 +146,7 @@ export function addPendingComment(interactionKey, comment) {
   setLocalInteractionState(interactionKey, localState);
 }
 
-// --- Récupération des données ---
+// --- Récupération des données (inchangée) ---
 
 let seriesStatsCache = new Map();
 
