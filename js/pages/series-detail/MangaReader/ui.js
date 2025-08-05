@@ -14,6 +14,7 @@ function truncateText(text, maxLength) {
   if (!text || text.length <= maxLength) return text;
   return text.substring(0, maxLength - 3) + "...";
 }
+
 export function handleError(message) {
   console.error(message);
   const root = qs("#manga-reader-root");
@@ -23,25 +24,26 @@ export function handleError(message) {
 
 export async function setupUI() {
   dom.root = qs("#manga-reader-root");
+  // Cet innerHTML est sûr car il s'agit de la structure statique de la page, sans données utilisateur.
   dom.root.innerHTML = `
-        <div id="reader-mobile-header">
-            <button id="mobile-settings-toggle" class="reader-button" title="Ouvrir les options"><i class="fas fa-cog"></i></button>
-            <div class="mobile-header-info">
-                <a href="#" class="mobile-header-series-link"><span class="mobile-header-series"></span></a>
-                <div class="mobile-header-details">
-                    <span class="mobile-header-chapter"></span>
-                    <div class="mobile-header-stats"></div>
-                    <span class="mobile-header-page"></span>
-                </div>
+    <div id="reader-mobile-header">
+        <button id="mobile-settings-toggle" class="reader-button" title="Ouvrir les options"><i class="fas fa-cog"></i></button>
+        <div class="mobile-header-info">
+            <a href="#" class="mobile-header-series-link"><span class="mobile-header-series"></span></a>
+            <div class="mobile-header-details">
+                <span class="mobile-header-chapter"></span>
+                <div class="mobile-header-stats"></div>
+                <span class="mobile-header-page"></span>
             </div>
         </div>
-        <div id="reader-sidebar-overlay"></div>
-        <aside class="reader-controls-sidebar ${
-          state.isSidebarOpen ? "open" : ""
-        } ${state.settings.direction}-mode"></aside>
-        <div class="reader-viewer-container"></div>
-        <div id="webtoon-interactions-placeholder"></div>
-        <div class="reader-progress-bar"></div>
+    </div>
+    <div id="reader-sidebar-overlay"></div>
+    <aside class="reader-controls-sidebar ${
+      state.isSidebarOpen ? "open" : ""
+    } ${state.settings.direction}-mode"></aside>
+    <div class="reader-viewer-container"></div>
+    <div id="webtoon-interactions-placeholder"></div>
+    <div class="reader-progress-bar"></div>
     `;
   Object.assign(dom, {
     sidebar: qs(".reader-controls-sidebar"),
@@ -61,6 +63,7 @@ export async function setupUI() {
 
 function setupSidebarControls() {
   const statsHtml = `<div class="reader-stats-box"><span class="stat-item" id="reader-likes-stat"><i class="fas fa-heart"></i> 0</span><span class="stat-item" id="reader-comments-stat"><i class="fas fa-comment"></i> 0</span><span class="stat-item" id="reader-date-stat"></span></div>`;
+  // Cet innerHTML est sûr car il utilise des variables contrôlées (venant de vos fichiers JSON) et non de l'input utilisateur direct.
   dom.sidebar.innerHTML = `<div class="reader-info-box"><h2 class="reader-chapter-title">Chapitre ${
     state.currentChapter.number
   } : ${
@@ -90,42 +93,91 @@ function setupSidebarControls() {
 export function renderInteractionsSection(localState) {
   const { hasLiked, hasCommented } = localState;
   const stats = state.chapterStats;
-  const commentsHtml = (stats.comments || [])
-    .sort((a, b) => b.timestamp - a.timestamp)
-    .map((comment) => {
-      const userLikedComment =
-        localState.likedComments && localState.likedComments[comment.id];
-      // MODIFIÉ : Utilisation d'une image pour l'avatar
+  const commentListContainer = document.createElement("div");
+  commentListContainer.className = "comment-list";
+
+  const comments = (stats.comments || []).sort(
+    (a, b) => b.timestamp - a.timestamp
+  );
+
+  if (comments.length > 0) {
+    // Construction sécurisée des éléments de commentaire
+    const commentElements = comments.map((comment) => {
+      const itemDiv = document.createElement("div");
+      itemDiv.className = "comment-item";
+      itemDiv.dataset.commentId = comment.id;
+
       const avatarHtml = comment.avatarUrl
         ? `<img src="${comment.avatarUrl}" alt="Avatar" class="comment-avatar">`
         : `<div class="comment-avatar">${comment.username.charAt(0)}</div>`;
-      return `<div class="comment-item" data-comment-id="${
-        comment.id
-      }">${avatarHtml}<div class="comment-content"><div class="comment-header"><span class="comment-username">${
-        comment.username
-      }</span><span class="comment-timestamp">${timeAgo(
-        comment.timestamp
-      )}</span></div><p class="comment-text">${
-        comment.comment
-      }</p><div class="comment-actions"><button class="comment-like-button ${
-        userLikedComment ? "liked" : ""
-      }"><i class="fas fa-heart"></i> <span class="comment-like-count">${
-        comment.likes || 0
-      }</span></button></div></div></div>`;
-    })
-    .join("");
+      itemDiv.innerHTML = avatarHtml;
+
+      const contentDiv = document.createElement("div");
+      contentDiv.className = "comment-content";
+      const headerDiv = document.createElement("div");
+      headerDiv.className = "comment-header";
+
+      const usernameSpan = document.createElement("span");
+      usernameSpan.className = "comment-username";
+      usernameSpan.innerText = comment.username;
+
+      const timestampSpan = document.createElement("span");
+      timestampSpan.className = "comment-timestamp";
+      timestampSpan.innerText = timeAgo(comment.timestamp);
+
+      headerDiv.append(usernameSpan, timestampSpan);
+
+      const textP = document.createElement("p");
+      textP.className = "comment-text";
+      textP.innerText = comment.comment;
+
+      const userLikedComment =
+        localState.likedComments && localState.likedComments[comment.id];
+      const actionsDiv = document.createElement("div");
+      actionsDiv.className = "comment-actions";
+      actionsDiv.innerHTML = `
+                <button class="comment-like-button ${
+                  userLikedComment ? "liked" : ""
+                }">
+                    <i class="fas fa-heart"></i> <span class="comment-like-count">${
+                      comment.likes || 0
+                    }</span>
+                </button>
+            `;
+
+      contentDiv.append(headerDiv, textP, actionsDiv);
+      itemDiv.appendChild(contentDiv);
+      return itemDiv;
+    });
+    commentListContainer.append(...commentElements);
+  } else {
+    commentListContainer.innerHTML = "<p>Aucun commentaire pour le moment.</p>";
+  }
+
   const formDisabled = hasCommented ? "disabled" : "";
   const formMessage = hasCommented
     ? '<p class="form-message">Vous avez déjà commenté ce chapitre.</p>'
     : "";
-  // MODIFIÉ : Ajout de la classe spoiler-hidden par défaut
-  const interactionsHtml = `<div class="chapter-interactions-container"><div class="comments-section spoiler-hidden"><h3 class="comments-section-header">Commentaires (${
-    stats.comments?.length || 0
-  })</h3><form class="comment-form" ${formDisabled}><textarea placeholder="Ajouter un commentaire..." maxlength="150" rows="3" ${formDisabled}></textarea><div class="comment-form-actions"><button class="chapter-like-button ${
-    hasLiked ? "liked" : ""
-  }"><i class="fas fa-heart"></i> J'aime</button><button type="submit" ${formDisabled}>Envoyer</button></div>${formMessage}</form><div class="comment-list">${
-    commentsHtml || "<p>Aucun commentaire pour le moment.</p>"
-  }</div></div></div>`;
+
+  const interactionsHtml = `
+      <div class="chapter-interactions-container">
+        <div class="comments-section spoiler-hidden">
+          <h3 class="comments-section-header">Commentaires (${
+            stats.comments?.length || 0
+          })</h3>
+          <form class="comment-form" ${formDisabled}>
+            <textarea placeholder="Ajouter un commentaire..." maxlength="150" rows="3" ${formDisabled}></textarea>
+            <div class="comment-form-actions">
+              <button class="chapter-like-button ${
+                hasLiked ? "liked" : ""
+              }"><i class="fas fa-heart"></i> J'aime</button>
+              <button type="submit" ${formDisabled}>Envoyer</button>
+            </div>
+            ${formMessage}
+          </form>
+          ${commentListContainer.outerHTML}
+        </div>
+      </div>`;
 
   if (window.innerWidth <= 992 && state.settings.mode === "webtoon") {
     dom.sidebarInteractionsPlaceholder.innerHTML = "";
@@ -136,7 +188,6 @@ export function renderInteractionsSection(localState) {
   }
 }
 
-// ... le reste du fichier ui.js reste identique ...
 export function render(isInitializing = false) {
   renderViewer();
   updateUIOnPageChange();
@@ -144,22 +195,27 @@ export function render(isInitializing = false) {
     dom.viewerContainer.scrollTop = 0;
   }
 }
+
 export function renderViewer() {
   const viewer = document.createElement("div");
   const currentSpread = state.spreads[state.currentSpreadIndex] || [];
+
   const isLandscapeSpread =
     currentSpread.length === 1 &&
     domImages[currentSpread[0]]?.naturalWidth >
       domImages[currentSpread[0]]?.naturalHeight;
+
   viewer.className = `reader-viewer ${state.settings.mode}-mode fit-${state.settings.fit} ${state.settings.direction}-mode`;
   if (isLandscapeSpread) viewer.classList.add("single-landscape-spread");
   if (state.settings.stretchSmallPages) viewer.classList.add("stretch");
   dom.viewerContainer.className = `reader-viewer-container ${state.settings.mode}-mode`;
   dom.viewerContainer.innerHTML = "";
+
   domImages.forEach((img) => {
     img.style.maxWidth = null;
     img.style.maxHeight = null;
   });
+
   if (state.settings.mode === "webtoon") {
     domImages.forEach((img) => {
       if (state.settings.fit === "custom" && state.settings.limitWidth) {
@@ -218,6 +274,7 @@ export function renderViewer() {
   }
   dom.viewerContainer.appendChild(viewer);
 }
+
 export function renderProgressBar() {
   dom.progressBar.className = `reader-progress-bar ${state.settings.direction}-mode`;
   if (state.spreads.length === 0) return;
@@ -231,10 +288,12 @@ export function renderProgressBar() {
     })
     .join("");
 }
+
 export function updateUIOnPageChange() {
   renderProgressBar();
   updateControlsState();
 }
+
 function updateControlsState() {
   updateActiveButtons();
   populateChapterSelect();

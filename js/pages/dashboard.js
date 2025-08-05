@@ -66,25 +66,47 @@ async function loadAndDisplayComments() {
     }
 
     comments.sort((a, b) => b.timestamp - a.timestamp);
+
     comments.forEach((comment) => {
       const row = document.createElement("tr");
       row.dataset.commentId = comment.id;
       row.dataset.seriesSlug = comment.seriesSlug;
       row.dataset.chapterNumber = comment.chapterNumber;
+
       const date = new Date(comment.timestamp).toLocaleString("fr-FR");
-      row.innerHTML = `
-                <td>${comment.seriesSlug}<br><strong>Ch. ${
-        comment.chapterNumber
-      }</strong></td>
-                <td>${comment.username}</td>
-                <td>${comment.comment
-                  .replace(/</g, "<")
-                  .replace(/>/g, ">")}</td>
-                <td>${date}</td>
-                <td>
-                    <button class="action-btn delete-btn" title="Marquer pour suppression"><i class="fas fa-trash-alt"></i></button>
-                </td>
-            `;
+
+      // Cellule Série / Chapitre (construite de manière sécurisée)
+      const cellSeries = document.createElement("td");
+      const strong = document.createElement("strong");
+      strong.innerText = `Ch. ${comment.chapterNumber}`;
+      cellSeries.append(
+        comment.seriesSlug,
+        document.createElement("br"),
+        strong
+      );
+
+      // Cellule Auteur (sécurisée avec .innerText)
+      const cellUsername = document.createElement("td");
+      cellUsername.innerText = comment.username;
+
+      // Cellule Commentaire (sécurisée avec .innerText)
+      const cellComment = document.createElement("td");
+      cellComment.innerText = comment.comment;
+      cellComment.className = "comment-content";
+
+      // Cellule Date (sécurisée avec .innerText)
+      const cellDate = document.createElement("td");
+      cellDate.innerText = date;
+
+      // Cellule Actions (HTML statique donc sûr, créé par élément pour la cohérence)
+      const cellActions = document.createElement("td");
+      const deleteButton = document.createElement("button");
+      deleteButton.className = "action-btn delete-btn";
+      deleteButton.title = "Marquer pour suppression";
+      deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i>'; // Sûr car c'est une chaîne statique
+      cellActions.appendChild(deleteButton);
+
+      row.append(cellSeries, cellUsername, cellComment, cellDate, cellActions);
       tbodyEl.appendChild(row);
     });
   } catch (error) {
@@ -130,7 +152,7 @@ async function loadAndDisplayCacheList() {
                       )
                       .join("")}
                 </ul>
-            `;
+            `; // .innerHTML sûr ici car series.title et data.title viennent de vos fichiers JSON
       container.appendChild(seriesGroupEl);
     });
   } catch (error) {
@@ -171,25 +193,19 @@ export function initDashboardPage() {
   const saveBtn = qs("#save-changes-btn");
   const pendingCountSpan = qs("#pending-count");
 
-  // Gestion du logout
   qs("#logout-btn").addEventListener("click", () => {
     sessionStorage.removeItem("admin_token");
     window.location.href = "/admins.html";
   });
 
-  // Navigation entre les vues
   qsa(".nav-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       const view = btn.dataset.view;
-      if (view) {
-        window.location.hash = view;
-      }
+      if (view) window.location.hash = view;
     });
   });
 
-  // Gestionnaire d'événements global pour le contenu
   contentArea.addEventListener("click", async (e) => {
-    // Logique de purge de cache
     const purgeBtn = e.target.closest(".purge-btn");
     if (purgeBtn) {
       const item = purgeBtn.closest(".chapter-item");
@@ -214,7 +230,7 @@ export function initDashboardPage() {
           body: JSON.stringify({ seriesSlug, chapterNumber }),
         });
         const result = await res.json();
-        if (!res.ok) throw new Error(result.message);
+        if (!res.ok) throw new Error(result.message || `Erreur ${res.status}`);
         purgeBtn.style.backgroundColor = "#28a745";
         purgeBtn.innerHTML = `<i class="fas fa-check"></i> Cache vidé !`;
       } catch (err) {
@@ -230,7 +246,6 @@ export function initDashboardPage() {
       }
     }
 
-    // Logique de modération de commentaires
     const actionBtn = e.target.closest(".action-btn");
     if (actionBtn) {
       const row = actionBtn.closest("tr");
@@ -257,7 +272,6 @@ export function initDashboardPage() {
     }
   });
 
-  // Lancer le routeur initialement et écouter les changements
   window.addEventListener("hashchange", router);
-  router(); // Appel initial
+  router();
 }
