@@ -100,7 +100,9 @@
 
             if (response.ok && result.success) {
               sessionStorage.setItem("admin_token", result.token);
-              window.location.href = "/moderation.html";
+              // --- MODIFICATION PRINCIPALE ---
+              // Redirige vers le nouveau dashboard unifié
+              window.location.href = "/dashboard.html";
             } else {
               errorMessage.textContent =
                 result.message || "Une erreur est survenue.";

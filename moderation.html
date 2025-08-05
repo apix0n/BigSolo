@@ -29,14 +29,31 @@
       h1 {
         margin: 0;
       }
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .header-actions a {
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-family: system-ui, sans-serif;
+      }
       #logout-btn,
-      #save-changes-btn {
+      #save-changes-btn,
+      .header-actions a {
         background: #007bff;
         color: white;
         border: none;
         padding: 0.5rem 1rem;
         border-radius: 4px;
         cursor: pointer;
+      }
+      .header-actions a {
+        background: #17a2b8;
+      }
+      .header-actions a:hover {
+        background: #138496;
       }
       #logout-btn {
         background: #6c757d;
@@ -67,7 +84,6 @@
         padding: 12px 15px;
         text-align: left;
         border-bottom: 1px solid #dee2e6;
-        transition: all 0.3s ease;
       }
       #comments-table th {
         background-color: #f1f3f5;
@@ -85,6 +101,7 @@
         font-size: 1.2rem;
         cursor: pointer;
         padding: 5px;
+        transition: color 0.2s ease;
       }
       .delete-btn {
         color: #dc3545;
@@ -111,10 +128,11 @@
     <div class="container">
       <header>
         <h1>Modération des Commentaires</h1>
-        <div>
+        <div class="header-actions">
           <button id="save-changes-btn">
             Sauvegarder les changements (<span id="pending-count">0</span>)
           </button>
+          <a href="/cache-management.html">Gestion du Cache</a>
           <button id="logout-btn">Déconnexion</button>
         </div>
       </header>
@@ -153,20 +171,9 @@
         saveBtn.style.display = count > 0 ? "inline-block" : "none";
       }
 
-      async function sendDeletionQueue() {
+      function sendDeletionQueue() {
         if (deletionQueue.length === 0) return;
-
-        console.log(
-          `Envoi de ${deletionQueue.length} suppressions en attente...`
-        );
         try {
-          navigator.sendBeacon(
-            "/api/admin/batch-delete",
-            JSON.stringify(deletionQueue)
-          );
-          // Utilisation de sendBeacon pour une fiabilité maximale à la fermeture.
-          // sendBeacon ne permet pas d'envoyer des headers custom, nous devons donc ajuster l'API pour cela.
-          // Pour la simplicité, restons sur fetch avec keepalive.
           fetch("/api/admin/batch-delete", {
             method: "POST",
             headers: {
@@ -176,10 +183,9 @@
             body: JSON.stringify(deletionQueue),
             keepalive: true,
           });
-          deletionQueue = []; // Vider la file d'attente de manière optimiste
+          deletionQueue = [];
         } catch (e) {
           console.error("Erreur lors de l'envoi de la file de suppression", e);
-          // La file n'est pas vidée et sera renvoyée à la prochaine session.
         }
       }
 
@@ -201,17 +207,8 @@
           }
         }
         sessionStorage.removeItem("admin_token");
-        window.location.href = "/admin.html";
+        window.location.href = "/admins.html";
       });
-
-      async function loadComments() {
-        if (!token) {
-          window.location.href = "/admin.html";
-          return;
-        }
-        // ... (le reste de la fonction loadComments est identique)
-      }
-      // ... (le reste du script reste pareil jusqu'à displayComments)
 
       function displayComments(comments) {
         if (comments.length === 0) {
@@ -232,25 +229,24 @@
           const date = new Date(comment.timestamp).toLocaleString("fr-FR");
 
           row.innerHTML = `
-                    <td>${comment.seriesSlug}<br><strong>Ch. ${
+            <td>${comment.seriesSlug}<br><strong>Ch. ${
             comment.chapterNumber
           }</strong></td>
-                    <td>${comment.username}</td>
-                    <td class="comment-content">${comment.comment
-                      .replace(/</g, "<")
-                      .replace(/>/g, ">")}</td>
-                    <td>${date}</td>
-                    <td>
-                        <button class="action-btn delete-btn" title="Marquer pour suppression">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                `;
+            <td>${comment.username}</td>
+            <td class="comment-content">${comment.comment
+              .replace(/</g, "<")
+              .replace(/>/g, ">")}</td>
+            <td>${date}</td>
+            <td>
+                <button class="action-btn delete-btn" title="Marquer pour suppression">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </td>
+          `;
           tbodyElement.appendChild(row);
         });
       }
 
-      // MODIFICATION MAJEURE : Nouvelle logique de gestion des clics
       tbodyElement.addEventListener("click", (e) => {
         const btn = e.target.closest(".action-btn");
         if (!btn) return;
@@ -260,22 +256,16 @@
         const deletionAction = { commentId, seriesSlug, chapterNumber };
 
         if (btn.classList.contains("delete-btn")) {
-          // Ajouter à la file d'attente
           deletionQueue.push(deletionAction);
-
-          // Mettre à jour l'UI
           row.classList.add("marked-for-deletion");
           btn.classList.remove("delete-btn");
           btn.classList.add("undo-btn");
           btn.title = "Annuler la suppression";
           btn.innerHTML = `<i class="fas fa-undo"></i>`;
         } else if (btn.classList.contains("undo-btn")) {
-          // Retirer de la file d'attente
           deletionQueue = deletionQueue.filter(
             (item) => item.commentId !== commentId
           );
-
-          // Mettre à jour l'UI
           row.classList.remove("marked-for-deletion");
           btn.classList.remove("undo-btn");
           btn.classList.add("delete-btn");
@@ -285,26 +275,23 @@
         updatePendingCount();
       });
 
-      // Coller ici le reste du script original (loadComments, etc.)
       (async function init() {
         if (!token) {
-          window.location.href = "/admin.html";
+          window.location.href = "/admins.html";
           return;
         }
         try {
-          console.log("Chargement des commentaires...");
           const response = await fetch("/api/admin/comments", {
             headers: { Authorization: `Bearer ${token}` },
           });
           if (response.status === 401) {
             sessionStorage.removeItem("admin_token");
-            window.location.href = "/admin.html";
+            window.location.href = "/admins.html";
             return;
           }
           if (!response.ok)
             throw new Error(`Erreur serveur: ${response.status}`);
           const comments = await response.json();
-          console.log(`Affichage de ${comments.length} commentaires.`);
           displayComments(comments);
         } catch (error) {
           statusElement.textContent =

@@ -1,23 +1,32 @@
 // js/index.js
-import { loadComponent, qs } from './utils/domUtils.js';
-import { initHeader, setupMobileMenuInteractions } from './components/header.js';
-import { initMainScrollObserver } from './components/observer.js';
+import { loadComponent, qs } from "./utils/domUtils.js";
+import {
+  initHeader,
+  setupMobileMenuInteractions,
+} from "./components/header.js";
+import { initMainScrollObserver } from "./components/observer.js";
 
 async function initCommonComponents() {
-  const headerPlaceholder = qs('#main-header');
-  const mobileMenuPlaceholder = qs('#main-mobile-menu-overlay');
+  const headerPlaceholder = qs("#main-header");
+  const mobileMenuPlaceholder = qs("#main-mobile-menu-overlay");
   const loadPromises = [];
 
   if (headerPlaceholder) {
-    loadPromises.push(loadComponent(headerPlaceholder, '/includes/header.html'));
+    loadPromises.push(
+      loadComponent(headerPlaceholder, "/includes/header.html")
+    );
   } else {
     console.warn("Placeholder #main-header not found. Cannot load header.");
   }
 
   if (mobileMenuPlaceholder) {
-    loadPromises.push(loadComponent(mobileMenuPlaceholder, '/includes/mobile-menu.html'));
+    loadPromises.push(
+      loadComponent(mobileMenuPlaceholder, "/includes/mobile-menu.html")
+    );
   } else {
-    console.warn("Placeholder #main-mobile-menu-overlay not found. Cannot load mobile menu.");
+    console.warn(
+      "Placeholder #main-mobile-menu-overlay not found. Cannot load mobile menu."
+    );
   }
 
   if (loadPromises.length > 0) {
@@ -29,7 +38,7 @@ async function initCommonComponents() {
     }
   }
 
-  if (headerPlaceholder && headerPlaceholder.innerHTML.trim() !== '') {
+  if (headerPlaceholder && headerPlaceholder.innerHTML.trim() !== "") {
     try {
       initHeader();
     } catch (e) {
@@ -37,15 +46,17 @@ async function initCommonComponents() {
     }
   }
 
-  if (mobileMenuPlaceholder && mobileMenuPlaceholder.innerHTML.trim() !== '') {
-    if (typeof setupMobileMenuInteractions === 'function') {
+  if (mobileMenuPlaceholder && mobileMenuPlaceholder.innerHTML.trim() !== "") {
+    if (typeof setupMobileMenuInteractions === "function") {
       try {
         setupMobileMenuInteractions();
       } catch (e) {
         console.error("Error setting up mobile menu interactions:", e);
       }
     } else {
-      console.error("setupMobileMenuInteractions is not available or was not loaded correctly.");
+      console.error(
+        "setupMobileMenuInteractions is not available or was not loaded correctly."
+      );
     }
   }
 }
@@ -56,59 +67,81 @@ async function routeAndInitPage() {
   console.log(`Routing for path: "${path}", bodyId: "${bodyId}"`);
 
   switch (bodyId) {
-    case 'homepage':
+    case "homepage":
       console.log("Initializing homepage.");
-      const { initHomepage } = await import('./pages/homepage.js');
+      const { initHomepage } = await import("./pages/homepage.js");
       await initHomepage();
       initMainScrollObserver();
       break;
 
-    case 'galeriepage':
+    case "galeriepage":
       console.log("Initializing galerie page.");
-      const { initGaleriePage } = await import('./pages/galerie.js');
+      const { initGaleriePage } = await import("./pages/galerie.js");
       await initGaleriePage();
       initMainScrollObserver();
       break;
 
-    case 'presentationpage':
+    case "presentationpage":
       console.log("Initializing presentation page.");
-      const { initPresentationPage } = await import('./pages/presentation.js');
+      const { initPresentationPage } = await import("./pages/presentation.js");
       initPresentationPage();
       initMainScrollObserver();
       break;
 
-    case 'seriescoverspage':
+    case "seriescoverspage":
       console.log("Initializing series covers page.");
-      const { initSeriesCoversPage } = await import('./pages/series-covers.js');
+      const { initSeriesCoversPage } = await import("./pages/series-covers.js");
       await initSeriesCoversPage();
       initMainScrollObserver();
       break;
 
-    case 'seriesdetailpage':
+    case "seriesdetailpage":
       console.log("Initializing series detail page.");
-      const { initSeriesDetailPage } = await import('./pages/series-detail.js');
+      const { initSeriesDetailPage } = await import("./pages/series-detail.js");
       await initSeriesDetailPage();
       break;
 
-    case 'readerpage':
+    case "readerpage":
       console.log("Initializing Manga Reader page.");
-      // MODIFIÉ : L'import pointe maintenant vers le nouveau point d'entrée 'reader.js'
-      const { initMangaReader } = await import('./pages/series-detail/MangaReader/reader.js');
+      const { initMangaReader } = await import(
+        "./pages/series-detail/MangaReader/reader.js"
+      );
       await initMangaReader();
-      // Pas de scroll observer ici car le lecteur gère son propre affichage.
+      break;
+
+    // --- NOUVELLE ROUTE POUR LE DASHBOARD ---
+    case "dashboardpage":
+      console.log("Initializing Admin Dashboard page.");
+      const { initDashboardPage } = await import("./pages/dashboard.js");
+      await initDashboardPage();
+      // L'observer n'est pas nécessaire ici car le contenu est entièrement dynamique et non basé sur le scroll.
       break;
 
     default:
-      console.log('Aucune logique JS spécifique pour cet ID de body ou route non reconnue:', bodyId, path);
+      console.log(
+        "Aucune logique JS spécifique pour cet ID de body ou route non reconnue:",
+        bodyId,
+        path
+      );
+      // On peut toujours appeler l'observer pour des pages inconnues qui pourraient avoir des éléments animables.
       initMainScrollObserver();
       break;
   }
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  const bodyId = document.body.id;
   console.log("DOMContentLoaded event fired.");
+
+  // On ne charge les composants communs (header/menu) que si ce n'est pas une page d'admin
+  const isAdminPage =
+    bodyId === "dashboardpage" ||
+    window.location.pathname.startsWith("/admins");
+
   try {
-    await initCommonComponents();
+    if (!isAdminPage) {
+      await initCommonComponents();
+    }
     await routeAndInitPage();
     console.log("Page initialization complete.");
   } catch (error) {

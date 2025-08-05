@@ -15,8 +15,8 @@ export async function onRequest(context) {
         headers: {
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
-          "X-Cache": "HIT"
-        }
+          "X-Cache": "HIT",
+        },
       });
     } else {
       console.log(`[IMG_CHEST] Cache MISS → No value for key "${cacheKey}"`);
@@ -41,7 +41,9 @@ export async function onRequest(context) {
       });
 
       if (!res.ok) {
-        console.warn(`[IMG_CHEST] Failed fetch (HTTP ${res.status}) → stopping`);
+        console.warn(
+          `[IMG_CHEST] Failed fetch (HTTP ${res.status}) → stopping`
+        );
         break;
       }
 
@@ -51,17 +53,19 @@ export async function onRequest(context) {
         break;
       }
 
-      const simplified = json.data.map(post => ({
+      const simplified = json.data.map((post) => ({
         id: post.slug || post.id,
         views: post.views,
         title: post.title,
-        nsfw: post.nsfw
+        nsfw: post.nsfw,
       }));
 
       allPosts.push(...simplified);
 
       if (json.data.length < 24) {
-        console.log(`[IMG_CHEST] Page ${page} had less than 24 posts → end of data.`);
+        console.log(
+          `[IMG_CHEST] Page ${page} had less than 24 posts → end of data.`
+        );
         break;
       }
     } catch (err) {
@@ -78,14 +82,17 @@ export async function onRequest(context) {
     await env.IMG_CHEST_CACHE.put(cacheKey, payload, { expirationTtl: 3600 });
     console.log(`[IMG_CHEST] KV PUT SUCCESS → Key "${cacheKey}" stored for 1h`);
   } catch (e) {
-    console.error(`[IMG_CHEST] KV PUT ERROR → Could not store key "${cacheKey}":`, e);
+    console.error(
+      `[IMG_CHEST] KV PUT ERROR → Could not store key "${cacheKey}":`,
+      e
+    );
   }
 
   return new Response(payload, {
     headers: {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
-      "X-Cache": "MISS"
-    }
+      "X-Cache": "MISS",
+    },
   });
 }
