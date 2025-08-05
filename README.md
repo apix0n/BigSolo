@@ -1,3 +1,3 @@
 # BigSolo - Site
 
-Le site de Big_Herooooo pour les sorties de Big_Herooooo
+Le site super de Big_Herooooo pour les sorties de Big_Herooooo
