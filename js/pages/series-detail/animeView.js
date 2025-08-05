@@ -284,7 +284,12 @@ export async function renderEpisodePlayerView(
 
   let embedUrl = "";
   if (currentEpisode.type === "vidmoly" && currentEpisode.id) {
+    // On garde la compatibilité avec Vidmoly si besoin
     embedUrl = `https://vidmoly.net/embed-${currentEpisode.id}.html`;
+  } else if (currentEpisode.type === "gdrive" && currentEpisode.id) {
+    // NOUVELLE LOGIQUE POUR GOOGLE DRIVE
+    // On utilise le lien /preview pour l'intégration dans un iframe
+    embedUrl = `https://drive.google.com/file/d/${currentEpisode.id}/preview`;
   }
 
   if (!embedUrl) {
