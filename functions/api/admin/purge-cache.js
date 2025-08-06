@@ -24,8 +24,7 @@ export async function onRequest(context) {
   const authToken = request.headers
     .get("Authorization")
     ?.replace("Bearer ", "");
-  if (authToken !== "SECRET_STATIC_TOKEN_FOR_SIMPLICITY") {
-    // Assurez-vous que ce token correspond à celui de login.js
+  if (authToken !== env.ADMIN_TOKEN) {
     console.error("- Auth token check FAILED.");
     return new Response("Non autorisé", { status: 401 });
   }

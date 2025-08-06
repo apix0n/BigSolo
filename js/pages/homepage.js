@@ -52,7 +52,7 @@ function renderHeroSlide(series) {
       (a, b) => b.indice_ep - a.indice_ep
     )[0];
     if (latestEpisode) {
-      latestEpisodeButtonHtml = `<a href="/${seriesSlug}/episodes/${latestEpisode.indice_ep}" class="hero-cta-button-anime">Dernier Épisode</a>`;
+      latestEpisodeButtonHtml = `<a href="/${seriesSlug}/episodes/${latestEpisode.indice_ep}" class="hero-cta-button-anime">Dernier épisode (Ép. ${latestEpisode.indice_ep})</a>`;
     }
   }
 

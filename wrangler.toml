@@ -16,3 +16,4 @@ id = "0653d72f16bb45adb5155e2ea69e5031"
 [vars]
 ADMIN_USERNAME = ""
 ADMIN_PASSWORD = ""
+ADMIN_TOKEN = ""

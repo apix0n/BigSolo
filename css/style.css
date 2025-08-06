@@ -103,3 +103,10 @@ img.lazy-load-gallery[src*="placeholder_preview.png"] {
 img.lazy-load-gallery.image-loaded-fade-in {
   opacity: 1;
 }
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
