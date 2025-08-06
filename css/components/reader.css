@@ -55,6 +55,11 @@ body#readerpage #main-header {
   background-color: rgba(var(--clr-primary-rgb), 1);
 }
 
+/* Empêcher l'utilisateur de scroll si les options sont ouvertes */
+body:has(.reader-controls-sidebar.open) {
+  overflow: hidden !important;
+}
+
 .reader-viewer-container {
   /* NOUVEAU : On définit une couleur de fond pour le mode clair */
   background-color: #e9ecef;
@@ -139,7 +144,7 @@ body.dark .reader-viewer-container {
 }
 .reader-viewer.webtoon-mode {
   flex-direction: column;
-  gap: 2px;
+  gap: 10px;
 }
 .reader-viewer.webtoon-mode::after {
   content: "";
@@ -252,7 +257,8 @@ body.dark .reader-viewer-container {
   border-radius: 8px;
   padding: 0.3rem;
 }
-.setting-options button {
+.setting-options button,
+.mobile-page-select button {
   flex-grow: 1;
   padding: 0.55rem;
   border: none;
@@ -269,7 +275,8 @@ body.dark .reader-viewer-container {
   gap: 0.5rem;
   font-size: 0.82rem;
 }
-.setting-options button.active {
+.setting-options button.active,
+.mobile-page-select button {
   background-color: var(--clr-primary);
   color: #fff; /* Le blanc reste bon ici pour le contraste */
 }
@@ -292,6 +299,7 @@ body.dark .reader-viewer-container {
   border-radius: 6px;
   padding: 0.6rem;
   flex-shrink: 0;
+  cursor: pointer;
 }
 .nav-controls button:hover {
   background-color: rgba(var(--clr-text-rgb), 0.1);
@@ -590,7 +598,13 @@ body.dark .reader-viewer-container {
   align-items: center;
   gap: 0.3rem;
 }
+.mobile-page-select {
+  display: none;
+}
 @media (max-width: 992px) {
+  #main-header {
+    position: unset !important;
+  }
   #manga-reader-root {
     grid-template-columns: 1fr;
   }
@@ -598,13 +612,7 @@ body.dark .reader-viewer-container {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    position: sticky;
-    top: 61px;
-    left: 0;
-    right: 0;
-    z-index: 1025;
-    background-color: rgba(var(--clr-bg-card-rgb-val), 0.9);
-    backdrop-filter: blur(8px);
+    background-color: var(--clr-bg-card);
     color: var(--clr-text);
     padding: 0.6rem 1rem;
     min-height: 60px;
@@ -727,6 +735,7 @@ body.dark .reader-viewer-container {
   }
   .reader-progress-bar {
     left: 0;
+    display: none;
   }
   .reader-controls-sidebar {
     padding: 1rem;
@@ -754,6 +763,10 @@ body.dark .reader-viewer-container {
   }
   #fit-control-group {
     display: none;
+  }
+  .mobile-page-select {
+    display: flex;
+    gap: 0.5rem;
   }
 }
 @media (min-width: 993px) {

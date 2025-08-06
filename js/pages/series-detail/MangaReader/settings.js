@@ -80,12 +80,12 @@ export function populateChapterSelect() {
     if (!menu || !textSpan) return;
 
     // MODIFICATION : Inclure le titre et tronquer
-    const fullTitle = `Ch. ${state.currentChapter.number} - ${state.currentChapter.title || 'Titre inconnu'}`;
+    const fullTitle = `Ch. ${state.currentChapter.number} : ${state.currentChapter.title || 'Titre inconnu'}`;
     textSpan.textContent = truncateText(fullTitle, 28);
 
     menu.innerHTML = state.allChapterKeys.slice().sort((a, b) => parseFloat(b) - parseFloat(a)).map(key => {
         const data = state.seriesData.chapters[key];
-        const itemTitle = `Ch. ${key} - ${data.title || 'Titre inconnu'}`;
+        const itemTitle = `Ch. ${key} : ${data.title || 'Titre inconnu'}`;
         return `<div class="dropdown-item ${key === state.currentChapter.number ? 'active' : ''}" data-chapter="${key}" title="${itemTitle}">${truncateText(itemTitle, 35)}</div>`;
     }).join('');
 }

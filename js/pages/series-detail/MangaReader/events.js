@@ -256,6 +256,12 @@ export function initializeEvents() {
         dom.sidebar.classList.remove("ltr-mode", "rtl-mode");
         dom.sidebar.classList.add(`${value}-mode`);
       }
+      // Forcer le mode webtoon à l'orientation LTR
+      if (setting === "mode" && value === "webtoon") {
+        state.settings.direction = "ltr";
+        dom.sidebar.classList.remove("rtl-mode");
+        dom.sidebar.classList.add("ltr-mode");
+      }
       saveSettings();
       render();
       if (setting === "mode" && state.settings.mode === "webtoon")
