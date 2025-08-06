@@ -255,11 +255,11 @@ function displayColos() {
 
 function getSortModeText(mode) {
   switch(mode) {
-    case 'date-desc': return 'Trier par date (récent)';
-    case 'date-asc': return 'Trier par date (ancien)';
-    case 'chapter-desc': return 'Trier par chapitre (décroissant)';
-    case 'chapter-asc': return 'Trier par chapitre (croissant)';
-    default: return 'Trier par date (récent)';
+    case 'date-desc': return 'Date (récent)';
+    case 'date-asc': return 'Date (ancien)';
+    case 'chapter-desc': return 'Chapitre (décroissant)';
+    case 'chapter-asc': return 'Chapitre (croissant)';
+    default: return 'Date (récent)';
   }
 }
 
