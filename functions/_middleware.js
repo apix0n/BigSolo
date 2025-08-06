@@ -49,7 +49,7 @@ export async function onRequest(context) {
   if (pathname.endsWith(".html")) {
     pathname = pathname.slice(0, -5);
   }
-  if (pathname === "index") pathname = "/"; // Traite "index" comme racine
+  if (pathname === "/index") pathname = "/"; // Traite "index" comme racine
 
   // Redirection legacy (si besoin)
   if (pathname.startsWith("/series-detail")) {
