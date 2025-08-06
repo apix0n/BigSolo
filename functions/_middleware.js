@@ -82,20 +82,7 @@ export async function onRequest(context) {
       htmlFile: "/index.html",
       image: "/img/banner.jpg",
     },
-    "/index.html": {
-      title: "Accueil - BigSolo",
-      description:
-        "Retrouvez toutes les sorties de Big_herooooo en un seul et unique endroit !",
-      htmlFile: "/index.html",
-      image: "/img/banner.jpg",
-    },
     "/presentation": {
-      title: "Questions & Réponses - BigSolo",
-      description:
-        "Les réponses de BigSolo à vos questions sur son parcours dans le scantrad.",
-      htmlFile: "/presentation.html",
-    },
-    "/presentation.html": {
       title: "Questions & Réponses - BigSolo",
       description:
         "Les réponses de BigSolo à vos questions sur son parcours dans le scantrad.",
