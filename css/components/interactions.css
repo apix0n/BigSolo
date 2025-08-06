@@ -6,10 +6,6 @@
   margin-top: 0.5rem;
 }
 
-.reader-controls-sidebar .chapter-interactions-container {
-  padding-top: 1.5rem;
-}
-
 #reader-viewer-container + .chapter-interactions-container {
   padding: 1.5rem 5%;
   /* MODIFIÉ : Utilise la variable de thème globale */

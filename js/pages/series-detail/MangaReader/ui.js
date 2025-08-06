@@ -24,8 +24,18 @@ export function handleError(message) {
 
 export async function setupUI() {
   dom.root = qs("#manga-reader-root");
+
+  // ↓↓↓ MODIFICATION : Appliquer la classe si la sidebar doit être réduite au chargement ↓↓↓
+  if (state.settings.sidebarCollapsed) {
+    dom.root.classList.add("sidebar-collapsed");
+  }
+  // ↑↑↑ FIN DE LA MODIFICATION ↑↑↑
+
   // Cet innerHTML est sûr car il s'agit de la structure statique de la page, sans données utilisateur.
   dom.root.innerHTML = `
+    <button id="reader-sidebar-toggle" title="Masquer les contrôles">
+        <i class="fas fa-chevron-left"></i>
+    </button>
     <div id="reader-mobile-header">
         <button id="mobile-settings-toggle" class="reader-button" title="Ouvrir les options"><i class="fas fa-cog"></i></button>
         <div class="mobile-header-info">
@@ -38,9 +48,7 @@ export async function setupUI() {
         </div>
     </div>
     <div id="reader-sidebar-overlay"></div>
-    <aside class="reader-controls-sidebar ${
-      state.isSidebarOpen ? "open" : ""
-    } ${state.settings.direction}-mode"></aside>
+    <aside class="reader-controls-sidebar ${state.settings.direction}-mode"></aside>
     <div class="reader-viewer-container"></div>
     <div id="webtoon-interactions-placeholder"></div>
     <div class="reader-progress-bar"></div>
@@ -57,6 +65,7 @@ export async function setupUI() {
     mobilePageInfo: qs(".mobile-header-page"),
     mobileHeaderStats: qs(".mobile-header-stats"),
     webtoonInteractionsPlaceholder: qs("#webtoon-interactions-placeholder"),
+    readerSidebarToggle: qs("#reader-sidebar-toggle"),
   });
   setupSidebarControls();
 }
@@ -70,9 +79,7 @@ function setupSidebarControls() {
     state.currentChapter.title || ""
   }</h2><p class="reader-series-title"><a href="/${slugify(
     state.seriesData.title
-  )}">${
-    state.seriesData.title
-  }</a></p>${statsHtml}</div>
+  )}">${state.seriesData.title}</a></p>${statsHtml}</div>
   <div class="control-group"><label>Chapitre</label>
   <div class="nav-controls"><button id="prev-chapter-btn" title="Chapitre précédent"><i class="fas fa-angle-left"></i></button>
     <div class="custom-dropdown" id="chapter-dropdown"><button class="dropdown-toggle">
