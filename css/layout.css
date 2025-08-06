@@ -114,6 +114,12 @@ section {
   }
 }
 
+@media (max-width: 1240px) {
+  .header-left-group {
+    gap: 0.8rem;
+  }
+}
+
 @media (max-width: 1100px) {
   .gallery-grid {
     column-count: 4;
@@ -134,10 +140,6 @@ section {
 
   header#main-header {
     min-height: 55px;
-  }
-
-  .header-left-group {
-    gap: 0.8rem;
   }
 
   main {

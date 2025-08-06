@@ -45,7 +45,6 @@
   display: flex;
   align-items: center;
   gap: 0.8rem;
-  margin-left: 2rem;
   flex-grow: 1;
   justify-content: flex-start;
 }
@@ -146,7 +145,7 @@
 }
 
 /* --- Media Queries --- */
-@media (max-width: 768px) {
+@media (max-width: 1150px) {
   .hamburger-menu-btn {
     display: block;
   }
@@ -157,13 +156,21 @@
     display: none;
   }
 
-  .site-title-link {
-    font-size: 1.6rem;
-  }
-
   .theme-toggle {
     font-size: 0.8rem;
     width: 32px;
     height: 32px;
+  }
+}
+
+@media (max-width: 1240px) {
+  .desktop-navigation-wrapper {
+    margin-left: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .site-title-link {
+    font-size: 1.6rem;
   }
 }
