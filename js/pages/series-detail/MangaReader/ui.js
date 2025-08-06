@@ -394,5 +394,17 @@ function updateMobileHeader() {
       state.currentChapter.title || ""
     }`;
     dom.mobileChapterInfo.textContent = truncateText(chapterTitle, 30);
+    const currentSpread = state.spreads[state.currentSpreadIndex] || [];
+    const firstPageInSpread =
+      currentSpread.length > 0 ? currentSpread[0] + 1 : 0;
+    const lastPageInSpread =
+      currentSpread.length > 0
+        ? currentSpread[currentSpread.length - 1] + 1
+        : 0;
+    let pageText = `Pg. ${firstPageInSpread}`;
+    if (lastPageInSpread > firstPageInSpread)
+      pageText += `-${lastPageInSpread}`;
+    dom.mobilePageInfo.textContent = `${pageText} / ${state.pages.length}`;
+    dom.mobilePageInfo.dataset.pageNumber = firstPageInSpread;
   }
 }

@@ -735,7 +735,24 @@ body.dark .reader-viewer-container {
   }
   .reader-progress-bar {
     left: 0;
+  }
+  .reader-viewer-container.webtoon-mode ~ .reader-progress-bar {
     display: none;
+  }
+  :has(.reader-viewer-container.webtoon-mode) .mobile-header-page::after {
+    content: attr(data-page-number);
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    background-color: rgba(var(--clr-primary-rgb), 0.8);
+    height: 2em;
+    width: 2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
   }
   .reader-controls-sidebar {
     padding: 1rem;
