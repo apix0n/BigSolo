@@ -426,7 +426,8 @@ body.dark .detail-episode-item {
 
 .player-episode-item.active .player-episode-likes {
   cursor: default;
-  pointer-events: auto; /* Réactive les clics UNIQUEMENT sur cet élément */
+  pointer-events: auto;
+  /* Réactive les clics UNIQUEMENT sur cet élément */
 }
 
 .player-episode-item:not(.active) .player-episode-likes:hover {
@@ -663,7 +664,7 @@ body.dark .detail-episode-item {
     margin-top: 0.8rem;
   }
 
-  .series-detail-container > .detail-description {
+  .series-detail-container>.detail-description {
     display: block;
     font-size: 0.8rem;
     line-height: 1.5;
@@ -747,5 +748,15 @@ body.dark .detail-episode-item {
     width: auto;
     padding: 0.7rem 1rem;
     font-size: 0.7rem;
+  }
+
+  .detail-chapter-item .chapter-side-info,
+  .episode-side-info {
+    width: 100%;
+  }
+
+  .detail-episode-date {
+    font-size: 0.75rem;
+    margin-left: auto;
   }
 }

@@ -191,4 +191,8 @@ body.dark .detail-chapter-item {
     .detail-chapter-date {
       font-size: .75rem;
     }
+
+    .detail-chapter-date {
+      margin-left: auto;
+    }
 }
