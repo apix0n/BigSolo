@@ -345,10 +345,6 @@
     backdrop-filter: none;
   }
 
-  .hero-info-top {
-    /* Conteneur pour le titre et les tags */
-  }
-
   .hero-info .recommended-title,
   .hero-info .hero-description,
   .hero-info .hero-latest-info {
@@ -358,7 +354,7 @@
   .hero-info .hero-series-title {
     font-size: 2.2rem;
     margin-bottom: 0.8rem;
-    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5); /* On peut remettre une ombre légère si besoin */
+    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2); /* On peut remettre une ombre légère si besoin */
   }
 
   .hero-info .hero-tags {

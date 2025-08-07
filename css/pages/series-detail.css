@@ -175,7 +175,7 @@ p.detail-description {
   background-color: transparent;
   color: var(--clr-text-sub);
   cursor: pointer;
-  border-bottom: 3px solid transparent;
+  border-bottom: 2px solid transparent;
   margin-bottom: -1px;
   transition: color 0.3s ease, border-color 0.3s ease;
   text-decoration: none;
@@ -183,54 +183,62 @@ p.detail-description {
 
 .detail-nav-button:hover {
   color: var(--clr-primary);
+  border-bottom-color: var(--clr-primary);
 }
 
 .detail-nav-button.active {
   color: var(--clr-primary);
-  border-bottom-color: var(--clr-primary);
+  border-bottom: 3px solid var(--clr-primary);
 }
 
 .episode-list-container {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  border-radius: 10px;
+  background-color: var(--clr-bg-card);
+  border: 1px solid rgba(var(--clr-text-rgb), 0.1);
+  overflow: hidden;
 }
 
 .detail-episode-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.8rem 1.2rem;
-  background-color: var(--clr-bg-card);
-  border: 1px solid rgba(var(--clr-text-rgb), 0.08);
+  padding: 1rem;
+  border-bottom: 1px solid rgba(var(--clr-text-rgb), 0.05);
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease,
     border-color 0.2s ease;
   text-decoration: none;
 }
 
+.detail-episode-item:last-child {
+  border-bottom: none;
+}
+
 body.dark .detail-episode-item {
-  background-color: rgba(var(--clr-primary-rgb), 0.05);
-  border-color: rgba(var(--clr-text-rgb), 0.1);
+  background-color: var(--clr-bg-card);
 }
 
 .detail-episode-item:hover {
-  background-color: rgba(var(--clr-primary-rgb), 0.1);
-  border-color: rgba(var(--clr-primary-rgb), 0.3);
+  background-color: rgba(var(--clr-primary-rgb), 0.1) !important;
+}
+
+.detail-episode-item:hover .episode-main-info {
   transform: translateX(5px);
 }
 
 .episode-main-info {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: 0.5rem;
   overflow: hidden;
   flex-grow: 1;
   margin-right: 0.5rem;
 }
 
 .detail-episode-number {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--clr-primary);
 }
 
@@ -265,19 +273,19 @@ body.dark .detail-episode-item {
 }
 
 .player-series-title {
-  font-size: 1rem;
-  color: var(--clr-text-sub);
+  font-size: 1.2rem;
+  color: var(--clr-primary);
   text-decoration: none;
+  font-weight: 500;
 }
 
 .player-series-title:hover {
-  color: var(--clr-primary);
+  opacity: 0.7;
 }
 
 .player-episode-main-title {
   font-size: 1.8rem;
   font-weight: 700;
-  margin-top: 0.25rem;
 }
 
 .player-layout-grid {
@@ -337,17 +345,18 @@ body.dark .detail-episode-item {
 .player-sidebar {
   background: var(--clr-bg-card);
   border-radius: 14px;
-  padding: 1rem;
+  padding: .5rem;
   display: flex;
   flex-direction: column;
 }
 
 .sidebar-title {
-  font-size: 1.2rem;
   font-weight: 700;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
+  padding: .5rem;
+  margin-bottom: .5rem;
   border-bottom: 1px solid rgba(var(--clr-text-rgb), 0.1);
+  font-size: 1.5rem;
+  padding-top: .25rem;
 }
 
 .player-episode-list-wrapper {
@@ -391,7 +400,6 @@ body.dark .detail-episode-item {
   overflow: hidden;
   text-overflow: ellipsis;
   flex-grow: 1;
-  margin-right: 0.5rem;
 }
 
 .player-episode-likes {
@@ -587,7 +595,7 @@ body.dark .detail-episode-item {
     justify-content: center;
   }
 
-  .episode-nav-button.list-button {
+  .episode-nav-button.last-button {
     display: none;
   }
 }
@@ -668,6 +676,7 @@ body.dark .detail-episode-item {
 
   .inline-song-info-mobile {
     display: flex;
+    flex-direction: column;
   }
 
   .inline-songs-container {
@@ -691,7 +700,7 @@ body.dark .detail-episode-item {
 
   .inline-song-info-mobile .inline-song-title {
     font-size: 0.75rem;
-    max-width: 120px;
+    max-width: 135px;
   }
 
   .detail-navigation-tabs {
@@ -706,7 +715,10 @@ body.dark .detail-episode-item {
 
   .detail-episode-item {
     padding: 0.7rem;
+    padding-left: .8rem;
     font-size: 0.8rem;
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .player-header {

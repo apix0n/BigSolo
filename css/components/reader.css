@@ -57,10 +57,10 @@ body:has(.reader-controls-sidebar.open) {
 
 .reader-viewer-container {
   background-color: #e9ecef;
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - 70px - 22px);
   -webkit-user-select: none;
   user-select: none;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 70px - 22px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -80,7 +80,7 @@ body.dark .reader-viewer-container {
   justify-content: center;
   align-items: center;
   min-height: 100%;
-  padding: 1.5rem;
+  padding: .5rem;
   box-sizing: border-box;
 }
 .reader-viewer img {
@@ -134,7 +134,7 @@ body.dark .reader-viewer-container {
   object-fit: contain;
 }
 .reader-viewer.fit-height img {
-  max-height: calc(100vh - 60px - 3rem);
+  max-height: calc(100vh - 70px - 22px - 1rem);
   width: auto;
 }
 .reader-viewer.fit-width img {
@@ -143,7 +143,7 @@ body.dark .reader-viewer-container {
 }
 .reader-viewer.fit-both img {
   max-width: 100%;
-  max-height: calc(100vh - 60px - 3rem);
+  max-height: calc(100vh - 70px - 22px - 1rem);
   object-fit: contain;
 }
 .reader-viewer.fit-original img {
@@ -204,6 +204,7 @@ body.dark .reader-viewer-container {
   padding-bottom: 1rem;
   margin-bottom: 0.5rem;
   flex-shrink: 0;
+  border-bottom: 1px solid var(--clr-primary);
 }
 .reader-stats-box {
   display: flex;

@@ -2,7 +2,6 @@
 
 function renderInlineThemeSong(song, type) {
     if (!song) return '';
-    const typeShort = type === 'Opening' ? 'OP' : 'ED';
     const mobileTitle = song.title_op_fr_an || song.title_op_jp_an;
     const title_fr = song.title_op_fr_an || '';
     const title_jp = song.title_op_jp_an ? ` [${song.title_op_jp_an}]` : '';
@@ -17,7 +16,7 @@ function renderInlineThemeSong(song, type) {
               ${author}
           </div>
           <div class="inline-song-info-mobile">
-              <span class="inline-song-type">${typeShort}</span>
+              <span class="inline-song-type">${type}</span>
               <span class="inline-song-title">${mobileTitle}</span>
           </div>
         </a>

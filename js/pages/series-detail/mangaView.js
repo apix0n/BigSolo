@@ -139,8 +139,8 @@ function renderChaptersListForVolume(chaptersToRender, seriesSlug) {
 
       const likesHtml = `<span class="detail-chapter-likes ${
         localState.hasLiked ? "liked" : ""
-      }" title="J'aime"><i class="fas fa-heart"></i> ${displayLikes}</span>`;
-      const commentsHtml = `<span class="detail-chapter-comments" title="Commentaires"><i class="fas fa-comment"></i> ${
+        }" title="J'aime" data-like-count="${displayLikes}"><i class="fas fa-heart"></i> ${displayLikes}</span>`;
+      const commentsHtml = `<span class="detail-chapter-comments" title="Commentaires" data-comment-count="${serverStats.comments?.length || 0}"><i class="fas fa-comment"></i> ${
         serverStats.comments?.length || 0
       }</span>`;
 
@@ -231,16 +231,16 @@ function displayGroupedChapters(seriesData, seriesSlug) {
       const chaptersInVolume = grouped.get(volKey);
       const licenseDetails = volumeLicenseInfo.get(volKey);
       const isActiveByDefault = true;
-      let volumeHeaderContent = `<h4 class="volume-title-main">${volumeDisplayName}</h4>`;
+      let volumeHeaderContent = `<h4 class="volume-title-main">${volumeDisplayName}`;
       if (licenseDetails) {
-        volumeHeaderContent += `<div class="volume-license-details"><span class="volume-license-text">Disponible en papier, commandez-le</span><a href="${
-          licenseDetails[0]
-        }" target="_blank" rel="noopener noreferrer" class="volume-license-link">ici !</a>${
-          licenseDetails[1]
-            ? `<span class="volume-release-date">${licenseDetails[1]}</span>`
-            : ""
-        }</div>`;
+        volumeHeaderContent += `${licenseDetails[1]
+          ? ` <span class="volume-release-date">(${licenseDetails[1]})</span> `
+          : ""
+          }`
+        volumeHeaderContent += `<span class="volume-license-text">Disponible en papier, commandez-le <a href="${licenseDetails[0]
+          }" target="_blank" rel="noopener noreferrer" class="volume-license-link">ici !</a></span>`;
       }
+      volumeHeaderContent += "</h4>"
       return `<div class="volume-group"><div class="volume-header ${
         isActiveByDefault ? "active" : ""
       }" data-volume="${volKey}">${volumeHeaderContent}<i class="fas fa-chevron-down volume-arrow ${
@@ -274,7 +274,7 @@ export async function renderMangaView(seriesData, seriesSlug) {
   const container = qs("#series-detail-section");
   if (!container || !seriesData) return;
   const navTabsHtml = generateNavTabs(seriesData, seriesSlug, "manga");
-  const chaptersSectionHtml = `<div id="chapters-list-section" class="chapters-main-header"><h3 class="section-title">Liste des Chapitres</h3><div class="chapter-sort-filter"><button id="sort-volumes-btn" class="sort-button" title="Trier les volumes"><i class="fas fa-sort-numeric-down-alt"></i></button></div></div><div class="chapters-accordion-container"></div>`;
+  const chaptersSectionHtml = `<div id="chapters-list-section" class="chapters-main-header"><h3 class="section-title">Liste des chapitres</h3><div class="chapter-sort-filter"><button id="sort-volumes-btn" class="sort-button" title="Trier les volumes"><i class="fas fa-sort-numeric-down-alt"></i></button></div></div><div class="chapters-accordion-container"></div>`;
   container.innerHTML = `${generateSeriesHeader(
     seriesData
   )}<div id="reading-actions-container"></div>${navTabsHtml}${chaptersSectionHtml}`;
