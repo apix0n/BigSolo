@@ -60,12 +60,9 @@ function renderReadingActions(seriesData, seriesSlug) {
       nextChapter = chapters[lastReadIndex + 1];
     }
   }
-  const lastChapterUrl = `/${seriesSlug}/${String(lastChapter).replaceAll(
-    ".",
-    "-"
-  )}`;
+  const lastChapterUrl = `/${seriesSlug}/${String(lastChapter)}`;
   const nextChapterUrl = nextChapter
-    ? `/${seriesSlug}/${String(nextChapter).replaceAll(".", "-")}`
+    ? `/${seriesSlug}/${String(nextChapter)}`
     : null;
   let buttonsHtml = "";
   if (nextChapterUrl) {
@@ -148,7 +145,7 @@ function renderChaptersListForVolume(chaptersToRender, seriesSlug) {
       }</span>`;
 
       if (!isLicensed && c.groups && c.groups.Big_herooooo) {
-        href = `/${seriesSlug}/${String(c.chapter).replaceAll(".", "-")}`;
+        href = `/${seriesSlug}/${String(c.chapter)}`;
         if (c.groups.Big_herooooo.includes("/proxy/api/imgchest/chapter/")) {
           const parts = c.groups.Big_herooooo.split("/");
           const imgchestPostId = parts[parts.length - 1];
