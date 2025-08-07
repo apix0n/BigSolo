@@ -562,13 +562,18 @@ body.dark .detail-episode-item {
 
 @media (max-width: 992px) {
   .player-layout-grid {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
   }
 
   .player-sidebar {
-    grid-row: 2;
+    order: 2;
     margin-top: 1.5rem;
     max-height: 300px;
+  }
+
+  .player-main-content {
+    order: 1;
   }
 
   .episode-navigation {
