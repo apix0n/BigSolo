@@ -314,10 +314,22 @@ export function renderViewer() {
         // Sous-cas 2b: C'est une page portrait seule (début/fin de chapitre). Elle a besoin d'un placeholder.
         else {
           const placeholder = document.createElement("div");
-          if (state.settings.direction === "rtl") {
-            viewer.append(placeholder, image);
+          if (state.currentSpreadIndex === 0) {
+            // Pour la première planche
+            if (state.settings.direction === "rtl") {
+              // En RTL, l'image va à gauche
+              viewer.append(image, placeholder);
+            } else {
+              // En LTR, l'image va à droite
+              viewer.append(placeholder, image);
+            }
           } else {
-            viewer.append(image, placeholder);
+            // Pour toutes les autres planches
+            if (state.settings.direction === "rtl") {
+              viewer.append(placeholder, image);
+            } else {
+              viewer.append(image, placeholder);
+            }
           }
         }
       }
