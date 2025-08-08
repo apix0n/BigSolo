@@ -51,15 +51,6 @@ export async function onRequest(context) {
   }
   if (pathname === "/index") pathname = "/"; // Traite "index" comme racine
 
-  // Redirection legacy (si besoin)
-  if (pathname.startsWith("/series-detail")) {
-    const slugWithPotentialSubpaths = pathname.substring(
-      "/series-detail".length
-    );
-    const newUrl = new URL(slugWithPotentialSubpaths, url.origin);
-    return Response.redirect(newUrl.toString(), 301);
-  }
-
   // --- GESTION SPÉCIFIQUE DES URLS DE LA GALERIE ---
   if (pathname.startsWith("/galerie")) {
     const metaData = {

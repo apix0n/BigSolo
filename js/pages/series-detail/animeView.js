@@ -184,7 +184,7 @@ export async function renderEpisodesListView(seriesData, seriesSlug) {
       <div id="reading-actions-container"></div>
       ${navTabsHtml}
       <div id="chapters-list-section" class="episodes-main-header">
-          <h3 class="section-title">Liste des Épisodes</h3>
+          <h3 class="section-title">Liste des épisodes</h3>
       </div>
       <div class="episode-list-container">
           ${episodeListHtml}
@@ -252,7 +252,7 @@ export async function renderEpisodePlayerView(
       }" class="player-episode-item ${isActive}" data-episode-number="${
         ep.indice_ep
       }">
-          <span class="player-episode-number">Épisode ${ep.indice_ep}</span>
+          <span class="player-episode-number">Ép. ${ep.indice_ep}</span>
           <span class="player-episode-title">${
             ep.title_ep || "Titre inconnu"
           }</span>
@@ -320,7 +320,10 @@ export async function renderEpisodePlayerView(
             </div>
             <div class="episode-navigation">
                 ${prevButton}
-                <a href="/${seriesSlug}/episodes" class="episode-nav-button list-button"><i class="fas fa-list-ul"></i> Liste</a>
+                ${currentEpisode.indice_ep === chronoSortedEpisodes[chronoSortedEpisodes.length - 1].indice_ep 
+                  ? `<span class="episode-nav-button last-button disabled"><i class="fas fa-fast-forward"></i> Dernier</span>`
+                  : `<a href="/${seriesSlug}/episodes/${chronoSortedEpisodes[chronoSortedEpisodes.length - 1].indice_ep}" class="episode-nav-button last-button"><i class="fas fa-fast-forward"></i> Dernier</a>`
+                }
                 ${nextButton}
             </div>
           </div>
