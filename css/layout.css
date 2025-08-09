@@ -33,7 +33,7 @@ body.dark header#main-header {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.8rem;
 }
 
 .mobile-menu-overlay {

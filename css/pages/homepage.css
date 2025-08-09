@@ -8,6 +8,7 @@
   position: relative;
   left: 50%;
   right: 50%;
+  top: -70px;
   margin-left: -50vw; 
   margin-right: -50vw;
   padding-bottom: 2rem;
@@ -17,7 +18,7 @@
   position: relative;
   width: 100vw;
   max-width: 100vw;
-  height: 400px;
+  height: 470px;
   border-radius: 0; /* Suppression des coins arrondis */
   overflow: hidden;
   background-color: var(--clr-bg-card);
@@ -31,6 +32,7 @@
 }
 
 .hero-slide {
+  padding-top: 70px;
   position: absolute;
   top: 0;
   left: 0;
@@ -236,7 +238,7 @@
 .hero-image {
   position: absolute;
   right: 0;
-  bottom: -30px;
+  bottom: -110px;
   width: 45%;
   height: 105%;
   display: flex;
@@ -519,7 +521,7 @@
 
 @media (max-width: 768px) {
   .hero-carousel {
-    height: 400px;
+    height: 470px;
   }
   .hero-info {
     padding: 1.2rem;
