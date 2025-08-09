@@ -12,14 +12,14 @@
 
     const applyDarkTheme = () => {
       htmlEl.classList.add('dark');
-      htmlEl.style.backgroundColor = '#15171a';
-      htmlEl.style.color = '#eceff4';
+      // htmlEl.style.backgroundColor = '#15171a'; // Géré par CSS
+      // htmlEl.style.color = '#eceff4'; // Géré par CSS
     };
 
     const applyLightTheme = () => {
       htmlEl.classList.remove('dark');
-      htmlEl.style.backgroundColor = '#f7f8fc';
-      htmlEl.style.color = '#222831';
+      // htmlEl.style.backgroundColor = '#f7f8fc'; // Géré par CSS
+      // htmlEl.style.color = '#222831'; // Géré par CSS
     };
 
     if (savedTheme === 'dark' || (!savedTheme && prefersDarkSys)) {
@@ -63,14 +63,14 @@ window.themeUtils = {
 
     localStorage.setItem("mv-theme", isDark ? "dark" : "light");
 
-    // Mise à jour des styles inline pour l'anti-flash si nécessaire (mais les variables CSS devraient suffire)
-    if (isDark) {
-      htmlEl.style.backgroundColor = '#15171a';
-      htmlEl.style.color = '#eceff4';
-    } else {
-      htmlEl.style.backgroundColor = '#f7f8fc';
-      htmlEl.style.color = '#222831';
-    }
+    // Les styles inline ne sont plus nécessaires ici, car les variables CSS s'en chargent.
+    // if (isDark) {
+    //   htmlEl.style.backgroundColor = '#15171a';
+    //   htmlEl.style.color = '#eceff4';
+    // } else {
+    //   htmlEl.style.backgroundColor = '#f7f8fc';
+    //   htmlEl.style.color = '#222831';
+    // }
     return isDark;
   },
 

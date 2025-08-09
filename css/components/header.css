@@ -14,31 +14,23 @@
 
 .site-title-link {
   text-decoration: none;
-  color: var(--clr-text);
+  color: var(--clr-header-logo);
   font-weight: 700;
   font-size: 2.2rem;
   position: relative;
   line-height: 1;
-  transition: color 0.3s ease;
+  transition: color 0.3s ease, font-weight 0.3s ease, letter-spacing 0.3s ease;
+  letter-spacing: -0.5px; /* Initial spacing */
 }
 
 .site-title-link:hover {
-  color: var(--clr-primary);
+  color: var(--clr-header-logo);
+  font-weight: 800;
+  letter-spacing: 1px;
 }
 
 .site-title-link::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -6px;
-  width: 0;
-  height: 2px;
-  background: var(--clr-primary);
-  transition: width 0.3s ease;
-}
-
-.site-title-link:hover::after {
-  width: 100%;
+  content: none; /* Remove underline effect */
 }
 
 .desktop-navigation-wrapper {
@@ -73,7 +65,7 @@
 
 .desktop-nav a {
   text-decoration: none;
-  color: var(--clr-text);
+  color: var(--clr-header-text);
   font-weight: 600;
   position: relative;
   padding: 0.2em 0.1em;
@@ -81,7 +73,7 @@
 }
 
 .desktop-nav a:hover {
-  color: var(--clr-primary);
+  color: var(--clr-header-text-hover);
 }
 
 .desktop-nav a::after {
@@ -91,7 +83,7 @@
   bottom: -6px;
   width: 0;
   height: 2px;
-  background: var(--clr-primary);
+  background: var(--clr-header-text-hover);
   transition: width 0.3s ease;
 }
 
@@ -101,7 +93,7 @@
 }
 
 .desktop-nav a.active-nav-link {
-  color: var(--clr-primary);
+  color: var(--clr-header-text-hover);
   font-weight: 700;
 }
 
@@ -115,19 +107,20 @@
 }
 
 .desktop-social-icons a {
-  color: var(--clr-text);
+  color: var(--clr-header-icon);
   font-size: 1.25rem;
-  transition: color 0.3s ease;
+  transition: color 0.3s ease, transform 0.2s ease;
 }
 
 .desktop-social-icons a:hover {
-  color: var(--clr-primary);
+  color: var(--clr-header-icon);
+  transform: translateY(-2px) scale(1.05);
 }
 
 .theme-toggle {
   background: none;
-  border: 2px solid var(--clr-primary);
-  color: var(--clr-primary);
+  border: none;
+  color: var(--clr-header-icon);
   border-radius: 50%;
   width: 38px;
   height: 38px;
@@ -135,13 +128,12 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 1rem;
-  transition: background 0.3s ease, color 0.3s ease;
+  font-size: 1.2rem;
+  transition: transform 0.4s ease;
 }
 
 .theme-toggle:hover {
-  background: var(--clr-primary);
-  color: #fff;
+  transform: rotate(360deg);
 }
 
 /* --- Media Queries --- */
@@ -157,7 +149,7 @@
   }
 
   .theme-toggle {
-    font-size: 0.8rem;
+    font-size: 1rem;
     width: 32px;
     height: 32px;
   }

@@ -23,6 +23,16 @@ html.dark {
   --clr-accent-light: #ff6b6b;
   --clr-accent-dark: #ff7f7f;
 
+  /* Header specific colors */
+  --clr-header-logo-light: #000000;
+  --clr-header-logo-dark: #ffffff;
+  --clr-header-text-light: #495057; /* Dark Gray */
+  --clr-header-text-dark: #adb5bd; /* Light Gray */
+  --clr-header-text-hover-light: #000000;
+  --clr-header-text-hover-dark: #ffffff;
+  --clr-header-icon-light: #000000;
+  --clr-header-icon-dark: #ffffff;
+
   --clr-bg: var(--clr-bg-light);
   --clr-bg-card: var(--clr-bg-card-light);
   --clr-text: var(--clr-text-light);
@@ -33,6 +43,11 @@ html.dark {
   --clr-accent-rgb: 255, 107, 107;
   --clr-text-rgb: 34, 40, 49;
   --clr-bg-rgb-val: 247, 248, 252;
+
+  --clr-header-logo: var(--clr-header-logo-light);
+  --clr-header-text: var(--clr-header-text-light);
+  --clr-header-text-hover: var(--clr-header-text-hover-light);
+  --clr-header-icon: var(--clr-header-icon-light);
 
   --series-fixed-cover-width-desktop: 180px;
   --series-fixed-cover-width-mobile: 120px;
@@ -51,6 +66,11 @@ body.dark {
   --clr-accent-rgb: 255, 127, 127;
   --clr-text-rgb: 236, 239, 244;
   --clr-bg-rgb-val: 21, 23, 26;
+
+  --clr-header-logo: var(--clr-header-logo-dark);
+  --clr-header-text: var(--clr-header-text-dark);
+  --clr-header-text-hover: var(--clr-header-text-hover-dark);
+  --clr-header-icon: var(--clr-header-icon-dark);
 }
 
 * {
