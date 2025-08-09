@@ -46,15 +46,58 @@ function renderHeroSlide(series) {
     );
   const latestChapter = chaptersArray.length > 0 ? chaptersArray[0] : null;
 
+  // Boutons
+  let latestChapterButtonHtml = "";
+  if (latestChapter) {
+    latestChapterButtonHtml = `<a href="/${seriesSlug}/${String(latestChapter.chapter).replaceAll(".", "-")}" class="hero-cta-button">Dernier chapitre (Ch. ${latestChapter.chapter})</a>`;
+  }
   let latestEpisodeButtonHtml = "";
   if (seriesData.episodes && seriesData.episodes.length > 0) {
     const latestEpisode = [...seriesData.episodes].sort(
       (a, b) => b.indice_ep - a.indice_ep
     )[0];
     if (latestEpisode) {
-      latestEpisodeButtonHtml = `<a href="/${seriesSlug}/episodes/${latestEpisode.indice_ep}" class="hero-cta-button-anime">Dernier épisode (Ép. ${latestEpisode.indice_ep})</a>`;
+      latestEpisodeButtonHtml = `<a href="/${seriesSlug}/episodes/${latestEpisode.indice_ep}" class="hero-cta-button-anime">Dernier épisode (Ep. ${latestEpisode.indice_ep})</a>`;
     }
   }
+
+  // Statut + pastille (desktop)
+  let statusText = seriesData.release_status || "En cours";
+  let statusDotClass = statusText.toLowerCase().includes("fini") ? "status-dot finished" : "status-dot";
+  let statusHtml = `
+    <span class="status">
+      <span class="${statusDotClass}"></span>
+      ${statusText}
+    </span>
+  `;
+
+  // Bloc info desktop
+  let latestInfoHtml = "";
+  if (latestChapterButtonHtml || latestEpisodeButtonHtml) {
+    latestInfoHtml = `
+      <div class="hero-latest-info">
+        ${latestChapterButtonHtml}
+        ${latestEpisodeButtonHtml}
+        ${statusHtml}
+      </div>
+    `;
+  }
+
+  // Bloc info mobile (statut sous tags, boutons en bas)
+  let mobileStatusHtml = `
+    <div class="hero-mobile-status">
+      <span class="status">
+        <span class="${statusDotClass}"></span>
+        ${statusText}
+      </span>
+    </div>
+  `;
+  let mobileActionsHtml = `
+    <div class="hero-mobile-actions">
+      ${latestChapterButtonHtml}
+      ${latestEpisodeButtonHtml}
+    </div>
+  `;
 
   const backgroundImageUrl = seriesData.cover || "/img/placeholder_preview.png";
   const characterImageUrl = `/img/reco/${jsonFilename.replace(
@@ -85,29 +128,20 @@ function renderHeroSlide(series) {
                 .map((tag) => `<span class="tag">${tag}</span>`)
                 .join("")}
             </div>
+            <div class="hero-mobile-status mobile-only">
+              ${mobileStatusHtml}
+            </div>
             <p class="hero-description">${description}</p>
           </div>
           <div class="hero-actions">
-            <a href="/${seriesSlug}" class="hero-cta-button">Découvrir la série</a>
-            ${latestEpisodeButtonHtml}
-            ${
-              latestChapter
-                ? `
-              <div class="hero-latest-info">
-                Chapitre ${latestChapter.chapter}
-                <span class="status">• ${
-                  seriesData.release_status || "En cours"
-                }</span>
-              </div>
-            `
-                : ""
-            }
+            ${latestInfoHtml}
+          </div>
+          <div class="hero-mobile-actions mobile-only">
+            ${mobileActionsHtml}
           </div>
         </div>
         <div class="hero-image">
-          <img src="${characterImageUrl}" alt="${
-    seriesData.title
-  }" onerror="this.style.display='none'">
+          <img src="${characterImageUrl}" alt="${seriesData.title}" onerror="this.style.display='none'">
         </div>
       </div>
     </div>
