@@ -49,7 +49,7 @@ function renderHeroSlide(series) {
   // Boutons
   let latestChapterButtonHtml = "";
   if (latestChapter) {
-    latestChapterButtonHtml = `<a href="/${seriesSlug}/${String(latestChapter.chapter).replaceAll(".", "-")}" class="hero-cta-button">Dernier chapitre (Ch. ${latestChapter.chapter})</a>`;
+    latestChapterButtonHtml = `<a href="/${seriesSlug}/${String(latestChapter.chapter)}" class="hero-cta-button">Dernier chapitre (Ch. ${latestChapter.chapter})</a>`;
   }
   let latestEpisodeButtonHtml = "";
   if (seriesData.episodes && seriesData.episodes.length > 0) {
@@ -259,7 +259,7 @@ function renderSeriesCard(series) {
       last_updated_ts: parseDateToTimestamp(chapData.last_updated || 0),
       url:
         chapData.groups && chapData.groups.Big_herooooo !== ""
-          ? `/${seriesSlug}/${String(chapNum).replaceAll(".", "-")}`
+          ? `/${seriesSlug}/${String(chapNum)}`
           : null,
     }))
     .filter((chap) => chap.url)
