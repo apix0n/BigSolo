@@ -11,14 +11,16 @@ html.dark {
 
 :root {
   --clr-bg-light: #f7f8fc;
-  --clr-bg-dark: #15171a;
+  --clr-bg-dark: #151618;
   --clr-bg-card-light: #ffffff;
-  --clr-bg-card-dark: #1e2024;
-  --clr-text-light: #222831;
+  --clr-bg-card-dark: #1b1c1e;
+  --clr-text-light: #222529;
   --clr-text-dark: #eceff4;
-  --clr-text-sub-light: #69707d;
-  --clr-text-sub-dark: #cad0da;
-  --clr-primary-light: #0095AD;
+  --clr-text-sub-light: #70747b;
+  --clr-text-sub-dark: #d2d6db;
+  --clr-background-reader-dark: #111111;
+  --clr-background-reader-light: #f7f8fc;
+  --clr-primary-light: #0095ad;
   --clr-primary-dark: #1ab6b9;
   --clr-accent-light: #ff6b6b;
   --clr-accent-dark: #ff7f7f;
@@ -35,8 +37,13 @@ html.dark {
 
   --clr-bg: var(--clr-bg-light);
   --clr-bg-card: var(--clr-bg-card-light);
+  --clr-bg-card-rgb: 255, 255, 255;
   --clr-text: var(--clr-text-light);
+  --clr-text-rgb: 34, 40, 49;
   --clr-text-sub: var(--clr-text-sub-light);
+  --clr-text-sub-rgb: 112, 116, 123;
+  --clr-background-reader: var(--clr-background-reader-light);
+  --clr-background-reader-rgb: 247, 248, 252;
   --clr-primary: var(--clr-primary-light);
   --clr-primary-rgb: 0, 149, 173;
   --clr-accent: var(--clr-accent-light);

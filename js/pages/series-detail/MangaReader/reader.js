@@ -3,9 +3,9 @@ import { qs, slugify } from "../../../utils/domUtils.js";
 import { state } from "./state.js";
 import { setupUI, handleError, renderInteractionsSection } from "./ui.js";
 import { fetchAndLoadPages } from "./data.js";
-import { getInitialPageNumberFromUrl, preloadImages } from "./navigation.js";
+import { getInitialPageNumberFromUrl } from "./navigation.js";
 import { loadSettings } from "./settings.js";
-import { initializeEvents, attachInteractionListeners } from "./events.js";
+import { initializeEvents, attachInteractionListeners, updateLayout } from "./events.js";
 import {
   fetchSeriesStats,
   getLocalInteractionState,
@@ -23,6 +23,7 @@ export async function initMangaReader() {
   }
 
   try {
+    // 1. Initialisation de l'état
     const readerData = JSON.parse(dataPlaceholder.textContent);
     state.seriesData = readerData.series;
     state.currentChapter = {
@@ -35,11 +36,19 @@ export async function initMangaReader() {
 
     document.title = `${state.seriesData.title} - Ch. ${state.currentChapter.number} | BigSolo`;
 
+    // 2. Chargement des paramètres utilisateur
     loadSettings();
 
-    await setupUI();
+    // 3. Mise en place de l'interface (HTML/CSS)
+    setupUI();
+
+    // 4. Initialisation des événements
     initializeEvents();
 
+    // 5. Mise à jour du layout pour les sidebars (important !)
+    updateLayout();
+
+    // 6. Chargement des stats et interactions
     const seriesSlug = slugify(state.seriesData.title);
     const chapterNumber = state.currentChapter.number;
     const interactionKey = `interactions_${seriesSlug}_${chapterNumber}`;
@@ -49,43 +58,29 @@ export async function initMangaReader() {
       getLocalInteractionState(interactionKey),
     ]);
 
-    const serverChapterStats = stats[chapterNumber] || {
-      likes: 0,
-      comments: [],
-    };
+    const serverChapterStats = stats[chapterNumber] || { likes: 0, comments: [] };
     let optimisticStats = JSON.parse(JSON.stringify(serverChapterStats));
 
-    // CORRECTION : Logique de comptage optimiste améliorée
     if (localState.hasLiked) {
-      optimisticStats.likes = Math.max(optimisticStats.likes, 0) + 1;
+      optimisticStats.likes = (optimisticStats.likes || 0) + 1;
     }
-
-    // Pour les commentaires, s'assurer que ceux postés localement sont bien présents
     if (localState.pendingComments) {
-      const serverCommentIds = new Set(
-        optimisticStats.comments.map((c) => c.id)
-      );
-      const newComments = localState.pendingComments.filter(
-        (pc) => !serverCommentIds.has(pc.id)
-      );
+      const serverCommentIds = new Set(optimisticStats.comments.map((c) => c.id));
+      const newComments = localState.pendingComments.filter((pc) => !serverCommentIds.has(pc.id));
       optimisticStats.comments = [...newComments, ...optimisticStats.comments];
     }
-
-    // On s'assure aussi que le nombre total de commentaires est juste
-    optimisticStats.comments.length = new Set(
-      optimisticStats.comments.map((c) => c.id)
-    ).size;
-
     state.chapterStats = optimisticStats;
 
     renderInteractionsSection(localState);
     attachInteractionListeners();
 
+    // 6. Chargement des images du manga
     const initialPageNumber = getInitialPageNumberFromUrl();
-    fetchAndLoadPages(initialPageNumber);
-    preloadImages();
+    await fetchAndLoadPages(initialPageNumber);
+
   } catch (error) {
     handleError(`Impossible de charger le lecteur : ${error.message}`);
     console.error(error);
   }
 }
+// Pas de modification nécessaire ici, le calcul combiné est fait dans l’UI (voir ui.js)

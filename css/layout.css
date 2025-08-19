@@ -17,7 +17,8 @@ body.dark header#main-header {
 }
 
 .header-container {
-  padding: 1rem 5%;
+  padding: 0;
+  /* padding géré par .header-logo-center et .header-actions */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -31,8 +32,11 @@ body.dark header#main-header {
 }
 
 .header-actions {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: 14.5rem;
   gap: 0.8rem;
 }
 
@@ -58,18 +62,22 @@ body.dark header#main-header {
   visibility: visible;
 }
 
-main {
-  padding: 3rem 5%;
+@media (min-width: 769px) {
+  main > section:not(.full-width) {
+    padding-left: 16rem;
+    padding-right: 3rem;
+  }
 }
 
 section {
-  margin-bottom: 4rem;
+  margin-bottom: 3.5rem;
 }
 
 .series-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(550px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  gap: 20px;
+  justify-content: start;
 }
 
 .gallery-grid {
@@ -122,11 +130,12 @@ section {
   }
 
   main {
-    padding: 1.5rem 4%;
+    padding: 1.5rem 7%;
   }
 
   section {
-    margin-bottom: 2.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 
   .carousel-track {
@@ -137,6 +146,6 @@ section {
 
   .series-grid {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 20px;
   }
 }

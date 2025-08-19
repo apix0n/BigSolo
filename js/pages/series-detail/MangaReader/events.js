@@ -2,45 +2,372 @@
 import { qs, qsa, slugify } from "../../../utils/domUtils.js";
 import { state, dom, domImages } from "./state.js";
 import {
-  render,
   renderViewer,
-  updateUIOnPageChange,
+  activateChapterStats,
   renderInteractionsSection,
+  updateUIOnPageChange,
+  refreshChapterStatsUI,
 } from "./ui.js";
 import { calculateSpreads } from "./data.js";
+import { changeSpread, navigateToChapter } from "./navigation.js";
 import {
-  goToPage,
-  goToSpread,
-  changeSpread,
-  navigateToChapter,
-} from "./navigation.js";
-import { saveSettings, cycleFitMode, updateSliderStates } from "./settings.js";
+  saveSettings,
+  settingsConfig,
+  updateAllSettingsUI,
+} from "./settings.js";
 import {
   queueAction,
   getLocalInteractionState,
   setLocalInteractionState,
   addPendingComment,
 } from "../../../utils/interactions.js";
-// MODIFIÉ : Import de la nouvelle fonction
 import { assignUserIdentityForChapter } from "../../../utils/usernameGenerator.js";
 
 let scrollTimeout = null;
-let isSpoilerRevealed = false; // Pour se souvenir de l'état du flou
+
+export function updateLayout() {
+  let infoWidth = 0;
+  let settingsWidth = 0;
+  const rootStyle = getComputedStyle(document.documentElement);
+  const infoWidthRem = parseFloat(
+    rootStyle.getPropertyValue("--sidebar-info-width")
+  );
+  const settingsWidthRem = parseFloat(
+    rootStyle.getPropertyValue("--sidebar-settings-width")
+  );
+  const baseFontSize = parseFloat(rootStyle.fontSize);
+
+  // --- NOUVELLE LOGIQUE DE POSITIONNEMENT ---
+  if (state.settings.infoSidebarOpen && dom.infoSidebar) {
+    infoWidth = infoWidthRem * baseFontSize;
+    dom.infoSidebar.style.transform = "translateX(0)";
+  } else if (dom.infoSidebar) {
+    dom.infoSidebar.style.transform = "translateX(-100%)";
+  }
+
+  if (state.settings.settingsSidebarOpen && dom.settingsSidebar) {
+    settingsWidth = settingsWidthRem * baseFontSize;
+    dom.settingsSidebar.style.transform = `translateX(${infoWidth}px)`;
+  } else if (dom.settingsSidebar) {
+    const totalOffset = infoWidth + settingsWidthRem * baseFontSize;
+    dom.settingsSidebar.style.transform = `translateX(-${totalOffset}px)`;
+  }
+
+  // Décale le container du manga
+  const totalMargin = infoWidth + settingsWidth;
+  const readerContainer = dom.viewerContainer?.parentElement;
+  if (readerContainer) {
+    readerContainer.style.marginLeft = `${totalMargin}px`;
+  }
+}
+
+export function initializeEvents() {
+  console.log("Initialisation des événements du lecteur...");
+
+  dom.toggleInfoBtn.addEventListener("click", () => {
+    state.settings.infoSidebarOpen = !state.settings.infoSidebarOpen;
+    dom.toggleInfoBtn.classList.toggle(
+      "active",
+      state.settings.infoSidebarOpen
+    );
+    saveSettings();
+    updateLayout();
+  });
+
+  dom.toggleSettingsBtn.addEventListener("click", () => {
+    state.settings.settingsSidebarOpen = !state.settings.settingsSidebarOpen;
+    dom.toggleSettingsBtn.classList.toggle(
+      "active",
+      state.settings.settingsSidebarOpen
+    );
+    saveSettings();
+    updateLayout();
+  });
+
+  // --- AJOUT : Gestion du bouton global like ---
+  if (dom.toggleLikeBtn) {
+    dom.toggleLikeBtn.addEventListener("click", () => {
+      const seriesSlug = slugify(state.seriesData.title);
+      const chapterNumber = state.currentChapter.number;
+      const interactionKey = `interactions_${seriesSlug}_${chapterNumber}`;
+      let localState = getLocalInteractionState(interactionKey) || {};
+      const isLiked = !!localState.liked;
+
+      // Toggle like
+      localState.liked = !isLiked;
+      setLocalInteractionState(interactionKey, localState);
+
+      // Ajoute à la file d'attente
+      queueAction(seriesSlug, {
+        type: localState.liked ? "like" : "unlike",
+        chapter: chapterNumber,
+      });
+
+      // Met à jour l'UI (bouton global + stats sidebar)
+      updateLikeUI();
+    });
+  }
+
+  // --- AJOUT : Gestion du bouton like dans la sidebar (chapter-stats-details) ---
+  document.addEventListener("click", (e) => {
+    const likeBtn = e.target.closest(".chapter-like-btn");
+    if (likeBtn) {
+      const seriesSlug = slugify(state.seriesData.title);
+      const chapterNumber = state.currentChapter.number;
+      const interactionKey = `interactions_${seriesSlug}_${chapterNumber}`;
+      let localState = getLocalInteractionState(interactionKey) || {};
+      const isLiked = !!localState.liked;
+
+      // Toggle like
+      localState.liked = !isLiked;
+      setLocalInteractionState(interactionKey, localState);
+
+      // Ajoute à la file d'attente
+      queueAction(seriesSlug, {
+        type: localState.liked ? "like" : "unlike",
+        chapter: chapterNumber,
+      });
+
+      // Met à jour l'UI (bouton global + stats sidebar)
+      updateLikeUI();
+    }
+  });
+
+  // --- AJOUT : Gestion du like sur les commentaires ---
+  document.addEventListener("click", (e) => {
+    const commentLikeBtn = e.target.closest(".comment-like-action");
+    if (commentLikeBtn) {
+      const commentItem = commentLikeBtn.closest(".comment-item");
+      if (!commentItem) return;
+      const commentId = commentItem.dataset.commentId;
+      const seriesSlug = slugify(state.seriesData.title);
+      const chapterNumber = state.currentChapter.number;
+      const interactionKey = `interactions_${seriesSlug}_${chapterNumber}`;
+      let localState = getLocalInteractionState(interactionKey) || {};
+      if (!localState.likedComments) localState.likedComments = [];
+      const idx = localState.likedComments.indexOf(commentId);
+      const isLiked = idx !== -1;
+
+      // Toggle like
+      if (isLiked) {
+        localState.likedComments.splice(idx, 1);
+      } else {
+        localState.likedComments.push(commentId);
+      }
+      setLocalInteractionState(interactionKey, localState);
+
+      // Ajoute à la file d'attente
+      queueAction(seriesSlug, {
+        type: isLiked ? "unlike_comment" : "like_comment",
+        chapter: chapterNumber,
+        commentId,
+      });
+
+      // Met à jour l'UI
+      updateCommentLikesUI();
+    }
+  });
+
+  if (dom.chapterList) {
+    dom.chapterList.addEventListener("click", (e) => {
+      e.preventDefault();
+      const link = e.target.closest("a");
+      if (link) {
+        const chapterId = link.dataset.chapterId;
+        if (chapterId && chapterId !== state.currentChapter.number) {
+          // Redirige vers l'URL du chapitre (reload propre)
+          const seriesSlug = slugify(state.seriesData.title);
+          window.location.href = `/${seriesSlug}/${chapterId}`;
+        } else {
+          activateChapterStats(link);
+        }
+      }
+    });
+  }
+
+  setupSettingsEvents();
+
+  document.addEventListener("keydown", handleKeyDown);
+  dom.viewerContainer.addEventListener("click", handleViewerClick);
+  dom.viewerContainer.addEventListener("scroll", handleWebtoonScroll, {
+    passive: true,
+  });
+
+  console.log("Événements du lecteur initialisés.");
+}
+
+function setupSettingsEvents() {
+  console.log("Configuration des événements de paramètres...");
+
+  // --- Logique pour les boutons principaux (Mode, Ajustement) ---
+  qsa(".main-setting-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const settingName = btn.dataset.setting;
+      const config = settingsConfig[settingName];
+      const currentValue = state.settings[settingName];
+      const currentIndex = config.options.findIndex(
+        (opt) => opt.value === currentValue
+      );
+      const nextIndex = (currentIndex + 1) % config.options.length;
+      state.settings[settingName] = config.options[nextIndex].value;
+
+      if (settingName === "mode") {
+        calculateSpreads();
+      }
+
+      renderViewer();
+      saveSettings();
+      updateAllSettingsUI();
+    });
+  });
+
+  // --- Logique pour les boutons secondaires (Décalage, Direction, Étirer) ---
+  qsa(".secondary-toggle-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const subSetting = btn.dataset.subSetting;
+      if (subSetting === "direction") {
+        state.settings.direction =
+          state.settings.direction === "ltr" ? "rtl" : "ltr";
+      } else {
+        state.settings[subSetting] = !state.settings[subSetting];
+      }
+
+      if (subSetting === "doublePageOffset") {
+        calculateSpreads();
+      }
+
+      renderViewer();
+      saveSettings();
+      updateAllSettingsUI();
+    });
+  });
+
+  // --- NOUVELLE LOGIQUE POUR LES SLIDERS INTERACTIFS ---
+  qsa(".slider-control").forEach((control) => {
+    const header = control.querySelector(".slider-header");
+    const slider = control.querySelector(".PB-range-slider");
+    const valueDisplay = control.querySelector(".PB-range-slidervalue");
+    const settingName = control.dataset.subSetting; // 'limitWidth' ou 'limitHeight'
+    const valueSettingName =
+      settingName === "limitWidth" ? "customMaxWidth" : "customMaxHeight";
+
+    // 1. Écouteur pour le clic sur l'en-tête (la "checkbox")
+    if (header) {
+      header.addEventListener("click", () => {
+        state.settings[settingName] = !state.settings[settingName];
+        renderViewer();
+        saveSettings();
+        updateAllSettingsUI();
+      });
+    }
+
+    // 2. Écouteur pour le mouvement du slider
+    if (slider && valueDisplay) {
+      slider.addEventListener("input", () => {
+        const newValue = slider.value;
+        valueDisplay.textContent = `${newValue}px`;
+        state.settings[valueSettingName] = parseInt(newValue, 10);
+        renderViewer();
+      });
+
+      slider.addEventListener("change", saveSettings);
+
+      // Empêche le contrôle du slider avec les flèches du clavier
+      slider.addEventListener("keydown", (e) => {
+        if (
+          ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)
+        ) {
+          e.preventDefault();
+        }
+      });
+    }
+  });
+  console.log("Événements de paramètres configurés.");
+}
+
+export function attachInteractionListeners() {
+  const seriesSlug = slugify(state.seriesData.title);
+  const chapterNumber = state.currentChapter.number;
+  const interactionKey = `interactions_${seriesSlug}_${chapterNumber}`;
+
+  if (dom.commentSendBtn) {
+    const newSendBtn = dom.commentSendBtn.cloneNode(true);
+    dom.commentSendBtn.parentNode.replaceChild(newSendBtn, dom.commentSendBtn);
+    dom.commentSendBtn = newSendBtn;
+
+    dom.commentSendBtn.addEventListener("click", async () => {
+      const commentText = dom.commentTextarea.value.trim();
+      if (commentText.length === 0) return;
+
+      const userIdentity = await assignUserIdentityForChapter(interactionKey);
+      const newComment = {
+        id: `${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+        username: userIdentity.username,
+        avatarUrl: userIdentity.avatarUrl,
+        comment: commentText,
+        timestamp: Date.now(),
+        likes: 0,
+      };
+
+      addPendingComment(interactionKey, newComment);
+      state.chapterStats.comments.unshift(newComment);
+      renderInteractionsSection(getLocalInteractionState(interactionKey));
+      attachInteractionListeners();
+      queueAction(seriesSlug, {
+        type: "add_comment",
+        chapter: chapterNumber,
+        payload: newComment,
+      });
+      dom.commentTextarea.value = "";
+      dom.commentTextarea.style.height = "auto";
+
+      // --- Ajout : refresh dynamique du compteur de commentaires dans la sidebar ---
+      console.log(
+        "[MangaReader][events] Comment added, refreshing chapter stats UI"
+      );
+      if (typeof refreshChapterStatsUI === "function") {
+        refreshChapterStatsUI();
+      } else if (window.refreshChapterStatsUI) {
+        window.refreshChapterStatsUI();
+      }
+    });
+  }
+
+  if (dom.commentTextarea) {
+    dom.commentTextarea.addEventListener("input", () => {
+      dom.commentTextarea.style.height = "auto";
+      const newHeight = Math.min(dom.commentTextarea.scrollHeight, 120);
+      dom.commentTextarea.style.height = `${newHeight}px`;
+    });
+  }
+}
 
 function handleKeyDown(e) {
-  if (state.isModalOpen) return;
-  const isLtr = state.settings.direction === "ltr";
-  if (e.key === "ArrowRight") changeSpread(isLtr ? 1 : -1);
-  if (e.key === "ArrowLeft") changeSpread(isLtr ? -1 : 1);
+  if (state.settings.mode === "webtoon") return;
+  const direction = state.settings.direction;
+  if (e.key === "ArrowRight") changeSpread(direction === "ltr" ? 1 : -1);
+  if (e.key === "ArrowLeft") changeSpread(direction === "ltr" ? -1 : 1);
 }
+
+function handleViewerClick(e) {
+  if (state.settings.mode === "webtoon") return;
+  const rect = dom.viewerContainer.getBoundingClientRect();
+  const zone = (e.clientX - rect.left) / rect.width;
+  const direction = state.settings.direction;
+  if (zone < 0.35) changeSpread(direction === "ltr" ? -1 : 1);
+  else if (zone > 0.65) changeSpread(direction === "ltr" ? 1 : -1);
+}
+
 function handleWebtoonScroll() {
   if (state.settings.mode !== "webtoon") return;
   if (scrollTimeout) window.cancelAnimationFrame(scrollTimeout);
   scrollTimeout = window.requestAnimationFrame(() => {
-    const triggerPoint = window.innerHeight * 0.2;
+    const triggerPoint = window.innerHeight * 0.4;
     let closestImageIndex = -1;
     let minDistance = Infinity;
-    domImages.forEach((img, index) => {
+    const imagesInViewer = qsa(".reader-viewer-container img");
+
+    imagesInViewer.forEach((img, index) => {
       const rect = img.getBoundingClientRect();
       if (rect.bottom > 0 && rect.top < window.innerHeight) {
         const distance = Math.abs(rect.top - triggerPoint);
@@ -50,6 +377,7 @@ function handleWebtoonScroll() {
         }
       }
     });
+
     if (closestImageIndex !== -1) {
       const newSpreadIndex = state.pageToSpreadMap[closestImageIndex];
       if (
@@ -62,294 +390,65 @@ function handleWebtoonScroll() {
     }
   });
 }
-function handleSliderChange(e, setting, otherInput) {
-  if (e.target.disabled) return;
-  const value = parseInt(e.target.value, 10) || 0;
-  state.settings[setting] = value;
-  otherInput.value = value;
-  renderViewer();
-  if (e.type === "change") saveSettings();
-}
-function handleDropdownClick(e) {
-  const chapterItem = e.target.closest("#chapter-dropdown .dropdown-item");
-  if (chapterItem && chapterItem.dataset.chapter) {
-    window.location.href = `/${slugify(state.seriesData.title)}/${
-      chapterItem.dataset.chapter
-    }`;
-    return;
-  }
-  const pageItem = e.target.closest("#page-dropdown .dropdown-item");
-  if (pageItem) {
-    if (pageItem.dataset.pageIndex) {
-      goToPage(parseInt(pageItem.dataset.pageIndex, 10));
-    } else if (pageItem.dataset.spreadIndex) {
-      goToSpread(parseInt(pageItem.dataset.spreadIndex, 10));
-    }
-  }
-}
 
-export function attachInteractionListeners() {
+// --- AJOUT : Fonction pour mettre à jour l'état visuel des likes (global + sidebar) ---
+function updateLikeUI() {
   const seriesSlug = slugify(state.seriesData.title);
   const chapterNumber = state.currentChapter.number;
   const interactionKey = `interactions_${seriesSlug}_${chapterNumber}`;
-  const container = qs(".chapter-interactions-container");
-  if (!container) return;
+  const localState = getLocalInteractionState(interactionKey) || {};
+  const isLiked = !!localState.liked;
 
-  // NOUVEAU : Gestion du clic sur l'overlay de spoil
-  const spoilerSection = qs(".comments-section", container);
-  if (spoilerSection) {
-    if (isSpoilerRevealed) {
-      spoilerSection.classList.remove("spoiler-hidden");
-    }
-
-    spoilerSection.addEventListener("click", (e) => {
-      if (spoilerSection.classList.contains("spoiler-hidden")) {
-        spoilerSection.classList.remove("spoiler-hidden");
-        isSpoilerRevealed = true;
-      }
-    });
+  // Bouton global
+  if (dom.toggleLikeBtn) {
+    dom.toggleLikeBtn.classList.toggle("liked", isLiked);
   }
 
-  const commentForm = qs(".comment-form", container);
-  if (commentForm) {
-    const textarea = qs("textarea", commentForm);
-    textarea.addEventListener("input", () => {
-      const lines = textarea.value.split("\n");
-      if (lines.length > 5) {
-        // Un peu plus de lignes permises
-        textarea.value = lines.slice(0, 5).join("\n");
-      }
-    });
-    commentForm.addEventListener("submit", async (e) => {
-      // La fonction devient async
-      e.preventDefault();
-      const commentText = textarea.value.trim();
-      if (commentText.length === 0) return;
+  // Sidebar (chapter-stats-details)
+  const stats = document.querySelector(".chapter-stats-details");
+  if (stats) {
+    const heart = stats.querySelector(".fa-heart");
+    const count = stats.querySelector(".chapter-likes-count");
+    if (heart) heart.classList.toggle("liked", isLiked);
+    if (count) count.classList.toggle("liked", isLiked);
 
-      // MODIFIÉ : Utilisation du nouveau système d'identité
-      const userIdentity = await assignUserIdentityForChapter(interactionKey);
-      const newComment = {
-        id: `${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-        username: userIdentity.username,
-        avatarUrl: userIdentity.avatarUrl,
-        comment: commentText,
-        timestamp: Date.now(),
-        likes: 0,
-      };
-
-      addPendingComment(interactionKey, newComment);
-
-      let localState = getLocalInteractionState(interactionKey);
-      state.chapterStats.comments.unshift(newComment);
-
-      renderInteractionsSection(localState);
-      qs(".comments-section")?.classList.remove("spoiler-hidden");
-      isSpoilerRevealed = true;
-
-      attachInteractionListeners();
-      updateUIOnPageChange();
-
-      queueAction(seriesSlug, {
-        type: "add_comment",
-        chapter: chapterNumber,
-        payload: newComment,
-      });
-    });
-    const chapterLikeBtn = qs(".chapter-like-button", commentForm);
-    if (chapterLikeBtn) {
-      chapterLikeBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        let localState = getLocalInteractionState(interactionKey);
-        const wasLiked = localState.hasLiked || false;
-        state.chapterStats.likes += wasLiked ? -1 : 1;
-        chapterLikeBtn.classList.toggle("liked", !wasLiked);
-        updateUIOnPageChange();
-        queueAction(seriesSlug, {
-          type: wasLiked ? "unlike" : "like",
-          chapter: chapterNumber,
-        });
-        localState.hasLiked = !wasLiked;
-        setLocalInteractionState(interactionKey, localState);
-      });
-    }
+    // Compteur optimiste (+1 si like local)
+    let baseLikes =
+      state.chapterStats && typeof state.chapterStats.likes === "number"
+        ? state.chapterStats.likes
+        : 0;
+    count.textContent = isLiked ? baseLikes + 1 : baseLikes;
   }
-  const commentList = qs(".comment-list", container);
-  if (commentList) {
-    commentList.addEventListener("click", (e) => {
-      const likeButton = e.target.closest(".comment-like-button");
-      if (!likeButton) return;
-      const commentItem = e.target.closest(".comment-item");
-      const commentId = commentItem.dataset.commentId;
-      const likeCountSpan = qs(".comment-like-count", likeButton);
-      let localState = getLocalInteractionState(interactionKey);
-      if (!localState.likedComments) localState.likedComments = {};
-      const wasLiked = localState.likedComments[commentId] || false;
-      const actionType = wasLiked ? "unlike_comment" : "like_comment";
-      const currentLikes = parseInt(likeCountSpan.textContent, 10);
-      likeCountSpan.textContent = wasLiked
-        ? currentLikes - 1
-        : currentLikes + 1;
-      likeButton.classList.toggle("liked", !wasLiked);
-      queueAction(seriesSlug, {
-        type: actionType,
-        chapter: chapterNumber,
-        payload: { commentId },
-      });
-      localState.likedComments[commentId] = !wasLiked;
-      setLocalInteractionState(interactionKey, localState);
-    });
-  }
+
+  // Bouton like dans la liste des chapitres (si besoin, à ajouter si multi-chapitre)
 }
 
-export function initializeEvents() {
-  isSpoilerRevealed = false; // Réinitialiser l'état du flou à chaque initialisation de chapitre
+// --- AJOUT : Fonction pour mettre à jour l'état visuel des likes sur les commentaires ---
+function updateCommentLikesUI() {
+  const seriesSlug = slugify(state.seriesData.title);
+  const chapterNumber = state.currentChapter.number;
+  const interactionKey = `interactions_${seriesSlug}_${chapterNumber}`;
+  const localState = getLocalInteractionState(interactionKey) || {};
+  const likedComments = localState.likedComments || [];
 
-  if (dom.readerSidebarToggle) {
-    dom.readerSidebarToggle.addEventListener("click", () => {
-      dom.root.classList.toggle("sidebar-collapsed");
+  document.querySelectorAll(".comment-item").forEach((item) => {
+    const commentId = item.dataset.commentId;
+    const btn = item.querySelector(".comment-like-action");
+    const heart = btn?.querySelector(".fa-heart");
+    const countSpan = btn?.querySelector("span");
+    if (!btn || !heart || !countSpan) return;
+    const baseLikes =
+      parseInt(countSpan.dataset.baseLikes || countSpan.textContent, 10) || 0;
+    const isLiked = likedComments.includes(commentId);
 
-      // Mettre à jour le titre du bouton pour l'accessibilité
-
-      const isCollapsed = dom.root.classList.contains("sidebar-collapsed");
-      dom.readerSidebarToggle.setAttribute(
-        "title",
-        isCollapsed ? "Afficher les contrôles" : "Masquer les contrôles"
-      );
-
-      // ↓↓↓ MODIFICATION : Sauvegarder l'état dans les paramètres ↓↓↓
-      state.settings.sidebarCollapsed = isCollapsed;
-      saveSettings();
-      // ↑↑↑ FIN DE LA MODIFICATION ↑↑↑
-    });
-  }
-
-  document.addEventListener("keydown", handleKeyDown);
-  dom.mobileSettingsBtn.addEventListener("click", () => {
-    const isOpen = dom.sidebar.classList.contains("open");
-    dom.sidebar.classList.toggle("open", !isOpen);
-    dom.sidebarOverlay.classList.toggle("open", !isOpen);
-    dom.root.classList.toggle("sidebar-is-open", !isOpen);
-  });
-  dom.sidebarOverlay.addEventListener("click", () => {
-    dom.sidebar.classList.remove("open");
-    dom.sidebarOverlay.classList.remove("open");
-    dom.root.classList.remove("sidebar-is-open");
-  });
-  dom.sidebar.addEventListener("click", (e) => {
-    const button = e.target.closest("button");
-    handleDropdownClick(e);
-    if (!button || button.closest(".custom-dropdown")) return;
-    const actionMap = {
-      "first-page-btn": () => goToSpread(0),
-      "prev-page-btn": () => changeSpread(-1),
-      "next-page-btn": () => changeSpread(1),
-      "last-page-btn": () => goToSpread(state.spreads.length - 1),
-      "prev-chapter-btn": () => navigateToChapter(-1),
-      "next-chapter-btn": () => navigateToChapter(1),
-      "fit-mode-btn": cycleFitMode,
-    };
-    if (actionMap[button.id]) actionMap[button.id]();
-    else if (button.closest(".setting-options")) {
-      const group = button.closest(".setting-options");
-      const setting = group.dataset.setting,
-        value = button.dataset.value;
-      const currentPageIndex = (state.spreads[state.currentSpreadIndex] || [
-        0,
-      ])[0];
-      state.settings[setting] =
-        value === "true" ? true : value === "false" ? false : value;
-      if (setting === "mode" || setting === "doublePageOffset") {
-        calculateSpreads();
-        const newSpreadIndex = state.pageToSpreadMap[currentPageIndex];
-        if (newSpreadIndex !== undefined)
-          state.currentSpreadIndex = newSpreadIndex;
-        renderInteractionsSection(
-          getLocalInteractionState(
-            `interactions_${slugify(state.seriesData.title)}_${
-              state.currentChapter.number
-            }`
-          )
-        );
-        attachInteractionListeners();
-      }
-      if (setting === "direction") {
-        dom.sidebar.classList.remove("ltr-mode", "rtl-mode");
-        dom.sidebar.classList.add(`${value}-mode`);
-      }
-      // Forcer le mode webtoon à l'orientation LTR
-      if (setting === "mode" && value === "webtoon") {
-        state.settings.direction = "ltr";
-        dom.sidebar.classList.remove("rtl-mode");
-        dom.sidebar.classList.add("ltr-mode");
-      }
-      saveSettings();
-      render();
-      if (setting === "mode" && state.settings.mode === "webtoon")
-        goToSpread(state.currentSpreadIndex, true);
-    }
-  });
-  dom.viewerContainer.addEventListener("click", (e) => {
-    if (state.settings.mode === "webtoon") return;
-    const rect = dom.viewerContainer.getBoundingClientRect();
-    const zone = (e.clientX - rect.left) / rect.width;
-    if (zone < 0.35) changeSpread(state.settings.direction === "ltr" ? -1 : 1);
-    else if (zone > 0.65)
-      changeSpread(state.settings.direction === "ltr" ? 1 : -1);
-  });
-  const scrollTarget = window.innerWidth > 992 ? dom.viewerContainer : window;
-  scrollTarget.addEventListener("scroll", handleWebtoonScroll, {
-    passive: true,
-  });
-  dom.progressBar.addEventListener("click", (e) => {
-    if (e.target.matches(".progress-tick"))
-      goToSpread(parseInt(e.target.dataset.spreadIndex, 10));
-  });
-  dom.stretchToggle.addEventListener("change", (e) => {
-    state.settings.stretchSmallPages = e.target.checked;
-    saveSettings();
-    qs(".reader-viewer", dom.viewerContainer)?.classList.toggle(
-      "stretch",
-      e.target.checked
-    );
-  });
-  dom.limitWidthToggle.addEventListener("change", (e) => {
-    state.settings.limitWidth = e.target.checked;
-    updateSliderStates();
-    render();
-    saveSettings();
-  });
-  dom.limitHeightToggle.addEventListener("change", (e) => {
-    state.settings.limitHeight = e.target.checked;
-    updateSliderStates();
-    render();
-    saveSettings();
-  });
-  ["input", "change"].forEach((evt) => {
-    dom.customWidthSlider.addEventListener(evt, (e) =>
-      handleSliderChange(e, "customMaxWidth", dom.customWidthInput)
-    );
-    dom.customWidthInput.addEventListener(evt, (e) =>
-      handleSliderChange(e, "customMaxWidth", dom.customWidthSlider)
-    );
-    dom.customHeightSlider.addEventListener(evt, (e) =>
-      handleSliderChange(e, "customMaxHeight", dom.customHeightInput)
-    );
-    dom.customHeightInput.addEventListener(evt, (e) =>
-      handleSliderChange(e, "customMaxHeight", dom.customHeightSlider)
-    );
-  });
-  dom.stretchToggle.checked = state.settings.stretchSmallPages;
-  dom.limitWidthToggle.checked = state.settings.limitWidth;
-  dom.limitHeightToggle.checked = state.settings.limitHeight;
-  dom.customWidthSlider.value = state.settings.customMaxWidth;
-  dom.customWidthInput.value = state.settings.customMaxWidth;
-  dom.customHeightSlider.value = state.settings.customMaxHeight;
-  dom.customHeightInput.value = state.settings.customMaxHeight;
-  updateSliderStates();
-  document.addEventListener("click", () => {
-    qsa(".custom-dropdown .dropdown-toggle.open").forEach((toggle) => {
-      toggle.classList.remove("open");
-      toggle.nextElementSibling?.classList.remove("open");
-    });
+    btn.classList.toggle("liked", isLiked);
+    heart.classList.toggle("liked", isLiked);
+    countSpan.classList.toggle("liked", isLiked);
+    // Stocke la valeur de base pour éviter d'empiler les +1 à chaque update
+    countSpan.dataset.baseLikes = baseLikes;
+    countSpan.textContent = isLiked ? baseLikes + 1 : baseLikes;
   });
 }
+
+// À la fin de renderInteractionsSection dans ui.js, appeler updateCommentLikesUI pour appliquer l'état visuel après chaque rendu
+// (À ajouter dans ui.js, pas ici, mais rappel pour intégration)

@@ -1,22 +1,12 @@
 /* css/components/general.css */
 
 .section-title {
-  font-size: 2rem;
+  font-size: 2.4rem;
   font-weight: 700;
-  margin-bottom: 2rem;
+  margin-bottom: 0.4rem;
   display: inline-block;
   position: relative;
   color: var(--clr-text);
-}
-
-.section-title::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -8px;
-  width: 80px;
-  height: 4px;
-  background: var(--clr-primary);
 }
 
 .page-title {
@@ -74,8 +64,8 @@
 /* --- Media Queries --- */
 @media (max-width: 768px) {
   .section-title {
-    font-size: 1.5rem;
-    margin-bottom: 1.2rem;
+    font-size: 1.8rem;
+    margin-bottom: 0.3rem;
   }
 
   .section-title::after {

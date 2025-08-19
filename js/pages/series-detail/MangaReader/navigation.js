@@ -1,7 +1,7 @@
 // js/pages/series-detail/MangaReader/navigation.js
 import { slugify } from '../../../utils/domUtils.js';
-import { state, dom, domImages } from './state.js';
-import { render, updateUIOnPageChange } from './ui.js';
+import { state, domImages } from './state.js';
+import { render, updateUIOnPageChange } from './ui.js'; // Correction: 'render' est maintenant exporté par ui.js
 
 let urlUpdateTimeout = null;
 
@@ -60,7 +60,7 @@ export function goToSpread(spreadIndex, isInitializing = false) {
             domImages[pageIndex].scrollIntoView({ behavior, block: 'start' });
         }
     }
-    
+
     render(isInitializing);
     updateUrlForCurrentPage();
 }
@@ -90,15 +90,5 @@ export function navigateToChapter(delta, goToLastPage = false) {
         } else if (delta > 0) {
             alert("Il n'y a pas de prochain chapitre, il n'est peut-être pas encore disponible.");
         }
-    }
-}
-
-export function preloadImages() {
-    const nextSpreadIndex = state.currentSpreadIndex + 1;
-    if (nextSpreadIndex < state.spreads.length) {
-        state.spreads[nextSpreadIndex].forEach(pageIndex => {
-            // L'image est déjà en cours de chargement par `fetchAndLoadPages`,
-            // cette fonction sert de placeholder si on veut une logique de préchargement plus avancée.
-        });
     }
 }

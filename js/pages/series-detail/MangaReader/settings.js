@@ -1,177 +1,248 @@
 // js/pages/series-detail/MangaReader/settings.js
-import { qs, qsa, slugify } from "../../../utils/domUtils.js";
-import { state, dom } from "./state.js";
-import { render, renderViewer } from "./ui.js";
-import { goToPage, goToSpread } from "./navigation.js";
-import { calculateSpreads } from "./data.js";
+import { qs, qsa } from "../../../utils/domUtils.js";
+import { state } from "./state.js";
+import { renderViewer } from "./ui.js";
 
-function truncateText(text, maxLength) {
-  if (!text || text.length <= maxLength) return text;
-  return text.substring(0, maxLength - 3) + "...";
-}
-
-export function saveSettings() {
-  localStorage.setItem(
-    "bigsolo_reader_settings_v5",
-    JSON.stringify(state.settings)
-  );
-}
+// Configuration centralisée des options de paramètres.
+export const settingsConfig = {
+  mode: {
+    options: [
+      { value: "single", text: "Simple", icon: "fas fa-file" },
+      { value: "double", text: "Double", icon: "fas fa-book-open" },
+      { value: "webtoon", text: "Webtoon", icon: "fas fa-scroll" },
+    ],
+  },
+  fit: {
+    options: [
+      { value: "height", text: "Hauteur", icon: "fas fa-arrows-alt-v" },
+      { value: "width", text: "Largeur", icon: "fas fa-arrows-alt-h" },
+      { value: "custom", text: "Personnalisé", icon: "fas fa-ruler-combined" },
+    ],
+  },
+  direction: {
+    options: [
+      { value: "ltr", text: "Gauche à Droite" },
+      { value: "rtl", text: "Droite à Gauche" },
+    ],
+  },
+};
 
 export function loadSettings() {
-  const saved = localStorage.getItem("bigsolo_reader_settings_v5");
+  const saved = localStorage.getItem("bigsolo_reader_settings_v6"); // Version incrémentée pour éviter les conflits
   if (saved) {
     try {
+      // Fusionne les paramètres sauvegardés avec ceux par défaut pour ne pas casser si de nouvelles options sont ajoutées
       Object.assign(state.settings, JSON.parse(saved));
+      console.log("Paramètres du lecteur chargés :", state.settings);
     } catch (e) {
       console.error("Impossible de charger les paramètres du lecteur.", e);
     }
   }
 }
 
-export function cycleFitMode() {
-  const modes = ["width", "height", "both", "original", "custom"];
-  const current = modes.indexOf(state.settings.fit);
-  const nextIndex = current >= modes.length - 1 ? 0 : current + 1;
-  state.settings.fit = modes[nextIndex];
-  saveSettings();
-  render();
+export function saveSettings() {
+  localStorage.setItem(
+    "bigsolo_reader_settings_v6",
+    JSON.stringify(state.settings)
+  );
 }
 
-export function updateFitButton() {
-  const btn = qs("#fit-mode-btn");
-  if (!btn) return;
-  const icons = {
-    height: "fas fa-arrows-alt-v",
-    width: "fas fa-arrows-alt-h",
-    both: "fas fa-compress-arrows-alt",
-    original: "fas fa-search",
-  };
-  const text = {
-    height: "Hauteur",
-    width: "Largeur",
-    both: "Les Deux",
-    original: "Originale",
-  };
-  const currentFit = state.settings.fit;
-  if (currentFit === "custom")
-    btn.innerHTML = `<i class="fas fa-ruler-combined"></i> Personnalisé`;
-  else
-    btn.innerHTML = `<i class="${icons[currentFit]}"></i> ${text[currentFit]}`;
+function updateMainButtonUI(btn) {
+  const settingName = btn.dataset.setting;
+  const config = settingsConfig[settingName];
+  const currentValue = state.settings[settingName];
+
+  // CORRECTION: Cherche l'option par sa `value` au lieu d'un index numérique.
+  const currentOption = config.options.find(
+    (opt) => opt.value === currentValue
+  );
+
+  if (currentOption) {
+    btn.innerHTML = `<i class="icon ${currentOption.icon}"></i> <span class="text">${currentOption.text}</span>`;
+  } else {
+    console.warn(
+      `Option invalide pour le paramètre "${settingName}": ${currentValue}`
+    );
+  }
 }
 
-export function updateSliderStates() {
-  if (dom.customWidthSlider)
-    dom.customWidthSlider.disabled = !state.settings.limitWidth;
-  if (dom.customWidthInput)
-    dom.customWidthInput.disabled = !state.settings.limitWidth;
-  if (dom.customHeightSlider)
-    dom.customHeightSlider.disabled = !state.settings.limitHeight;
-  if (dom.customHeightInput)
-    dom.customHeightInput.disabled = !state.settings.limitHeight;
-}
+function updateSecondaryPanelsVisibility() {
+  const { mode, fit } = state.settings;
 
-export function setupDropdown(id) {
-  const dropdown = qs(`#${id}`);
-  if (!dropdown) return;
-  const toggle = qs(".dropdown-toggle", dropdown);
-  const menu = qs(".dropdown-menu", dropdown);
-  if (!toggle || !menu) return;
+  // Les panneaux restent toujours visibles
+  qs("#mode-options-panel").style.display = "flex";
+  qs("#fit-options-panel").style.display = "flex";
 
-  toggle.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const wasOpen = toggle.classList.contains("open");
-    qsa(".custom-dropdown .dropdown-toggle.open").forEach((otherToggle) => {
-      if (otherToggle !== toggle) {
-        otherToggle.classList.remove("open");
-        otherToggle.nextElementSibling?.classList.remove("open");
-      }
-    });
-    toggle.classList.toggle("open", !wasOpen);
-    menu.classList.toggle("open", !wasOpen);
+  // Désactive individuellement les boutons selon le contexte
+  const doublePageOffsetBtn = qs('[data-sub-setting="doublePageOffset"]');
+  const directionBtn = qs('[data-sub-setting="direction"]');
+  const stretchBtn = qs('[data-sub-setting="stretch"]');
+
+  if (doublePageOffsetBtn) {
+    doublePageOffsetBtn.classList.toggle("disabled", mode !== "double");
+  }
+  if (directionBtn) {
+    directionBtn.classList.toggle("disabled", mode === "webtoon");
+  }
+  if (stretchBtn) {
+    stretchBtn.classList.toggle("disabled", fit !== "custom");
+  }
+
+  // Désactive les sliders si le mode n'est pas 'custom'
+  qsa(".slider-control").forEach((control) => {
+    control.classList.toggle("disabled", fit !== "custom");
+    if (fit !== "custom") {
+      control.classList.remove("active");
+    }
   });
-
-  // La logique de clic est maintenant gérée dans events.js pour une meilleure séparation
 }
 
-export function populateChapterSelect() {
-  const menu = qs("#chapter-dropdown .dropdown-menu");
-  const textSpan = qs("#chapter-dropdown .chapter-text");
-  if (!menu || !textSpan) return;
-
-  // MODIFICATION : Inclure le titre et tronquer
-  const fullTitle = `Ch. ${state.currentChapter.number} : ${
-    state.currentChapter.title || "Titre inconnu"
-  }`;
-  textSpan.textContent = truncateText(fullTitle, 28);
-
-  menu.innerHTML = state.allChapterKeys
-    .slice()
-    .sort((a, b) => parseFloat(b) - parseFloat(a))
-    .map((key) => {
-      const data = state.seriesData.chapters[key];
-      const itemTitle = `Ch. ${key} : ${data.title || "Titre inconnu"}`;
-      return `<div class="dropdown-item ${
-        key === state.currentChapter.number ? "active" : ""
-      }" data-chapter="${key}" title="${itemTitle}">${truncateText(
-        itemTitle,
-        35
-      )}</div>`;
-    })
-    .join("");
-}
-
-export function populatePageSelect() {
-  const menu = qs("#page-dropdown .dropdown-menu");
-  const textSpan = qs("#page-dropdown .page-text");
-  if (!menu || !textSpan) return;
-
-  const currentSpread = state.spreads[state.currentSpreadIndex] || [];
-  const firstPageInSpread = currentSpread.length > 0 ? currentSpread[0] + 1 : 0;
-  const lastPageInSpread =
-    currentSpread.length > 0 ? currentSpread[currentSpread.length - 1] + 1 : 0;
-  let pageText = `${firstPageInSpread}`;
-  if (lastPageInSpread > firstPageInSpread) pageText += `-${lastPageInSpread}`;
-
-  textSpan.textContent = `${pageText} / ${state.pages.length}`;
-
-  menu.innerHTML = state.spreads
-    .map((spread, i) => {
-      const isActive = i === state.currentSpreadIndex;
-      const firstPage = spread[0] + 1;
-      const lastPage = spread[spread.length - 1] + 1;
-      let pageLabel = `Page ${firstPage}`;
-      if (lastPage > firstPage) pageLabel += `-${lastPage}`;
-      return `<div class="dropdown-item ${
-        isActive ? "active" : ""
-      }" data-spread-index="${i}">${pageLabel}</div>`;
-    })
-    .join("");
-}
-
-export function updateActiveButtons() {
-  qsa(".setting-options", dom.sidebar).forEach((group) => {
-    const setting = group.dataset.setting;
-    if (state.settings.hasOwnProperty(setting)) {
-      const value = String(state.settings[setting]);
-      qsa("button", group).forEach((btn) =>
-        btn.classList.toggle("active", btn.dataset.value === value)
+function updateSecondaryTogglesUI() {
+  qsa(".secondary-toggle-btn").forEach((btn) => {
+    const subSetting = btn.dataset.subSetting;
+    if (subSetting === "direction") {
+      const dirValue = state.settings.direction;
+      const dirOption = settingsConfig.direction.options.find(
+        (opt) => opt.value === dirValue
       );
+      btn.innerHTML = `<i class="check-icon fas fa-sync-alt"></i> <span class="text-content">${
+        dirOption ? dirOption.text : ""
+      }</span>`;
+    } else {
+      const isActive = state.settings[subSetting];
+      btn.classList.toggle("active", isActive);
+      btn.querySelector(".check-icon").className = `check-icon ${
+        isActive ? "fas fa-check-square" : "far fa-square"
+      }`;
     }
   });
 
-  const isWebtoon = state.settings.mode === "webtoon";
-  if (dom.modeOptionsGroup)
-    dom.modeOptionsGroup.classList.toggle("visible", !isWebtoon);
-  if (dom.modeOptionsGroup)
-    dom.modeOptionsGroup.classList.toggle(
-      "double-mode-active",
-      state.settings.mode === "double"
-    );
-  if (dom.customFitControls)
-    dom.customFitControls.classList.toggle(
-      "visible",
-      state.settings.fit === "custom"
-    );
+  qsa(".slider-control").forEach((control) => {
+    const settingName = control.dataset.subSetting;
+    const isActive = state.settings[settingName];
+    // Nouvelle logique : ne jamais activer si désactivé
+    if (control.classList.contains("disabled")) {
+      control.classList.remove("active");
+    } else {
+      control.classList.toggle("active", isActive);
+    }
+    const sliderInput = control.querySelector(".PB-range-slider");
+    if (sliderInput) {
+      sliderInput.disabled = !control.classList.contains("active");
+    }
+  });
+}
 
-  updateFitButton();
+function updateSliderValues() {
+  qsa(".slider-control").forEach((control) => {
+    const slider = control.querySelector('input[type="range"]');
+    // Correction ici : cibler la bonne classe pour la valeur affichée
+    const valueSpan = control.querySelector(".PB-range-slidervalue");
+    const settingName = control.dataset.subSetting;
+
+    const value =
+      state.settings[settingName.replace("limit", "customMax")] || 1200;
+    if (slider) slider.value = value;
+    if (valueSpan) valueSpan.textContent = `${value}px`;
+  });
+}
+
+export function updateAllSettingsUI() {
+  console.log("Mise à jour de l'UI des paramètres...");
+  qsa(".main-setting-btn").forEach(updateMainButtonUI);
+  updateSecondaryPanelsVisibility();
+  updateSecondaryTogglesUI();
+  updateSliderValues();
+  console.log("UI des paramètres mise à jour.");
+}
+
+export function setupSettingsEvents() {
+  console.log("Configuration des événements de paramètres...");
+
+  // --- Logique pour les boutons principaux (Mode, Ajustement) ---
+  qsa(".main-setting-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const settingName = btn.dataset.setting;
+      const config = settingsConfig[settingName];
+      const currentValue = state.settings[settingName];
+      const currentIndex = config.options.findIndex(
+        (opt) => opt.value === currentValue
+      );
+      const nextIndex = (currentIndex + 1) % config.options.length;
+      state.settings[settingName] = config.options[nextIndex].value;
+
+      console.log(
+        `Paramètre principal '${settingName}' changé en '${state.settings[settingName]}'`
+      );
+
+      if (settingName === "mode") {
+        console.log("Changement de mode, recalcul des planches...");
+        calculateSpreads();
+      }
+
+      renderViewer();
+      saveSettings();
+      updateAllSettingsUI();
+    });
+  });
+
+  // --- Logique pour les boutons secondaires (Décalage, Direction, Étirer) ---
+  qsa(".secondary-toggle-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const subSetting = btn.dataset.subSetting;
+      if (subSetting === "direction") {
+        state.settings.direction =
+          state.settings.direction === "ltr" ? "rtl" : "ltr";
+      } else {
+        state.settings[subSetting] = !state.settings[subSetting];
+      }
+      console.log(
+        `Paramètre secondaire '${subSetting}' changé en '${state.settings[subSetting]}'`
+      );
+
+      if (subSetting === "doublePageOffset") {
+        calculateSpreads();
+      }
+
+      renderViewer();
+      saveSettings();
+      updateAllSettingsUI();
+    });
+  });
+
+  // --- NOUVELLE LOGIQUE POUR LES SLIDERS INTERACTIFS ---
+  qsa(".slider-control").forEach((control) => {
+    const header = control.querySelector(".slider-header");
+    const slider = control.querySelector(".PB-range-slider");
+    const valueDisplay = control.querySelector(".PB-range-slidervalue");
+    const settingName = control.dataset.subSetting; // 'limitWidth' ou 'limitHeight'
+    const valueSettingName =
+      settingName === "limitWidth" ? "customMaxWidth" : "customMaxHeight";
+
+    // 1. Gérer le clic sur l'en-tête pour activer/désactiver
+    if (header) {
+      header.addEventListener("click", () => {
+        // Inverse la valeur booléenne dans l'état global
+        state.settings[settingName] = !state.settings[settingName];
+        // Sauvegarde les paramètres
+        saveSettings();
+        // Met à jour toute l'interface des paramètres (ce qui ajoutera/retirera la classe .active)
+        updateAllSettingsUI();
+      });
+    }
+
+    // 2. Gérer la mise à jour de la valeur du slider
+    if (slider && valueDisplay) {
+      slider.addEventListener("input", () => {
+        const newValue = slider.value;
+        valueDisplay.textContent = `${newValue}px`;
+        state.settings[valueSettingName] = newValue;
+        renderViewer(); // Applique le changement visuel en direct
+      });
+
+      // Sauvegarde la valeur finale quand l'utilisateur relâche le slider
+      slider.addEventListener("change", saveSettings);
+    }
+  });
+  console.log("Événements de paramètres configurés.");
 }

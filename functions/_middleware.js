@@ -164,7 +164,8 @@ export async function onRequest(context) {
           image: ogImageUrl,
         };
 
-        const assetUrl = new URL("/reader.html", url.origin);
+        // Remplacement ici : on sert le nouveau template
+        const assetUrl = new URL("/templates/MangaReader.html", url.origin);
         let html = await env.ASSETS.fetch(assetUrl).then((res) => res.text());
 
         const tags = generateMetaTags({ ...metaData, url: url.href });

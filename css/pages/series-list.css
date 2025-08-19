@@ -1,0 +1,748 @@
+/* Styles communs pour MangaList et AnimeList */
+
+.series-list-view,
+.manga-list-view,
+.anime-list-view {
+  background: var(--clr-bg-card);
+  border-radius: 14px;
+  padding: 2rem 2rem 1.7rem 2rem;
+}
+
+.detail-main-info {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.detail-infos {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-meta {
+  font-size: 1rem;
+  color: var(--clr-text-sub);
+  margin-top: 0;
+  line-height: 1.5;
+}
+
+.detail-meta.detail-creator-info .creator-separator {
+  display: inline-block;
+  padding: 0 1rem;
+}
+
+.detail-additional-metadata {
+  line-height: 1.6;
+  color: var(--clr-text-sub);
+  font-size: 0.95rem;
+  margin-bottom: 0.8rem;
+}
+
+.detail-description {
+  font-size: 1rem;
+  color: var(--clr-text-sub);
+  line-height: 1.6;
+  padding-right: 11.5rem;
+  box-sizing: border-box;
+  margin-bottom: 0.5rem;
+}
+
+/* Supprimer les styles liés à la navigation et à la liste des chapitres */
+.detail-navigation-tabs,
+.detail-tab,
+.detail-chapters-section,
+.chapters-grid,
+.episodes-grid,
+.volume-header,
+.detail-chapter-item,
+.detail-chapter-number,
+.detail-chapter-title,
+.detail-chapter-date,
+.detail-chapter-collab,
+.licensed-chapter-item,
+.detail-chapter-views,
+.detail-episode-item,
+.detail-episode-number,
+.detail-episode-title,
+.detail-episode-date {
+  display: none !important;
+}
+
+/* --- HERO BANNER --- */
+#hero-banner-section.full-width {
+  top: -60px;
+  position: relative;
+  width: 100vw;
+  max-width: 100vw;
+  height: 340px;
+  min-height: 220px;
+  margin: 0 calc(50% - 50vw);
+  border-radius: 0;
+  z-index: 1;
+  overflow: hidden;
+  background: none !important;
+  /* On gère le fond via les pseudo-éléments */
+}
+
+#hero-banner-section.full-width::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image: var(--hero-banner-bg);
+  background-size: cover;
+  background-position: center;
+  /* On récupère l'URL du style inline JS */
+  /* Mais on va le faire via JS juste après */
+  filter: blur(12px) brightness(0.4);
+  pointer-events: none;
+  transition: filter 0.3s;
+}
+
+#hero-banner-section.full-width::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.hero-banner-overlay {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+}
+
+/* --- INFOS PRINCIPALES --- */
+#series-info-section {
+  position: relative;
+  z-index: 3;
+  margin-top: -320px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.major-container {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  border-radius: 18px;
+  align-items: flex-start;
+  /* <-- ici */
+  min-width: 0;
+  width: 100%;
+}
+
+.detail-cover-wrapper {
+  flex: 0 0 auto;
+  width: 220px;
+  min-width: 180px;
+  max-width: 240px;
+  display: flex;
+  align-items: flex-start;
+  /* <-- ici */
+  justify-content: flex-start;
+  height: 330px;
+  /* <-- ici */
+}
+
+.detail-cover {
+  width: 100%;
+  height: 330px;
+  border-radius: 4px;
+  background: #fff;
+  object-fit: cover;
+  display: block;
+}
+
+/* Texte à droite */
+.hero-info-text-container {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  color: #fff;
+  z-index: 3;
+  height: 330px;
+  /* même hauteur que la couverture */
+}
+
+.hero-info-top {
+  /* Aligne le haut */
+}
+
+.hero-info-bottom {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.hero-titles {
+  margin-bottom: 0.5rem;
+}
+
+.detail-jp-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.5rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.detail-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--clr-text);
+  line-height: 1.13;
+}
+
+.series-metadata-container {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.detail-tag {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-radius: 4px;
+  padding: 0.2em 0.7em;
+  font-size: 0.85em;
+  font-weight: 400;
+}
+
+.series-status-year {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85em;
+  color: #e0e0e0;
+}
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 1rem;
+}
+
+.status-indicator .status-dot {
+  display: inline-block;
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  margin-right: 0.18em;
+  vertical-align: middle;
+  background-color: #4caf50;
+  flex-shrink: 0;
+}
+
+.status-indicator.finished,
+.status-indicator .status-dot.finished {
+  background-color: #e53935;
+}
+
+.release-year {
+  color: #e0e0e0;
+}
+
+.detail-meta.detail-creator-info {
+  font-size: 1rem;
+  color: #e0e0e0;
+  margin: 0;
+}
+
+#reading-actions-container {
+  margin-top: 1.2rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.detail-action-btn,
+.reading-action-button {
+  padding: 0.65rem 1.3rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+  background-color: #fff;
+  color: #222831;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.detail-action-btn:hover,
+.reading-action-button:hover,
+.detail-action-btn:focus,
+.reading-action-button:focus {
+  background-color: var(--clr-bg-card);
+  border: 1.5px solid var(--clr-bg-card);
+  color: #fff;
+}
+
+html.dark .detail-action-btn,
+html.dark .reading-action-button {
+  background-color: var(--clr-bg-card);
+  color: #fff;
+  border: 1.5px solid rgba(var(--clr-bg-card-rgb), 0.25);
+}
+
+html.dark .detail-action-btn:hover,
+html.dark .reading-action-button:hover,
+html.dark .detail-action-btn:focus,
+html.dark .reading-action-button:focus {
+  background-color: #fff;
+  color: #222831;
+  border-color: #fff;
+}
+
+/* --- SECTION LISTE DES CHAPITRES --- */
+.series-chapters-list {
+  margin-top: 2.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.chapters-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* Nouvelle disposition : tabs + search/sort sur la même ligne, alignés en bas */
+.chapter-switch-tabs {
+  display: flex;
+  gap: 1.2rem;
+  align-items: flex-end;
+  flex: 1 1 auto;
+}
+
+.chapter-header-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  flex: 0 0 auto;
+}
+
+/* Tabs style sans --clr-primary, opacité blanc/noir */
+.chapter-tab-btn {
+  padding-bottom: 0.8rem;
+  padding-right: 2.4rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  border: none;
+  background-color: transparent;
+  color: rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.3s, border-color 0.3s;
+  text-decoration: none;
+  text-align: left;
+  justify-content: flex-start;
+  display: flex;
+  border-bottom: 3px solid;
+}
+
+html.dark .chapter-tab-btn {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.chapter-tab-btn.active,
+.chapter-tab-btn:focus {
+  font-weight: 700;
+  color: #111;
+  border-bottom: 3px solid rgba(0, 0, 0, 0.85);
+  background: none;
+}
+
+html.dark .chapter-tab-btn.active,
+html.dark .chapter-tab-btn:focus {
+  color: #fff;
+  border-bottom: 3px solid rgba(255, 255, 255, 0.85);
+}
+
+.chapter-tab-btn:hover:not(.active) {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+html.dark .chapter-tab-btn:hover:not(.active) {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Centrage à gauche du texte */
+.chapter-tab-btn {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.search-chapter input[type="text"] {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid rgba(var(--clr-text-rgb), 0.15);
+  background: var(--clr-bg-card);
+  color: var(--clr-text);
+  font-size: 1rem;
+  min-width: 180px;
+  transition: border-color 0.2s;
+}
+
+.search-chapter input[type="text"]:focus {
+  border-color: #fff;
+  outline: none;
+}
+
+.sort-chapter-btn {
+  background: var(--clr-bg-card);
+  color: var(--clr-text-sub);
+  border: 1px solid rgba(var(--clr-text-rgb), 0.15);
+  border-radius: 6px;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sort-chapter-btn:hover,
+.sort-chapter-btn:focus {
+  background: #fff;
+  color: #222831;
+  border-color: #fff;
+}
+
+html.dark .sort-chapter-btn:hover,
+html.dark .sort-chapter-btn:focus {
+  background: #222831;
+  color: #fff;
+  border-color: #222831;
+}
+
+.chapters-list-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+/* --- CARTE CHAPITRE LISTE --- */
+.chapter-card-list-item {
+  font-weight: 600;
+  background: var(--clr-bg-card);
+  border-radius: 4px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: background 0.18s, color 0.18s;
+  cursor: pointer;
+}
+
+.chapter-card-list-item:hover {
+  background: var(--clr-bg-card-light);
+  color: #111;
+}
+
+.chapter-card-list-item:hover .chapter-card-list-number,
+.chapter-card-list-item:hover .chapter-card-list-title {
+  color: #111;
+  opacity: 1;
+}
+
+.chapter-card-list-top,
+.chapter-card-list-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 100%;
+  /* Empêche le retour à la ligne des enfants */
+  flex-wrap: nowrap;
+}
+
+.chapter-card-list-left {
+  min-width: 0;
+  flex: 1 1 0;
+  display: flex;
+  align-items: flex-end;
+}
+
+.chapter-card-list-title {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #fff;
+  opacity: 0.5;
+  margin-top: 0.2rem;
+  display: block;
+  max-width: 170px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.18s, opacity 0.18s;
+  min-width: 0;
+  flex: 1 1 0;
+}
+
+.chapter-card-list-right {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  white-space: nowrap;
+}
+
+.chapter-card-list-views,
+.chapter-card-list-likes,
+.chapter-card-list-comments {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  margin-left: 0.6em;
+  font-weight: 600;
+  transition: color 0.18s;
+}
+
+.chapter-card-list-views {
+  margin-left: 0;
+}
+
+.chapter-card-list-likes {
+}
+
+.chapter-card-list-comments {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.chapter-card-list-likes i,
+.chapter-card-list-comments i,
+.chapter-card-list-views i {
+  margin-right: 0.22em;
+  font-size: 0.9em;
+}
+
+/* Hover: texte noir sur fond clair */
+.chapter-card-list-item:hover .chapter-card-list-views,
+.chapter-card-list-item:hover .chapter-card-list-comments {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.chapter-card-list-item:hover .chapter-card-list-likes {
+  color: var(--clr-accent);
+}
+
+.chapter-card-list-likes.liked,
+.chapter-card-list-likes.liked .fa-heart,
+.chapter-card-list-likes.liked .likes-count,
+.chapter-card-list-likes .fa-heart.liked,
+.chapter-card-list-likes .likes-count.liked {
+  color: var(--clr-accent) !important;
+}
+
+/* Corrige le style des liens de carte chapitre */
+a.chapter-card-list-item {
+  color: inherit;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  background: var(--clr-bg-card);
+  border-radius: 4px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  padding: 1.1rem;
+  justify-content: space-between;
+  transition: background 0.18s, color 0.18s;
+  cursor: pointer;
+}
+
+/* Pour éviter le bleu/underline sur hover/focus */
+a.chapter-card-list-item:visited,
+a.chapter-card-list-item:active,
+a.chapter-card-list-item:focus,
+a.chapter-card-list-item:hover {
+  color: inherit;
+  text-decoration: none;
+  outline: none;
+}
+
+@media (max-width: 900px) {
+  .chapters-list-container {
+    gap: 1rem 1.2rem;
+  }
+
+  .chapter-card-list-item {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+    padding: 1rem 0.8rem 0.9rem 0.8rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .series-chapters-list {
+    margin-top: 1.2rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .chapters-list-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.7rem;
+  }
+
+  .chapter-header-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+
+  .chapters-list-container {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .chapter-card-list-item {
+    padding: 0.8rem 0.6rem 0.7rem 0.6rem;
+  }
+}
+
+/* --- BOUTON SEE MORE ET INFOS SUPPLÉMENTAIRES --- */
+.series-see-more-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  border-top: 2px solid rgba(var(--clr-text-rgb), 0.15);
+  margin-top: 0.5rem;
+  padding-top: 0.7rem;
+  transition: max-height 0.3s, opacity 0.3s;
+  overflow: hidden;
+}
+
+.series-see-more-row.hide {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.series-see-more-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8em;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: rgba(var(--clr-text-rgb), 0.15);
+  color: #fff;
+  border: none;
+  border-radius: 0 0 8px 8px;
+  padding: 0.3em 1em;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+  margin-top: -0.9em;
+  z-index: 2;
+  position: relative;
+}
+
+.series-see-more-btn .see-more-label {
+  padding: 0 0.7em;
+  white-space: nowrap;
+  font-size: 1em;
+}
+
+.series-see-more-btn i {
+  font-size: 1.1em;
+  vertical-align: middle;
+}
+
+.series-see-more-btn:hover,
+.series-see-more-btn:focus {
+  background: rgba(var(--clr-text-rgb), 0.45);
+  color: #fff;
+}
+
+.series-more-infos {
+  margin-top: -0.7rem;
+  color: var(--clr-text);
+  border-radius: 0 0 10px 10px;
+  font-size: 1rem;
+  width: 100%;
+  display: none;
+  animation: fadeInMoreInfos 0.25s;
+}
+
+/* Style identique à la description principale */
+.series-more-infos {
+  font-size: 1rem;
+  color: var(--clr-text-sub);
+  line-height: 1.8;
+  padding-right: 11.5rem;
+  box-sizing: border-box;
+}
+
+@keyframes fadeInMoreInfos {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tooltip pour les cartes chapitre */
+.chapter-card-tooltip {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 9999;
+  min-width: 180px;
+  max-width: 320px;
+  background: rgba(var(--clr-bg-rgb-val), 0.65);
+  color: #fff;
+  border-radius: 4px;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.22s;
+  white-space: pre-line;
+  max-height: 220px;
+  overflow-y: auto;
+  font-family: inherit;
+}
+
+.chapter-card-tooltip.visible {
+  opacity: 1;
+}
+
+.chapter-card-tooltip strong {
+  font-weight: 700;
+}

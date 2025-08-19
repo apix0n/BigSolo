@@ -1,0 +1,71 @@
+<!-- 1. Bannière -->
+<section id="hero-banner-section" class="full-width">
+  <div class="hero-banner-overlay"></div>
+</section>
+
+<!-- 2. Infos principales -->
+<section id="series-info-section">
+  <div class="major-container">
+    <div class="detail-cover-wrapper">
+      <img class="detail-cover" src="" alt="Couverture" />
+    </div>
+    <div class="hero-info-text-container">
+      <div class="hero-info-top">
+        <div class="hero-titles">
+          <h2 class="detail-jp-title"></h2>
+          <h1 class="detail-title"></h1>
+        </div>
+        <div class="series-metadata-container">
+          <div class="detail-tags"></div>
+          <div class="series-status-year">
+            <span class="status-indicator"><span class="status-dot"></span></span>
+            <span class="year-separator">-</span>
+            <span class="release-year"></span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-info-bottom">
+        <div class="hero-creator-info">
+          <p class="detail-meta detail-creator-info"></p>
+        </div>
+        <div id="reading-actions-container"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Description (onglets supprimés) -->
+<section id="series-description-section">
+  <p class="detail-description"></p>
+  <div class="series-see-more-row">
+    <button class="series-see-more-btn" type="button">
+      <i class="fa-solid fa-arrow-down"></i>
+      <span class="see-more-label">Afficher plus</span>
+      <i class="fa-solid fa-arrow-down"></i>
+    </button>
+  </div>
+  <div class="series-more-infos" style="display:none;">
+    <!-- Le JS injectera ici les infos supplémentaires -->
+  </div>
+</section>
+
+<!-- 4. Liste des chapitres (nouvelle structure) -->
+<section class="series-chapters-list">
+  <div class="chapters-list-header">
+    <div class="chapter-switch-tabs">
+      <button class="chapter-tab-btn active" data-tab="chapters">Chapitres</button>
+      <button class="chapter-tab-btn" data-tab="episodes">Épisodes</button>
+    </div>
+    <div class="chapter-header-actions">
+      <div class="search-chapter">
+        <input type="text" placeholder="Rechercher un chapitre..." />
+      </div>
+      <div class="sort-chapter">
+        <button class="sort-chapter-btn"><i class="fas fa-sort"></i> Trier</button>
+      </div>
+    </div>
+  </div>
+  <div class="chapters-list-container">
+    <!-- Les cartes chapitres seront injectées ici par le JS -->
+  </div>
+</section>

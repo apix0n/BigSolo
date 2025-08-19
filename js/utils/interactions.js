@@ -8,6 +8,16 @@ const ACTION_QUEUE_KEY = "bigsolo_action_queue";
 // interne au site ou s'il quitte vraiment le site.
 let isInternalNavigation = false;
 
+// Log au chargement du module (utile si ce fichier est chargé au début)
+console.log(
+  "[DEBUG][interactions.js][MODULE LOAD] bigsolo_action_queue =",
+  localStorage.getItem("bigsolo_action_queue")
+);
+console.log(
+  "[DEBUG][interactions.js][MODULE LOAD] bigsolo_internal_nav =",
+  sessionStorage.getItem("bigsolo_internal_nav")
+);
+
 // On ajoute un écouteur d'événements sur l'ensemble du document pour intercepter
 // tous les clics. Le 'true' final (phase de capture) assure qu'il s'exécute
 // avant que le navigateur ne commence à suivre le lien.
@@ -25,13 +35,30 @@ document.addEventListener(
     // C'est la vérification clé : on compare le nom de domaine du lien cliqué
     // avec le nom de domaine de la page actuelle. Si c'est le même, c'est une navigation interne.
     if (link.hostname === window.location.hostname) {
+      // --- LOGS DEBUG SESSIONSTORAGE ---
+      console.log(
+        "[DEBUG][interactions.js][CLICK] Avant setItem, bigsolo_internal_nav =",
+        sessionStorage.getItem("bigsolo_internal_nav")
+      );
+      sessionStorage.setItem("bigsolo_internal_nav", "1");
+      console.log(
+        "[DEBUG][interactions.js][CLICK] Après setItem, bigsolo_internal_nav =",
+        sessionStorage.getItem("bigsolo_internal_nav")
+      );
       // On lève le drapeau pour indiquer une navigation interne.
       isInternalNavigation = true;
+      console.log(
+        "[DEBUG][interactions.js] Navigation interne détectée (clic sur lien):",
+        link.href
+      );
 
       // Par sécurité, on remet le drapeau à false après un court instant.
       // Cela gère le cas où la navigation serait annulée (ex: Ctrl+clic pour ouvrir dans un nouvel onglet).
       setTimeout(() => {
         isInternalNavigation = false;
+        console.log(
+          "[DEBUG][interactions.js] isInternalNavigation reset à false (timeout)"
+        );
       }, 500);
     }
   },
@@ -74,11 +101,33 @@ export function queueAction(seriesSlug, action) {
 // --- Logique d'envoi de la file d'attente (MODIFIÉE) ---
 
 function sendActionQueue() {
+  console.log("[DEBUG][interactions.js][sendActionQueue] START");
+  console.log(
+    "[DEBUG][interactions.js][sendActionQueue] bigsolo_action_queue =",
+    localStorage.getItem("bigsolo_action_queue")
+  );
+  console.log(
+    "[DEBUG][interactions.js][sendActionQueue] bigsolo_internal_nav =",
+    sessionStorage.getItem("bigsolo_internal_nav")
+  );
+
+  if (sessionStorage.getItem("bigsolo_internal_nav") === "1") {
+    sessionStorage.removeItem("bigsolo_internal_nav");
+    console.log(
+      "[DEBUG][interactions.js] Navigation interne détectée via sessionStorage, annulation de l'envoi."
+    );
+    return;
+  }
+
+  console.log(
+    "[DEBUG][interactions.js] sendActionQueue appelé. isInternalNavigation =",
+    isInternalNavigation
+  );
   // On vérifie le drapeau AVANT de faire quoi que ce soit.
-  // Si c'est une navigation interne, on arrête tout.
+  // Si c'est une navigation interne (SPA), on arrête tout.
   if (isInternalNavigation) {
     console.log(
-      "Navigation interne détectée. L'envoi de la file d'attente est reporté."
+      "[DEBUG][interactions.js] Annulation de l'envoi (navigation interne détectée)"
     );
     return;
   }
@@ -86,37 +135,82 @@ function sendActionQueue() {
   const queue = getActionQueue();
   const seriesSlugs = Object.keys(queue);
 
-  if (seriesSlugs.length === 0) return;
+  if (seriesSlugs.length === 0) {
+    console.log(
+      "[DEBUG][interactions.js] File d'attente vide, rien à envoyer."
+    );
+    return;
+  }
 
   for (const seriesSlug of seriesSlugs) {
     const actions = queue[seriesSlug];
     if (actions.length > 0) {
-      console.log(
-        `Envoi de ${actions.length} action(s) pour la série ${seriesSlug} lors de la fermeture de la page.`
-      );
       try {
-        // On utilise navigator.sendBeacon. C'est la méthode la plus fiable
-        // pour envoyer des données juste avant qu'une page ne se ferme.
+        const currentQueue = getActionQueue();
+        console.log(
+          `[DEBUG][interactions.js][sendActionQueue] Suppression de la file pour ${seriesSlug}, état avant suppression:`,
+          JSON.stringify(currentQueue)
+        );
         const blob = new Blob([JSON.stringify({ seriesSlug, actions })], {
           type: "application/json",
         });
-        navigator.sendBeacon("/api/log-action", blob);
-
-        // On vide la file d'attente de manière optimiste.
-        const currentQueue = getActionQueue();
+        console.log(
+          "[DEBUG][interactions.js][sendActionQueue] Appel navigator.sendBeacon pour",
+          seriesSlug,
+          actions
+        );
+        const beaconResult = navigator.sendBeacon("/api/log-action", blob);
+        console.log(
+          "[DEBUG][interactions.js][sendActionQueue] sendBeacon result:",
+          beaconResult
+        );
         delete currentQueue[seriesSlug];
         saveActionQueue(currentQueue);
+        console.log(
+          `[DEBUG][interactions.js][sendActionQueue] Etat après suppression:`,
+          localStorage.getItem("bigsolo_action_queue")
+        );
+        if (
+          localStorage.getItem("bigsolo_action_queue") !== "{}" &&
+          localStorage.getItem("bigsolo_action_queue") !== null
+        ) {
+          console.warn(
+            "[DEBUG][interactions.js][sendActionQueue] ATTENTION: File d'attente non vide après suppression !"
+          );
+        }
+        console.log(
+          `[DEBUG][interactions.js] File d'attente pour ${seriesSlug} supprimée du localStorage.`
+        );
       } catch (error) {
         console.warn(
-          "L'envoi de la file d'attente a échoué. Les actions seront renvoyées à la prochaine session.",
+          "[DEBUG][interactions.js] Erreur lors de l'envoi de la file d'attente :",
           error
         );
       }
     }
   }
+  // Log final pour vérifier l'état du localStorage après suppression
+  console.log(
+    "[DEBUG][interactions.js] queue après suppression :",
+    getActionQueue()
+  );
 }
 
-window.addEventListener("pagehide", sendActionQueue);
+// L'envoi ne se fait QUE lors d'un vrai pagehide (fermeture/refresh)
+window.addEventListener("pagehide", (event) => {
+  console.log(
+    "[DEBUG][interactions.js][pagehide] event pagehide déclenché. Persisted:",
+    event.persisted
+  );
+  sendActionQueue();
+});
+
+// --- AJOUT : test avec beforeunload ---
+window.addEventListener("beforeunload", (event) => {
+  alert("beforeunload déclenché"); // juste pour voir si ça s'affiche
+  console.log("[DEBUG][interactions.js][beforeunload] event déclenché");
+  sendActionQueue();
+});
 
 // --- Gestion de l'état local de l'utilisateur (inchangée) ---
 

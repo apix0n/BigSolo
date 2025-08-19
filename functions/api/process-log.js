@@ -75,20 +75,21 @@ export async function onRequest(context) {
                 ) {
                   seriesInteractions[chapter].comments.push(payload);
                 }
-              } else if (type === "like_comment") {
-                const comment = seriesInteractions[chapter].comments.find(
-                  (c) => c.id === payload.commentId
-                );
-                if (comment) {
-                  comment.likes = (comment.likes || 0) + 1;
+              } else if (type === "like_comment" || type === "unlike_comment") {
+                // Correction: vérifier que payload et payload.commentId existent
+                if (payload && payload.commentId) {
+                  const comment = seriesInteractions[chapter].comments.find(
+                    (c) => c.id === payload.commentId
+                  );
+                  if (comment) {
+                    if (type === "like_comment") {
+                      comment.likes = (comment.likes || 0) + 1;
+                    } else if (type === "unlike_comment") {
+                      comment.likes = Math.max(0, (comment.likes || 0) - 1);
+                    }
+                  }
                 }
-              } else if (type === "unlike_comment") {
-                const comment = seriesInteractions[chapter].comments.find(
-                  (c) => c.id === payload.commentId
-                );
-                if (comment) {
-                  comment.likes = Math.max(0, (comment.likes || 0) - 1);
-                }
+                // Sinon, on ignore silencieusement l'action malformée
               }
             }
             // ↑↑↑ FIN DE LA MODIFICATION ↑↑↑
@@ -117,8 +118,12 @@ export async function onRequest(context) {
   } catch (error) {
     console.error(
       "CRON/MANUAL: Erreur critique lors du traitement des logs:",
-      error
+      error && error.stack ? error.stack : error
     );
-    return new Response("Erreur lors du traitement.", { status: 500 });
+    // Ajout : retourne l'erreur détaillée dans la réponse pour debug local
+    return new Response(
+      "Erreur lors du traitement : " + (error && error.stack ? error.stack : error),
+      { status: 500 }
+    );
   }
 }

@@ -17,6 +17,8 @@ export async function onRequest(context) {
       });
     }
 
+    console.log("[API log-action] Reçu une requête log-action");
+
     // NOUVELLE LOGIQUE : Créer une clé unique pour chaque envoi de log
     // Cela évite les race conditions.
     const uniqueId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;

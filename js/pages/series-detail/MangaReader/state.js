@@ -2,25 +2,33 @@
 
 // L'état global du lecteur, exporté pour être modifiable par les autres modules.
 export let state = {
-    seriesData: null,
-    currentChapter: null,
-    allChapterKeys: [],
-    pages: [],
-    spreads: [],
-    pageToSpreadMap: [],
-    currentSpreadIndex: 0,
-    chapterStats: { likes: 0, comments: [] }, // AJOUT : Pour stocker les stats du chapitre actuel
-    settings: {
-    mode: "webtoon",
-    fit: "width",
-    direction: "ltr",
-    doublePageOffset: false,
-    stretchSmallPages: false,
+  seriesData: null,
+  currentChapter: null,
+  allChapterKeys: [],
+  pages: [],
+  spreads: [],
+  pageToSpreadMap: [],
+  currentSpreadIndex: 0,
+  chapterStats: { likes: 0, comments: [] },
+  settings: {
+    // État des options principales (valeurs, pas indices)
+    mode: 'double', // 'single', 'double', 'webtoon'
+    fit: 'width',   // 'height', 'width', 'custom'
+
+    // État des options secondaires
+    doublePageOffset: true,
+    direction: 'rtl', // 'ltr', 'rtl'
+    stretch: false,
     limitWidth: true,
     limitHeight: false,
+
+    // Valeurs des sliders
     customMaxWidth: 1200,
     customMaxHeight: 1080,
-    sidebarCollapsed: false, // <-- AJOUTÉ : Par défaut, la sidebar n'est pas réduite
+
+    // État de l'UI
+    infoSidebarOpen: true, // Ouvert par défaut pour la démo
+    settingsSidebarOpen: false
   },
 };
 
@@ -32,5 +40,5 @@ export let domImages = [];
 
 // Fonction pour mettre à jour la liste des images
 export function setDomImages(images) {
-    domImages = images;
+  domImages = images;
 }

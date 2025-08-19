@@ -71,6 +71,19 @@
         <h1>Erreur 404 <img src="/img/emojis/shrug.png" alt=""></h1>
         <p>La page que vous recherchez n'est pas ou plus disponible. Vous allez être redirigé vers la page d'accueil dans <span id="sec">5</span> secondes.</p>
         <a href="/">Si vous n'êtes pas redirigé, appuyez ici.</a>
+        <script>
+          // Compte à rebours dynamique pour la redirection
+          let sec = 5;
+          const secSpan = document.getElementById('sec');
+          const interval = setInterval(() => {
+            sec--;
+            if (secSpan) secSpan.textContent = sec;
+            if (sec <= 0) {
+              clearInterval(interval);
+              window.location.href = "/";
+            }
+          }, 1000);
+        </script>
     </body>
 
 </html>

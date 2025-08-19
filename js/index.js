@@ -1,4 +1,3 @@
-// js/index.js
 import { loadComponent, qs } from "./utils/domUtils.js";
 import {
   initHeader,
@@ -61,6 +60,62 @@ async function initCommonComponents() {
   }
 }
 
+function getSeriesData() {
+  const dataElement = document.getElementById("series-data-placeholder");
+  if (
+    dataElement &&
+    dataElement.textContent.trim() !== "<!-- SERIES_DATA_PLACEHOLDER -->"
+  ) {
+    try {
+      return JSON.parse(dataElement.textContent);
+    } catch (e) {
+      console.error("Erreur lors du parsing des données JSON de la série.", e);
+      return null;
+    }
+  }
+  return null;
+}
+
+function handleInternalNavigation(event, seriesData) {
+  // --- AJOUT : ignore le clic sur un bouton like ---
+  if (event.target.closest(".chapter-card-list-likes")) {
+    return; // Ne pas intercepter, laisse le like JS agir
+  }
+
+  const link = event.target.closest("a");
+  if (
+    link &&
+    link.href.startsWith(window.location.origin) &&
+    !link.hasAttribute("target") &&
+    !link.hasAttribute("download") &&
+    !link.getAttribute("href").startsWith("mailto:") &&
+    !link.getAttribute("href").startsWith("tel:")
+  ) {
+    // AJOUT : si le lien demande un reload complet, on laisse le navigateur faire
+    if (link.hasAttribute("data-full-reload")) {
+      return; // Ne rien faire, laisser le comportement natif
+    }
+    // Correction : n'intercepter que les liens internes à la série (ex: /slug/...)
+    const url = new URL(link.href);
+    const pathSegments = url.pathname.split("/").filter(Boolean);
+    // Si la cible est une page globale (/, /galerie, /presentation, etc.), on laisse le navigateur faire un vrai reload
+    if (
+      pathSegments.length === 0 ||
+      pathSegments[0] === "galerie" ||
+      pathSegments[0] === "presentation"
+    ) {
+      // Laisse le comportement par défaut (reload)
+      return;
+    }
+    // Sinon, navigation SPA interne à la série
+    event.preventDefault();
+    history.pushState({}, "", link.href);
+    import("./pages/series-detail/router.js").then(({ handleRouteChange }) => {
+      handleRouteChange(seriesData);
+    });
+  }
+}
+
 async function routeAndInitPage() {
   const path = window.location.pathname;
   const bodyId = document.body.id;
@@ -96,9 +151,26 @@ async function routeAndInitPage() {
       break;
 
     case "seriesdetailpage":
-      console.log("Initializing series detail page.");
-      const { initSeriesDetailPage } = await import("./pages/series-detail.js");
-      await initSeriesDetailPage();
+      console.log("Initializing series detail page (SPA routing).");
+      const seriesData = getSeriesData();
+      if (seriesData) {
+        const { handleRouteChange } = await import(
+          "./pages/series-detail/router.js"
+        );
+        handleRouteChange(seriesData);
+
+        // Navigation interne (liens SPA)
+        document.body.addEventListener("click", (e) =>
+          handleInternalNavigation(e, seriesData)
+        );
+        // Navigation via boutons précédent/suivant du navigateur
+        window.addEventListener("popstate", () =>
+          handleRouteChange(seriesData)
+        );
+      } else {
+        document.getElementById("series-detail-section").textContent =
+          "Erreur: Impossible de charger les informations de la série.";
+      }
       break;
 
     case "readerpage":
@@ -109,12 +181,10 @@ async function routeAndInitPage() {
       await initMangaReader();
       break;
 
-    // --- NOUVELLE ROUTE POUR LE DASHBOARD ---
     case "dashboardpage":
       console.log("Initializing Admin Dashboard page.");
       const { initDashboardPage } = await import("./pages/dashboard.js");
       await initDashboardPage();
-      // L'observer n'est pas nécessaire ici car le contenu est entièrement dynamique et non basé sur le scroll.
       break;
 
     default:
@@ -123,7 +193,6 @@ async function routeAndInitPage() {
         bodyId,
         path
       );
-      // On peut toujours appeler l'observer pour des pages inconnues qui pourraient avoir des éléments animables.
       initMainScrollObserver();
       break;
   }
@@ -133,7 +202,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const bodyId = document.body.id;
   console.log("DOMContentLoaded event fired.");
 
-  // On ne charge les composants communs (header/menu) que si ce n'est pas une page d'admin
   const isAdminPage =
     bodyId === "dashboardpage" ||
     window.location.pathname.startsWith("/admins");
