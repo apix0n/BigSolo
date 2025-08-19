@@ -61,22 +61,6 @@ body#readerpage {
   color: var(--clr-text-light);
 }
 
-#global-reader-controls #toggle-chapters-like {
-  background: transparent;
-  color: var(--clr-text-sub);
-  border: 1.5px solid var(--clr-bg-card-light);
-  font-size: 1.2rem;
-  cursor: pointer;
-  height: 36px;
-  width: 36px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  margin-left: 0.2rem;
-}
-
 #global-reader-controls #toggle-chapters-like.liked {
   background: var(--clr-accent);
   color: var(--clr-background-reader-dark);
@@ -166,178 +150,113 @@ body#readerpage {
   z-index: 1;
 }
 
+/* --- LOGIQUE CSS DU VIEWER (ANCIENNE VERSION) --- */
 .reader-viewer-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100%;
+  background-color: #e9ecef;
+  min-height: calc(100vh - 70px - 22px);
+  -webkit-user-select: none;
+  user-select: none;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
-
 .reader-viewer-container img {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
   -webkit-user-drag: none;
 }
-
-/* --- LOGIQUE CSS DU VIEWER (RÉINTÉGRÉE) --- */
+body.dark .reader-viewer-container {
+  background-color: #111;
+}
 .reader-viewer {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
+  min-height: 100%;
+  padding: 0.5rem;
+  box-sizing: border-box;
 }
-
-/* Images par défaut dans le viewer */
 .reader-viewer img {
-  display: block;
-  object-fit: contain;
   max-width: 100%;
-  max-height: 100%;
-}
-
-/* Modes de lecture */
-
-/* WEBTOON / single : colonne, scroll vertical possible */
-.reader-viewer.webtoon-mode {
-  flex-direction: column;
   height: auto;
-  justify-content: flex-start;
 }
-
-/* DOUBLE MODE: on utilise flex pour pouvoir appliquer row-reverse en RTL
-   -> chaque spread (2 images) s'affiche côte à côte, centré dans le conteneur.
-*/
+.reader-viewer.stretch img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
 .reader-viewer.double-mode {
-  display: flex;
-  flex-direction: row;
-  /* LTR par défaut */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   justify-content: center;
-  /* Centre la paire dans le reader-container */
+  align-items: center;
+  min-height: 0;
+}
+.reader-viewer.double-mode.single-landscape-spread {
+  display: flex;
+  justify-content: center;
   align-items: center;
 }
-
-/* Mode visuel pour forcer l'ordre lorsque l'utilisateur choisit RTL */
-.reader-viewer.double-mode.rtl-mode {
-  flex-direction: row-reverse;
-}
-
-/* Explicitement garder LTR si nécessaire */
-.reader-viewer.double-mode.ltr-mode {
-  flex-direction: row;
-}
-
-/* Chaque image prend la moitié de la largeur disponible dans une spread double */
-.reader-viewer.double-mode img {
-  width: calc(50% - 6px);
-  /* soustrait la moitié du gap pour éviter overflow */
-  height: auto;
-  max-height: calc(100vh - 60px - 2rem);
-}
-
-/* --- Modes d'ajustement --- */
-/* Fit width / height pour single-mode */
-.reader-viewer.fit-width img {
+.reader-viewer.double-mode.single-landscape-spread.fit-width img,
+.reader-viewer.double-mode.single-landscape-spread.fit-both img {
   width: 100%;
   height: auto;
-  max-height: none;
+}
+.reader-viewer.double-mode.single-landscape-spread.fit-height img {
+  height: 100%;
+  width: auto;
+}
+.reader-viewer.double-mode img {
+  justify-self: end;
+}
+.reader-viewer.double-mode img:last-child {
+  justify-self: start;
+}
+.reader-viewer.stretch.double-mode img {
+  width: auto;
+  height: 100%;
+  object-fit: contain;
+}
+.reader-viewer.double-mode div {
+  width: 100%;
+  height: 100%;
+}
+.reader-viewer.double-mode.fit-width img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
-/* Pour double-mode, fit-width doit donner 50% par image */
-.reader-viewer.double-mode.fit-width img {
-  width: calc(50% - 6px);
-  height: auto;
-  max-height: none;
+.reader-viewer.double-mode.rtl-mode > img:nth-child(2) {
+  order: -1;
 }
 
 .reader-viewer.fit-height img {
+  max-height: calc(100vh - 70px - 22px - 1rem);
   width: auto;
-  height: 100%;
+}
+.reader-viewer.fit-width img {
+  width: 100%;
+  height: auto;
+}
+.reader-viewer.fit-both img {
+  max-width: 100%;
+  max-height: calc(100vh - 70px - 22px - 1rem);
+  object-fit: contain;
+}
+.reader-viewer.fit-original img {
   max-width: none;
-  max-height: calc(100vh - 60px - 2rem);
+  max-height: none;
 }
-
-/* Pour double-mode, fit-height : images adaptées en hauteur */
-.reader-viewer.double-mode.fit-height img {
-  width: auto;
-  height: 100%;
-  max-width: calc(50% - 6px);
-  max-height: calc(100vh - 60px - 2rem);
+.reader-viewer.webtoon-mode {
+  flex-direction: column;
+  gap: 10px;
 }
-
-/* --- COMPORTEMENT SPÉCIFIQUE : SPREADS AVEC UNE SEULE IMAGE EN MODE DOUBLE --- */
-/* Single-image spreads should take the full viewer width (x) when fit is 'width' or 'custom'.
-   Keep 'fit-height' behavior (height:100%) when user selected height mode. */
-
-/* Single image in double mode: align left (LTR) or right (RTL) instead of center */
-.reader-viewer.double-mode > img:only-child {
-  margin-left: 0;
-  margin-right: auto;
-  width: 100%;
-  height: auto;
-  max-width: 100%;
-  object-fit: contain;
+.reader-viewer.webtoon-mode::after {
+  content: "";
   display: block;
-  box-sizing: border-box;
 }
-.reader-viewer.double-mode.rtl-mode > img:only-child {
-  margin-left: auto;
-  margin-right: 0;
-}
-
-/* Fit height: keep height 100% and align left/right */
-.reader-viewer.double-mode.fit-height > img:only-child {
-  width: auto;
-  height: 100%;
-  max-width: 100%;
-  max-height: calc(100vh - 60px - 2rem);
-  object-fit: contain;
-  margin-left: 0;
-  margin-right: auto;
-}
-.reader-viewer.double-mode.fit-height.rtl-mode > img:only-child {
-  margin-left: auto;
-  margin-right: 0;
-}
-
-/* Fit custom/width: fill width, align left/right */
-.reader-viewer.double-mode.fit-custom > img:only-child,
-.reader-viewer.double-mode.fit-width > img:only-child {
-  width: 100%;
-  height: auto;
-  max-width: calc(100% - 12px);
-  object-fit: contain;
-  margin-left: 0;
-  margin-right: auto;
-}
-.reader-viewer.double-mode.fit-custom.rtl-mode > img:only-child,
-.reader-viewer.double-mode.fit-width.rtl-mode > img:only-child {
-  margin-left: auto;
-  margin-right: 0;
-}
-
-/* If user explicitly chose fit-height, respect height = 100% */
-.reader-viewer.double-mode.fit-height > img:only-child {
-  width: auto;
-  height: 100%;
-  max-width: 100%;
-  max-height: calc(100vh - 60px - 2rem);
-  object-fit: contain;
-}
-
-/* If user chose 'custom' (personnalisé) we treat like 'width' for layout:
-   single-image spreads fill the viewer width (x). */
-.reader-viewer.double-mode.fit-custom > img:only-child,
-.reader-viewer.double-mode.fit-width > img:only-child {
-  width: 100%;
-  height: auto;
-  max-width: calc(100% - 12px);
-  object-fit: contain;
-}
-
-/* Small screens: ensure very wide landscape images don't overflow */
-@media (max-width: 900px) {
-  .reader-viewer.double-mode > img:only-child {
-    max-width: 100%;
-  }
-}
+/* --- FIN LOGIQUE CSS DU VIEWER (ANCIENNE VERSION) --- */
 
 /* --- STYLES DES SIDEBARS (inchangés mais conservés) --- */
 .reader-sidebar .control-group {
@@ -786,7 +705,6 @@ body#readerpage {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
-  margin-left: 0.2rem;
 }
 
 #global-reader-controls #toggle-chapters-like.liked {
