@@ -141,11 +141,12 @@ body#readerpage {
   position: relative;
   z-index: 1;
   height: 100%;
+  padding: 0 1rem 0.5rem 1rem;
 }
 
 .reader-viewer-container {
   background-color: var(--clr-bg-reader);
-  height: 100%; /* On utilise height au lieu de min-height */
+  height: calc(100% - 4.5rem);
   -webkit-user-select: none;
   user-select: none;
   overflow: hidden; /* Important: on empêche son propre scroll, le scroll sera sur .reader-viewer */
@@ -169,7 +170,6 @@ body.dark .reader-viewer-container {
   height: 100%; /* On s'assure qu'il utilise toute la hauteur du parent */
   box-sizing: border-box;
   overflow-y: auto; /* Permet le scroll pour le mode webtoon */
-  scrollbar-gutter: stable; /* Réserve l'espace pour la scrollbar */
 }
 
 .reader-viewer img {
@@ -201,7 +201,7 @@ body.dark .reader-viewer-container {
   display: flex;
   grid-template-columns: none; /* Annule la grille explicitement */
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
 }
 
 /* Cas des images paysage en mode double */
@@ -682,6 +682,7 @@ body.dark .reader-viewer-container {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: clip;
 }
 
 .user-info {

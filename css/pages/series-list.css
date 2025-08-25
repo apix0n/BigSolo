@@ -170,7 +170,6 @@
   font-size: 0.95rem;
   color: var(--clr-text-sub);
   line-height: 1.6;
-  padding-right: 11.5rem;
   box-sizing: border-box;
   margin-bottom: 0.5rem;
 }
@@ -1038,5 +1037,9 @@ a.chapter-card-list-item:hover {
   .chapters-list-container {
     grid-template-columns: 1fr; /* Passage en une seule colonne */
     gap: 10px;
+  }
+
+  .chapter-card-list-title {
+    max-width: unset;
   }
 }

@@ -96,9 +96,9 @@ function handleViewerClick(e) {
   const rect = dom.viewerContainer.getBoundingClientRect();
   const zone = (e.clientX - rect.left) / rect.width;
   const direction = state.settings.direction;
-  if (zone < 0.35) {
+  if (zone < 0.45) {
     changeSpread(direction === "ltr" ? -1 : 1);
-  } else if (zone > 0.65) {
+  } else if (zone > 0.55) {
     changeSpread(direction === "ltr" ? 1 : -1);
   }
 }
