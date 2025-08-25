@@ -1,7 +1,7 @@
 /* Définition des variables locales au lecteur */
 :root {
   --sidebar-info-width: 16rem;
-  --sidebar-settings-width: 16rem;
+  --sidebar-settings-width: 14rem;
   --global-controls-height: 50px;
 }
 
@@ -16,7 +16,7 @@ body#readerpage {
   display: flex;
   flex-direction: column;
   position: relative;
-  background-color: var(--clr-background-reader-dark);
+  background-color: var(--clr-bg-reader);
 }
 
 /* --- Contrôles Globaux (en haut à gauche) --- */
@@ -26,19 +26,20 @@ body#readerpage {
   left: 0;
   height: var(--global-controls-height);
   width: var(--sidebar-info-width);
-  /* Aligné sur la première sidebar */
   background: transparent;
   z-index: 1001;
   display: flex;
   align-items: center;
-  padding: 1.5rem 0 0 1.5rem;
+  /* - Debut correction */
+  padding: 1.5rem 0 0 1.5rem; /* Ajustement du padding pour être un peu plus joli */
+  box-sizing: border-box; /* S'assure que le padding est inclus dans la hauteur */
   gap: 0.75rem;
+  /* - Fin correction */
 }
-
 #global-reader-controls button {
   background: transparent;
-  color: var(--clr-text-sub);
-  border: 1.5px solid var(--clr-bg-card-light);
+  color: var(--clr-reader-invert);
+  border: 1.5px solid var(--clr-bg-reader-invert);
   font-size: 1.2rem;
   cursor: pointer;
   height: 36px;
@@ -51,33 +52,24 @@ body#readerpage {
 }
 
 #global-reader-controls button:hover {
-  background: var(--clr-bg-card-light);
-  color: var(--clr-text-light);
+  background: var(--clr-bg-reader-invert);
+  color: var(--clr-text-invert);
 }
 
 #global-reader-controls button.active {
-  border-color: var(--clr-bg-card-light);
-  background: var(--clr-bg-card-light);
-  color: var(--clr-text-light);
+  border-color: var(--clr-bg-reader-invert);
+  background: var(--clr-bg-reader-invert);
+  color: var(--clr-text-invert);
 }
 
 #global-reader-controls #toggle-chapters-like.liked {
   background: var(--clr-accent);
-  color: var(--clr-background-reader-dark);
+  color: var(--clr-bg-reader);
   border-color: var(--clr-accent);
 }
 
 #global-reader-controls #toggle-chapters-like.liked i.fas.fa-heart {
-  color: var(--clr-background-reader-dark);
-}
-
-#global-reader-controls #toggle-chapters-like:not(.liked) i.fas.fa-heart {
-  color: var(--clr-text-sub);
-}
-
-#global-reader-controls #toggle-chapters-like:hover {
-  background: var(--clr-bg-card-light);
-  color: var(--clr-text-light);
+  color: var(--clr-bg-reader);
 }
 
 #live-page-counter {
@@ -89,11 +81,11 @@ body#readerpage {
 /* --- Layout Principal (Sidebars + Viewer) --- */
 .reader-layout-container {
   display: flex;
-  flex-grow: 1;
-  min-height: 0;
-  padding-top: var(--global-controls-height);
-  position: relative; /* <-- Ajouté */
-  overflow: hidden; /* <-- Ajouté */
+  flex-grow: 1; /* Cette ligne est cruciale, elle dit au conteneur de prendre TOUT l'espace restant */
+  min-height: 0; /* Empêche le conteneur de déborder si son contenu est trop grand */
+  position: relative;
+  overflow: hidden;
+  /* On retire padding-top car les contrôles ne sont plus dans le même flux de layout */
 }
 
 /* --- NOUVELLE LOGIQUE D'ANIMATION POUR LES SIDEBARS --- */
@@ -102,7 +94,7 @@ body#readerpage {
   top: 0;
   left: 0;
   height: 100%;
-  margin-top: 3.2rem;
+  margin-top: 3rem;
   padding: 1.5rem 0 1.5rem 1.5rem;
   flex-shrink: 0;
   display: flex;
@@ -121,9 +113,8 @@ body#readerpage {
 }
 
 #settings-sidebar {
-  padding-right: 1rem;
+  padding: 1.5rem 0 0 1rem;
   width: var(--sidebar-settings-width);
-  left: var(--info-sidebar-offset, 0px);
   z-index: 2;
 }
 
@@ -139,6 +130,7 @@ body#readerpage {
 }
 
 .reader-container {
+  margin-top: 4.5rem;
   flex-grow: 1;
   min-width: 0;
   overflow-y: auto;
@@ -148,17 +140,18 @@ body#readerpage {
   transition: margin-left 0.3s ease-in-out;
   position: relative;
   z-index: 1;
+  height: 100%;
 }
 
-/* --- LOGIQUE CSS DU VIEWER (ANCIENNE VERSION) --- */
 .reader-viewer-container {
-  background-color: #e9ecef;
-  min-height: calc(100vh - 70px - 22px);
+  background-color: var(--clr-bg-reader);
+  height: 100%; /* On utilise height au lieu de min-height */
   -webkit-user-select: none;
   user-select: none;
-  overflow-y: auto;
+  overflow: hidden; /* Important: on empêche son propre scroll, le scroll sera sur .reader-viewer */
   -webkit-overflow-scrolling: touch;
 }
+
 .reader-viewer-container img {
   -webkit-user-select: none;
   -ms-user-select: none;
@@ -168,14 +161,17 @@ body#readerpage {
 body.dark .reader-viewer-container {
   background-color: #111;
 }
+
 .reader-viewer {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100%;
-  padding: 0.5rem;
+  height: 100%; /* On s'assure qu'il utilise toute la hauteur du parent */
   box-sizing: border-box;
+  overflow-y: auto; /* Permet le scroll pour le mode webtoon */
+  scrollbar-gutter: stable; /* Réserve l'espace pour la scrollbar */
 }
+
 .reader-viewer img {
   max-width: 100%;
   height: auto;
@@ -185,41 +181,87 @@ body.dark .reader-viewer-container {
   height: 100%;
   object-fit: contain;
 }
+
 .reader-viewer.double-mode {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  justify-content: center;
-  align-items: center;
+  /* La ligne suivante est la correction clé */
+  grid-template-rows: minmax(
+    0,
+    100%
+  ); /* Force la ligne de la grille à ne pas dépasser 100% de la hauteur du conteneur */
+  justify-items: center; /* Centre les images horizontalement dans leurs colonnes */
+  align-items: center; /* Centre les images verticalement dans leurs colonnes */
   min-height: 0;
 }
+
+/* Gère le cas d'une seule image PAYSAGE qui doit prendre toute la largeur */
 .reader-viewer.double-mode.single-landscape-spread {
+  /* On annule la grille et on passe en flex pour un centrage simple */
   display: flex;
+  grid-template-columns: none; /* Annule la grille explicitement */
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
+
+/* Cas des images paysage en mode double */
 .reader-viewer.double-mode.single-landscape-spread.fit-width img,
 .reader-viewer.double-mode.single-landscape-spread.fit-both img {
+  /* En mode largeur ou "les deux", l'image prend toute la largeur du conteneur */
   width: 100%;
   height: auto;
 }
+
 .reader-viewer.double-mode.single-landscape-spread.fit-height img {
-  height: 100%;
+  /* En mode hauteur, elle respecte les mêmes règles que les autres images en fit-height */
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
   width: auto;
+  height: auto;
 }
+
+/* Styles par défaut pour les images en mode double (2 pages) */
 .reader-viewer.double-mode img {
-  justify-self: end;
+  justify-self: end; /* La 1ère image (logique) se colle à droite de sa colonne */
 }
 .reader-viewer.double-mode img:last-child {
+  justify-self: start; /* La 2ème image (logique) se colle à gauche de sa colonne */
+}
+
+/* Pour le mode RTL, on inverse l'ordre visuel et l'alignement */
+.reader-viewer.double-mode.rtl-mode > img:nth-child(2) {
+  order: -1; /* Place la 2ème image avant la 1ère visuellement */
+}
+.reader-viewer.double-mode.rtl-mode img {
+  justify-self: start; /* La 1ère (logique) se colle à gauche */
+}
+.reader-viewer.double-mode.rtl-mode img:last-child {
+  justify-self: end; /* La 2ème (logique) se colle à droite */
+}
+
+/* --- NOUVELLE LOGIQUE POUR LA PAGE UNIQUE (PORTRAIT) --- */
+
+/* Pour la lecture de droite à gauche (RTL) */
+/* La page unique se place dans la colonne de gauche et se colle à droite */
+.reader-viewer.double-mode.rtl-mode .single-page-spread {
+  grid-column: 1 / 2;
+  justify-self: end;
+}
+
+/* Pour la lecture de gauche à droite (LTR) */
+/* La page unique se place dans la colonne de droite et se colle à gauche */
+.reader-viewer.double-mode.ltr-mode .single-page-spread {
+  grid-column: 2 / 3;
   justify-self: start;
 }
+
+/* --- Styles de dimensionnement --- */
+
 .reader-viewer.stretch.double-mode img {
   width: auto;
   height: 100%;
   object-fit: contain;
-}
-.reader-viewer.double-mode div {
-  width: 100%;
-  height: 100%;
 }
 .reader-viewer.double-mode.fit-width img {
   width: 100%;
@@ -227,14 +269,18 @@ body.dark .reader-viewer-container {
   object-fit: contain;
 }
 
-.reader-viewer.double-mode.rtl-mode > img:nth-child(2) {
-  order: -1;
+.reader-viewer-container:has(.reader-viewer.fit-custom) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .reader-viewer.fit-height img {
-  max-height: calc(100vh - 70px - 22px - 1rem);
-  width: auto;
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
 }
+
 .reader-viewer.fit-width img {
   width: 100%;
   height: auto;
@@ -249,6 +295,7 @@ body.dark .reader-viewer-container {
   max-height: none;
 }
 .reader-viewer.webtoon-mode {
+  justify-content: flex-start; /* Aligne le contenu en haut */
   flex-direction: column;
   gap: 10px;
 }
@@ -256,9 +303,7 @@ body.dark .reader-viewer-container {
   content: "";
   display: block;
 }
-/* --- FIN LOGIQUE CSS DU VIEWER (ANCIENNE VERSION) --- */
 
-/* --- STYLES DES SIDEBARS (inchangés mais conservés) --- */
 .reader-sidebar .control-group {
   margin-bottom: 2rem;
 }
@@ -268,7 +313,6 @@ body.dark .reader-viewer-container {
   font-weight: 700;
   color: var(--clr-text);
   margin-bottom: 0.4rem;
-  border-bottom: 1px solid var(--clr-border);
 }
 
 #info-series-link {
@@ -323,12 +367,12 @@ body.dark .reader-viewer-container {
 }
 
 #info-chapters-group .chapter-list a:hover {
-  background: var(--clr-bg-card-light);
+  background: var(--clr-bg-reader-invert);
 }
 
 #info-chapters-group .chapter-list a:hover .chapter-number,
 #info-chapters-group .chapter-list a:hover .chapter-title {
-  color: var(--clr-text-light);
+  color: var(--clr-text-invert);
 }
 
 .chapter-info-main {
@@ -340,7 +384,7 @@ body.dark .reader-viewer-container {
 
 .chapter-number {
   font-weight: 700;
-  color: var(--clr-header-text-dark);
+  color: var(--clr-text-fifth);
   min-width: 30px;
   transition: color 0.2s ease;
 }
@@ -361,7 +405,7 @@ body.dark .reader-viewer-container {
   font-size: 0.75rem;
   margin-top: 0.4rem;
   padding-top: 0.4rem;
-  border-top: 1.5px solid var(--clr-background-reader-dark);
+  border-top: 1.5px solid var(--clr-bg-reader);
   width: 100%;
   display: flex;
   justify-content: space-between;
@@ -374,20 +418,20 @@ body.dark .reader-viewer-container {
 }
 
 #info-chapters-group .chapter-list a.active {
-  background: var(--clr-bg-card-light);
+  background: var(--clr-bg-reader-invert);
 }
 
 #info-chapters-group .chapter-list a.active .chapter-number,
 #info-chapters-group .chapter-list a.active .chapter-title {
-  color: var(--clr-text-light);
+  color: var(--clr-text-invert);
 }
 
 #info-chapters-group .chapter-list a.active .chapter-stats-details {
-  color: var(--clr-text-sub-light);
+  color: var(--clr-bg-reader);
 }
 
 #info-chapters-group .chapter-list a.active .chapter-stats-details i {
-  color: var(--clr-background-reader-dark);
+  color: var(--clr-bg-reader);
 }
 
 #settings-sidebar .control-group {
@@ -400,9 +444,9 @@ body.dark .reader-viewer-container {
   width: 100%;
   padding: 0.6rem 1rem;
   border-radius: 4px;
-  background: var(--clr-bg-card-light);
+  background: var(--clr-bg-invert);
   border: none;
-  color: var(--clr-text-light);
+  color: var(--clr-text-invert);
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
@@ -437,12 +481,12 @@ body.dark .reader-viewer-container {
 
 .secondary-toggle-btn:hover {
   opacity: 1;
-  background-color: var(--clr-background-reader-dark);
+  background-color: var(--clr-bg-reader);
 }
 
 .secondary-toggle-btn.active {
   opacity: 1;
-  border-color: var(--clr-bg-card-light);
+  border-color: var(--clr-bg-invert);
 }
 
 .secondary-toggle-btn.disabled {
@@ -503,7 +547,7 @@ body.dark .reader-viewer-container {
 
 .slider-control.active {
   opacity: 1;
-  border-color: var(--clr-bg-card-light);
+  border-color: var(--clr-bg-card-invert);
 }
 
 .slider-control.active .slider-body {
@@ -523,7 +567,7 @@ body.dark .reader-viewer-container {
 }
 
 .slider-control:hover {
-  background: var(--clr-background-reader-dark);
+  background: var(--clr-bg-reader);
 }
 
 .PB-range-slider {
@@ -531,7 +575,7 @@ body.dark .reader-viewer-container {
   width: 100%;
   height: 4px;
   border-radius: 4px;
-  background: var(--clr-bg);
+  background: var(--clr-text-sub);
   outline: none;
   transition: opacity 0.2s;
 }
@@ -541,11 +585,8 @@ body.dark .reader-viewer-container {
 }
 
 .PB-range-slidervalue {
+  color: var(--clr-bg-sub);
   font-size: 0.8rem;
-}
-
-.reader-viewer.fit-height:not(.webtoon-mode) > img {
-  max-width: none;
 }
 
 .PB-range-slider::-webkit-slider-thumb {
@@ -554,7 +595,7 @@ body.dark .reader-viewer-container {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background-color: var(--clr-bg-card-light);
+  background-color: var(--clr-bg-invert);
   cursor: pointer;
   transition: 0.3s ease-in-out;
   border: 2px solid var(--clr-bg-card);
@@ -579,7 +620,7 @@ body.dark .reader-viewer-container {
   padding: 10px;
   font-size: 0.9rem;
   outline: none;
-  caret-color: var(--clr-primary);
+  caret-color: var(--clr-text);
   background-color: transparent;
   color: var(--clr-text);
   font-family: inherit;
@@ -592,8 +633,8 @@ body.dark .reader-viewer-container {
 }
 
 #info-comments-group .send-btn {
-  background-color: var(--clr-bg-card-light);
-  color: var(--clr-text-light);
+  background-color: var(--clr-bg-card-invert);
+  color: var(--clr-text-invert);
   padding: 8px 12px;
   border-radius: 6px;
   cursor: pointer;
@@ -694,8 +735,8 @@ body.dark .reader-viewer-container {
 /* --- Bouton global like dans la barre de contrôle --- */
 #global-reader-controls #toggle-chapters-like {
   background: transparent;
-  color: var(--clr-text-sub);
-  border: 1.5px solid var(--clr-bg-card-light);
+  color: var(--clr-bg-reader-invert);
+  border: 1.5px solid var(--clr-bg-reader-invert);
   font-size: 1.2rem;
   cursor: pointer;
   height: 36px;
@@ -709,21 +750,22 @@ body.dark .reader-viewer-container {
 
 #global-reader-controls #toggle-chapters-like.liked {
   background: var(--clr-accent);
-  color: var(--clr-background-reader-dark);
+  color: var(--clr-bg-reader);
   border-color: var(--clr-accent);
 }
 
 #global-reader-controls #toggle-chapters-like.liked i.fas.fa-heart {
-  color: var(--clr-background-reader-dark);
-}
-
-#global-reader-controls #toggle-chapters-like:not(.liked) i.fas.fa-heart {
-  color: var(--clr-text-sub);
+  color: var(--clr-bg-reader);
 }
 
 #global-reader-controls #toggle-chapters-like:hover {
-  background: var(--clr-bg-card-light);
-  color: var(--clr-text-light);
+  background: var(--clr-bg-reader-invert);
+  color: var(--clr-text-invert);
+}
+
+#global-reader-controls #toggle-chapters-like.liked:hover {
+  background: var(--clr-accent);
+  color: var(--clr-text-invert);
 }
 
 /* --- Like dans la sidebar (stats chapitre) --- */

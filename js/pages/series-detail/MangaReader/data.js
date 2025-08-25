@@ -1,20 +1,18 @@
-// js/pages/series-detail/MangaReader/data.js
+// --- File: js/pages/series-detail/MangaReader/data.js ---
+
 import { qs } from "../../../utils/domUtils.js";
 import { loadGlobalConfig } from "../../../utils/fetchUtils.js";
-// CORRECTION : On importe bien 'domImages' en tant que variable séparée
 import { state, domImages, setDomImages } from "./state.js";
-import { render, handleError } from "./ui.js";
 import { goToSpread } from "./navigation.js";
+import { render as renderViewer } from "./components/viewer.js";
 
 /**
  * Calcule la disposition des planches (spreads) en fonction du mode de lecture.
- * Cette fonction ne doit être appelée qu'une fois les dimensions des images connues.
  */
 export function calculateSpreads() {
   state.spreads = [];
   state.pageToSpreadMap = [];
 
-  // CORRECTION : On utilise directement la variable 'domImages' importée
   const images = domImages;
 
   if (state.settings.mode === "webtoon" || state.settings.mode === "single") {
@@ -64,11 +62,10 @@ export function calculateSpreads() {
 }
 
 /**
- * Récupère la liste des pages du chapitre, attend leur chargement complet,
- * puis initialise l'affichage du lecteur.
+ * Récupère la liste des pages du chapitre et attend leur chargement complet.
  */
 export async function fetchAndLoadPages(initialPageNumber = 1) {
-  const loadingMsgContainer = qs("#manga-reader-root .reader-viewer");
+  const loadingMsgContainer = qs("#manga-reader-root .reader-viewer-container");
   if (loadingMsgContainer) {
     loadingMsgContainer.innerHTML = `<p id="reader-loading-msg">Chargement des informations...</p>`;
   }
@@ -97,8 +94,7 @@ export async function fetchAndLoadPages(initialPageNumber = 1) {
     setDomImages(newDomImages);
 
     if (newDomImages.length === 0) {
-      handleError("Ce chapitre ne contient aucune page.");
-      return;
+      throw new Error("Ce chapitre ne contient aucune page.");
     }
 
     let loadedCount = 0;
@@ -106,9 +102,12 @@ export async function fetchAndLoadPages(initialPageNumber = 1) {
       loadingMsgElement.textContent = `Chargement des pages... (0 / ${newDomImages.length})`;
 
     const onAllImagesProcessed = () => {
-      loadingMsgElement?.remove();
-
       calculateSpreads();
+
+      // En mode webtoon, on affiche TOUTES les images une seule fois.
+      if (state.settings.mode === "webtoon") {
+        renderViewer();
+      }
 
       let finalInitialIndex = 0;
       if (initialPageNumber === "last") {
@@ -118,12 +117,14 @@ export async function fetchAndLoadPages(initialPageNumber = 1) {
         initialPageNumber > 0
       ) {
         const pageIndex = initialPageNumber - 1;
+        // On utilise la map pour trouver la planche (spread) correspondante
         const targetSpreadIndex = state.pageToSpreadMap[pageIndex];
         if (targetSpreadIndex !== undefined)
           finalInitialIndex = targetSpreadIndex;
       }
 
       state.currentSpreadIndex = finalInitialIndex;
+      // Maintenant, goToSpread trouvera les images dans le DOM pour le mode webtoon
       goToSpread(state.currentSpreadIndex, true);
     };
 
@@ -136,7 +137,6 @@ export async function fetchAndLoadPages(initialPageNumber = 1) {
           onAllImagesProcessed();
         }
       };
-
       img.onload = handleLoadOrError;
       img.onerror = () => {
         console.error(
@@ -145,10 +145,9 @@ export async function fetchAndLoadPages(initialPageNumber = 1) {
         img.alt = "Erreur de chargement";
         handleLoadOrError();
       };
-
       img.src = state.pages[index];
     });
   } catch (error) {
-    handleError(`Erreur lors du chargement du chapitre : ${error.message}`);
+    throw error; // Propage l'erreur pour qu'elle soit attrapée par reader.js
   }
 }

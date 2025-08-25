@@ -17,6 +17,13 @@ export async function onRequest(context) {
       });
     }
 
+    // Ajout : pour chaque action de type 'rate', s'assurer que la valeur est dans payload.value
+    for (const action of actions) {
+      if (action.type === "rate" && action.value !== undefined) {
+        action.payload = { value: action.value };
+      }
+    }
+
     console.log("[API log-action] Reçu une requête log-action");
 
     // NOUVELLE LOGIQUE : Créer une clé unique pour chaque envoi de log

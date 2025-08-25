@@ -1,3 +1,5 @@
+// --- File: js/index.js ---
+
 import { loadComponent, qs } from "./utils/domUtils.js";
 import {
   initHeader,
@@ -76,40 +78,51 @@ function getSeriesData() {
   return null;
 }
 
+/**
+ * Gère la navigation interne pour la SPA (Single Page Application) sur la page de détail.
+ * @param {Event} event - L'événement de clic.
+ * @param {object} seriesData - Les données de la série.
+ */
 function handleInternalNavigation(event, seriesData) {
-  // --- AJOUT : ignore le clic sur un bouton like ---
+  // Ignore les clics sur les boutons de like pour ne pas interférer
   if (event.target.closest(".chapter-card-list-likes")) {
-    return; // Ne pas intercepter, laisse le like JS agir
+    return;
   }
 
   const link = event.target.closest("a");
+
+  // Si le lien n'existe pas, on arrête
+  if (!link) {
+    return;
+  }
+
+  // ***** CORRECTION ICI *****
+  // Si le lien est une carte de chapitre OU un bouton d'action ("Continuer", "Dernier"),
+  // on laisse le navigateur faire un rechargement complet.
   if (
-    link &&
+    link.classList.contains("chapter-card-list-item") ||
+    link.classList.contains("detail-action-btn")
+  ) {
+    console.log(
+      "[Index] Clic sur un lien de lecture, on laisse le navigateur gérer le rechargement."
+    );
+    return;
+  }
+
+  // Vérifie si c'est un lien de navigation SPA (les onglets Manga/Episodes)
+  const isSpaLink =
     link.href.startsWith(window.location.origin) &&
     !link.hasAttribute("target") &&
-    !link.hasAttribute("download") &&
-    !link.getAttribute("href").startsWith("mailto:") &&
-    !link.getAttribute("href").startsWith("tel:")
-  ) {
-    // AJOUT : si le lien demande un reload complet, on laisse le navigateur faire
-    if (link.hasAttribute("data-full-reload")) {
-      return; // Ne rien faire, laisser le comportement natif
-    }
-    // Correction : n'intercepter que les liens internes à la série (ex: /slug/...)
-    const url = new URL(link.href);
-    const pathSegments = url.pathname.split("/").filter(Boolean);
-    // Si la cible est une page globale (/, /galerie, /presentation, etc.), on laisse le navigateur faire un vrai reload
-    if (
-      pathSegments.length === 0 ||
-      pathSegments[0] === "galerie" ||
-      pathSegments[0] === "presentation"
-    ) {
-      // Laisse le comportement par défaut (reload)
-      return;
-    }
-    // Sinon, navigation SPA interne à la série
+    !link.getAttribute("href")?.startsWith("#") &&
+    link.href.includes(seriesData.slug);
+
+  if (isSpaLink) {
     event.preventDefault();
-    history.pushState({}, "", link.href);
+    if (link.href !== window.location.href) {
+      history.pushState({}, "", link.href);
+      console.log("[Index] Navigation SPA (onglet) vers :", link.href);
+    }
+
     import("./pages/series-detail/router.js").then(({ handleRouteChange }) => {
       handleRouteChange(seriesData);
     });
@@ -119,39 +132,39 @@ function handleInternalNavigation(event, seriesData) {
 async function routeAndInitPage() {
   const path = window.location.pathname;
   const bodyId = document.body.id;
-  console.log(`Routing for path: "${path}", bodyId: "${bodyId}"`);
+  console.log(`[Index] Routing for path: "${path}", bodyId: "${bodyId}"`);
 
   switch (bodyId) {
     case "homepage":
-      console.log("Initializing homepage.");
+      console.log("[Index] Initializing homepage.");
       const { initHomepage } = await import("./pages/homepage.js");
       await initHomepage();
       initMainScrollObserver();
       break;
 
     case "galeriepage":
-      console.log("Initializing galerie page.");
+      console.log("[Index] Initializing galerie page.");
       const { initGaleriePage } = await import("./pages/galerie.js");
       await initGaleriePage();
       initMainScrollObserver();
       break;
 
     case "presentationpage":
-      console.log("Initializing presentation page.");
+      console.log("[Index] Initializing presentation page.");
       const { initPresentationPage } = await import("./pages/presentation.js");
       initPresentationPage();
       initMainScrollObserver();
       break;
 
     case "seriescoverspage":
-      console.log("Initializing series covers page.");
+      console.log("[Index] Initializing series covers page.");
       const { initSeriesCoversPage } = await import("./pages/series-covers.js");
       await initSeriesCoversPage();
       initMainScrollObserver();
       break;
 
     case "seriesdetailpage":
-      console.log("Initializing series detail page (SPA routing).");
+      console.log("[Index] Initializing series detail page (SPA routing).");
       const seriesData = getSeriesData();
       if (seriesData) {
         const { handleRouteChange } = await import(
@@ -159,22 +172,23 @@ async function routeAndInitPage() {
         );
         handleRouteChange(seriesData);
 
-        // Navigation interne (liens SPA)
         document.body.addEventListener("click", (e) =>
           handleInternalNavigation(e, seriesData)
         );
-        // Navigation via boutons précédent/suivant du navigateur
         window.addEventListener("popstate", () =>
           handleRouteChange(seriesData)
         );
       } else {
-        document.getElementById("series-detail-section").textContent =
-          "Erreur: Impossible de charger les informations de la série.";
+        const mainContainer = document.getElementById("series-detail-main");
+        if (mainContainer) {
+          mainContainer.innerHTML =
+            "<p class='loading-message'>Erreur: Impossible de charger les informations de la série.</p>";
+        }
       }
       break;
 
     case "readerpage":
-      console.log("Initializing Manga Reader page.");
+      console.log("[Index] Initializing Manga Reader page.");
       const { initMangaReader } = await import(
         "./pages/series-detail/MangaReader/reader.js"
       );
@@ -182,16 +196,14 @@ async function routeAndInitPage() {
       break;
 
     case "dashboardpage":
-      console.log("Initializing Admin Dashboard page.");
+      console.log("[Index] Initializing Admin Dashboard page.");
       const { initDashboardPage } = await import("./pages/dashboard.js");
       await initDashboardPage();
       break;
 
     default:
       console.log(
-        "Aucune logique JS spécifique pour cet ID de body ou route non reconnue:",
-        bodyId,
-        path
+        `[Index] No specific JS logic for bodyId "${bodyId}" or route not recognized.`
       );
       initMainScrollObserver();
       break;
@@ -200,7 +212,7 @@ async function routeAndInitPage() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   const bodyId = document.body.id;
-  console.log("DOMContentLoaded event fired.");
+  console.log("[Index] DOMContentLoaded event fired.");
 
   const isAdminPage =
     bodyId === "dashboardpage" ||
@@ -211,8 +223,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       await initCommonComponents();
     }
     await routeAndInitPage();
-    console.log("Page initialization complete.");
+    console.log("[Index] Page initialization complete.");
   } catch (error) {
-    console.error("Error during page initialization process:", error);
+    console.error("[Index] Error during page initialization process:", error);
   }
 });

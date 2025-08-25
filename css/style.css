@@ -1,60 +1,69 @@
 html {
-  background-color: #f7f8fc !important;
+  background-color: #e9ecef !important;
   color: #222831 !important;
 }
 
 html.dark {
-  background-color: #15171a !important;
+  background-color: #111 !important;
   color: #eceff4 !important;
   color-scheme: dark;
 }
 
 :root {
-  --clr-bg-light: #f7f8fc;
-  --clr-bg-dark: #151618;
-  --clr-bg-card-light: #ffffff;
-  --clr-bg-card-dark: #1b1c1e;
-  --clr-text-light: #222529;
-  --clr-text-dark: #eceff4;
-  --clr-text-sub-light: #70747b;
-  --clr-text-sub-dark: #d2d6db;
-  --clr-background-reader-dark: #111111;
-  --clr-background-reader-light: #f7f8fc;
-  --clr-primary-light: #0095ad;
-  --clr-primary-dark: #1ab6b9;
-  --clr-accent-light: #ff6b6b;
-  --clr-accent-dark: #ff7f7f;
+  --iclr-bg-light: #e9ecef;
+  --iclr-bg-dark: #111;
+  --iclr-bg-card-light: #ffffff;
+  --iclr-bg-card-dark: #1b1c1e;
+  --iclr-text-light: #222329;
+  --iclr-text-dark: #eff2f6;
+  --iclr-text-sub-light: #4d4c52;
+  --iclr-text-sub-dark: #d2d6db;
+  --iclr-text-fifth-light: #7f7f80;
+  --iclr-text-fifth-dark: #807f7f;
+  --iclr-background-reader-light: #e9ecef;
+  --iclr-background-reader-dark: #111111;
+  --iclr-primary-light: #0095ad;
+  --iclr-primary-dark: #1ab6b9;
+  --iclr-accent-light: #ff6b6b;
+  --iclr-accent-dark: #ff7f7f;
 
-  /* Header specific colors */
-  --clr-header-logo-light: #000000;
-  --clr-header-logo-dark: #ffffff;
-  --clr-header-text-light: #495057; /* Dark Gray */
-  --clr-header-text-dark: #adb5bd; /* Light Gray */
-  --clr-header-text-hover-light: #000000;
-  --clr-header-text-hover-dark: #ffffff;
-  --clr-header-icon-light: #000000;
-  --clr-header-icon-dark: #ffffff;
-
-  --clr-bg: var(--clr-bg-light);
-  --clr-bg-card: var(--clr-bg-card-light);
+  /* Main Light */
+  --clr-bg: var(--iclr-bg-light);
+  --clr-bg-rgb: 247, 248, 252;
+  --clr-bg-card: var(--iclr-bg-card-light);
   --clr-bg-card-rgb: 255, 255, 255;
-  --clr-text: var(--clr-text-light);
+  --clr-text: var(--iclr-text-light);
   --clr-text-rgb: 34, 40, 49;
-  --clr-text-sub: var(--clr-text-sub-light);
+  --clr-text-sub: var(--iclr-text-sub-light);
   --clr-text-sub-rgb: 112, 116, 123;
-  --clr-background-reader: var(--clr-background-reader-light);
-  --clr-background-reader-rgb: 247, 248, 252;
-  --clr-primary: var(--clr-primary-light);
+  --clr-text-fifth: var(--iclr-text-fifth-light);
+  --clr-text-fifth-rgb: 128, 127, 127;
+  --clr-bg-reader: var(--iclr-background-reader-light);
+  --clr-bg-reader-rgb: 247, 248, 252;
+  --clr-primary: var(--iclr-primary-light);
   --clr-primary-rgb: 0, 149, 173;
-  --clr-accent: var(--clr-accent-light);
+  --clr-accent: var(--iclr-accent-light);
   --clr-accent-rgb: 255, 107, 107;
-  --clr-text-rgb: 34, 40, 49;
   --clr-bg-rgb-val: 247, 248, 252;
 
-  --clr-header-logo: var(--clr-header-logo-light);
-  --clr-header-text: var(--clr-header-text-light);
-  --clr-header-text-hover: var(--clr-header-text-hover-light);
-  --clr-header-icon: var(--clr-header-icon-light);
+  /* Invert Light */
+  --clr-bg-invert: var(--iclr-bg-dark);
+  --clr-bg-invert-rgb: 21, 23, 26;
+  --clr-bg-card-invert: var(--iclr-bg-card-dark);
+  --clr-bg-card-invert-rgb: 27, 28, 30;
+  --clr-text-invert: var(--iclr-text-dark);
+  --clr-text-invert-rgb: 236, 239, 244;
+  --clr-text-sub-invert: var(--iclr-text-sub-dark);
+  --clr-text-sub-invert-rgb: 210, 214, 219;
+  --clr-text-fifth-invert: var(--iclr-text-fifth-dark);
+  --clr-text-fifth-invert-rgb: 128, 127, 127;
+  --clr-bg-reader-invert: var(--iclr-background-reader-dark);
+  --clr-bg-reader-invert-rgb: 17, 17, 17;
+  --clr-primary-invert: var(--iclr-primary-dark);
+  --clr-primary-invert-rgb: 26, 182, 185;
+  --clr-accent-invert: var(--iclr-accent-dark);
+  --clr-accent-invert-rgb: 255, 127, 127;
+  --clr-bg-invert-rgb-val: 21, 23, 26;
 
   --series-fixed-cover-width-desktop: 180px;
   --series-fixed-cover-width-mobile: 120px;
@@ -63,28 +72,51 @@ html.dark {
 
 html.dark:root,
 body.dark {
-  --clr-bg: var(--clr-bg-dark);
-  --clr-bg-card: var(--clr-bg-card-dark);
-  --clr-text: var(--clr-text-dark);
-  --clr-text-sub: var(--clr-text-sub-dark);
-  --clr-primary: var(--clr-primary-dark);
-  --clr-primary-rgb: 26, 182, 185;
-  --clr-accent: var(--clr-accent-dark);
-  --clr-accent-rgb: 255, 127, 127;
+  /* Main Dark */
+  --clr-bg: var(--iclr-bg-dark);
+  --clr-bg-rgb: 21, 23, 26;
+  --clr-bg-card: var(--iclr-bg-card-dark);
+  --clr-bg-card-rgb: 27, 28, 30;
+  --clr-text: var(--iclr-text-dark);
   --clr-text-rgb: 236, 239, 244;
+  --clr-text-sub: var(--iclr-text-sub-dark);
+  --clr-text-sub-rgb: 210, 214, 219;
+  --clr-text-fifth: var(--iclr-text-fifth-dark);
+  --clr-text-fifth-rgb: 128, 127, 127;
+  --clr-bg-reader: var(--iclr-background-reader-dark);
+  --clr-bg-reader-rgb: 17, 17, 17;
+  --clr-primary: var(--iclr-primary-dark);
+  --clr-primary-rgb: 26, 182, 185;
+  --clr-accent: var(--iclr-accent-dark);
+  --clr-accent-rgb: 255, 127, 127;
   --clr-bg-rgb-val: 21, 23, 26;
 
-  --clr-header-logo: var(--clr-header-logo-dark);
-  --clr-header-text: var(--clr-header-text-dark);
-  --clr-header-text-hover: var(--clr-header-text-hover-dark);
-  --clr-header-icon: var(--clr-header-icon-dark);
+  /* Invert Dark */
+  --clr-bg-invert: var(--iclr-bg-light);
+  --clr-bg-invert-rgb: 247, 248, 252;
+  --clr-bg-card-invert: var(--iclr-bg-card-light);
+  --clr-bg-card-invert-rgb: 255, 255, 255;
+  --clr-text-invert: var(--iclr-text-light);
+  --clr-text-invert-rgb: 34, 40, 49;
+  --clr-text-sub-invert: var(--iclr-text-sub-light);
+  --clr-text-sub-invert-rgb: 112, 116, 123;
+  --clr-text-fifth-invert: var(--iclr-text-fifth-light);
+  --clr-text-fifth-invert-rgb: 128, 127, 127;
+  --clr-bg-reader-invert: var(--iclr-background-reader-light);
+  --clr-bg-reader-invert-rgb: 247, 248, 252;
+  --clr-primary-invert: var(--iclr-primary-light);
+  --clr-primary-invert-rgb: 0, 149, 173;
+  --clr-accent-invert: var(--iclr-accent-light);
+  --clr-accent-invert-rgb: 255, 107, 107;
+  --clr-bg-invert-rgb-val: 247, 248, 252;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease,
+    transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
 }
 
 html {
@@ -104,7 +136,6 @@ body#readerpage {
   /* Empêche le scroll de la page principale quand le lecteur est ouvert */
   overflow: hidden;
 }
-
 
 img {
   display: block;

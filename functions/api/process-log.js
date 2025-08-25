@@ -64,7 +64,19 @@ export async function onRequest(context) {
                 (seriesInteractions[chapter].likes || 0) - 1
               );
             }
-
+            // Gestion des notes (ratings) au niveau de la série (pas par chapitre)
+            else if (type === "rate") {
+              if (!seriesInteractions.stats) seriesInteractions.stats = {};
+              if (!Array.isArray(seriesInteractions.stats.ratings)) {
+                seriesInteractions.stats.ratings = [];
+              }
+              // On stocke la note dans un tableau temporaire (sera agrégé à la fin)
+              seriesInteractions.stats.ratings.push(
+                payload && payload.value !== undefined
+                  ? payload.value
+                  : action.value
+              );
+            }
             // Les actions de commentaires ne seront traitées que si ce n'est pas un épisode
             else if (!isEpisode) {
               if (type === "add_comment") {
@@ -99,6 +111,25 @@ export async function onRequest(context) {
         await env.INTERACTIONS_LOG.delete(logKey);
       }
 
+      // Agrégation finale des notes (ratings) pour stats globales
+      if (
+        seriesInteractions.stats &&
+        Array.isArray(seriesInteractions.stats.ratings)
+      ) {
+        const ratingsArr = seriesInteractions.stats.ratings.filter(
+          (v) => typeof v === "number" && !isNaN(v)
+        );
+        const ratingsCount = ratingsArr.length;
+        const avgRating =
+          ratingsCount > 0
+            ? ratingsArr.reduce((a, b) => a + b, 0) / ratingsCount
+            : null;
+        seriesInteractions.stats.ratings = {
+          count: ratingsCount,
+          average:
+            avgRating !== null ? Math.round(avgRating * 100) / 100 : null,
+        };
+      }
       await env.INTERACTIONS_CACHE.put(
         cacheKey,
         JSON.stringify(seriesInteractions)
@@ -122,7 +153,8 @@ export async function onRequest(context) {
     );
     // Ajout : retourne l'erreur détaillée dans la réponse pour debug local
     return new Response(
-      "Erreur lors du traitement : " + (error && error.stack ? error.stack : error),
+      "Erreur lors du traitement : " +
+        (error && error.stack ? error.stack : error),
       { status: 500 }
     );
   }

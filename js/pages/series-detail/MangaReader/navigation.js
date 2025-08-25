@@ -1,94 +1,111 @@
-// js/pages/series-detail/MangaReader/navigation.js
-import { slugify } from '../../../utils/domUtils.js';
-import { state, domImages } from './state.js';
-import { render, updateUIOnPageChange } from './ui.js'; // Correction: 'render' est maintenant exporté par ui.js
+// --- File: js/pages/series-detail/MangaReader/navigation.js ---
+
+import { qs, slugify } from "../../../utils/domUtils.js";
+import { state, dom, domImages } from "./state.js";
+import { render as renderViewer } from "./components/viewer.js";
 
 let urlUpdateTimeout = null;
 
 export function getInitialPageNumberFromUrl() {
-    if (window.location.hash === '#last') return 'last';
-    const pathSegments = window.location.pathname.split('/').filter(Boolean);
-    if (pathSegments.length === 3) {
-        const pageNumber = parseInt(pathSegments[2], 10);
-        if (!isNaN(pageNumber) && pageNumber > 0) return pageNumber;
-    }
-    return 1;
+  if (window.location.hash === "#last") return "last";
+  const pathSegments = window.location.pathname.split("/").filter(Boolean);
+  if (pathSegments.length === 3) {
+    const pageNumber = parseInt(pathSegments[2], 10);
+    if (!isNaN(pageNumber) && pageNumber > 0) return pageNumber;
+  }
+  return 1;
 }
 
 export function updateUrlForCurrentPage() {
-    clearTimeout(urlUpdateTimeout);
-    urlUpdateTimeout = setTimeout(() => {
-        const seriesSlug = slugify(state.seriesData.title);
-        const chapterNumber = state.currentChapter.number;
-        const currentSpread = state.spreads[state.currentSpreadIndex];
-        if (!currentSpread || currentSpread.length === 0) return;
+  clearTimeout(urlUpdateTimeout);
+  urlUpdateTimeout = setTimeout(() => {
+    const seriesSlug = slugify(state.seriesData.title);
+    const chapterNumber = state.currentChapter.number;
+    const currentSpread = state.spreads[state.currentSpreadIndex];
+    if (!currentSpread || currentSpread.length === 0) return;
 
-        const firstPageIndexInSpread = currentSpread[0];
-        const pageNumberForUrl = firstPageIndexInSpread + 1;
-        const newPath = `/${seriesSlug}/${chapterNumber}/${pageNumberForUrl}`;
+    const firstPageIndexInSpread = currentSpread[0];
+    const pageNumberForUrl = firstPageIndexInSpread + 1;
+    const newPath = `/${seriesSlug}/${chapterNumber}/${pageNumberForUrl}`;
 
-        if (window.location.pathname !== newPath) {
-            history.replaceState({ page: pageNumberForUrl }, "", newPath);
-        }
-    }, 150);
-}
-
-export function goToPage(pageIndex, isInitializing = false) {
-    if (state.settings.mode === 'webtoon') {
-        const targetImage = domImages[pageIndex];
-        if (targetImage) {
-            const behavior = isInitializing ? 'auto' : 'smooth';
-            targetImage.scrollIntoView({ behavior, block: 'start' });
-            if (!isInitializing) {
-                state.currentSpreadIndex = pageIndex;
-                updateUIOnPageChange();
-            }
-        }
-    } else {
-        const spreadIndex = state.pageToSpreadMap[pageIndex];
-        if (spreadIndex !== undefined) goToSpread(spreadIndex, isInitializing);
+    if (window.location.pathname !== newPath) {
+      history.replaceState({ page: pageNumberForUrl }, "", newPath);
     }
+  }, 150);
 }
 
 export function goToSpread(spreadIndex, isInitializing = false) {
-    state.currentSpreadIndex = Math.max(0, Math.min(spreadIndex, state.spreads.length - 1));
+  state.currentSpreadIndex = Math.max(
+    0,
+    Math.min(spreadIndex, state.spreads.length - 1)
+  );
 
-    if (state.settings.mode === 'webtoon') {
-        const pageIndex = state.spreads[state.currentSpreadIndex]?.[0];
-        if (pageIndex !== undefined && domImages[pageIndex]) {
-            const behavior = isInitializing ? 'auto' : 'smooth';
-            domImages[pageIndex].scrollIntoView({ behavior, block: 'start' });
-        }
+  if (state.settings.mode === "webtoon") {
+    // En mode webtoon, on ne re-render pas, on scroll directement
+    const pageIndex = state.spreads[state.currentSpreadIndex]?.[0];
+    if (pageIndex !== undefined && domImages[pageIndex]) {
+      // Utilise 'auto' pour un positionnement instantané au chargement
+      const behavior = isInitializing ? "auto" : "smooth";
+      console.log(
+        `[Navigation] Webtoon: Scrolling vers l'image index ${pageIndex}`
+      );
+      // On s'assure que l'image est bien dans le DOM avant de scroller
+      const imageInDom = qs(`.reader-viewer img:nth-child(${pageIndex + 1})`);
+      if (imageInDom) {
+        imageInDom.scrollIntoView({ behavior, block: "start" });
+      } else {
+        console.warn(
+          `[Navigation] Tentative de scroll vers une image non trouvée dans le DOM (index ${pageIndex})`
+        );
+      }
     }
+  } else {
+    // Pour les autres modes, on re-render la planche
+    renderViewer();
+  }
+  updateUIOnPageChange();
 
-    render(isInitializing);
-    updateUrlForCurrentPage();
+  if (!isInitializing && state.settings.mode !== "webtoon") {
+    dom.viewerContainer.scrollTop = 0;
+  }
+  updateUrlForCurrentPage();
 }
 
 export function changeSpread(delta) {
-    const isLastSpread = state.currentSpreadIndex >= state.spreads.length - 1;
-    if (delta > 0 && isLastSpread) {
-        navigateToChapter(1);
-    } else if (delta < 0 && state.currentSpreadIndex === 0) {
-        navigateToChapter(-1, true);
-    } else {
-        goToSpread(state.currentSpreadIndex + delta);
-    }
+  const isLastSpread = state.currentSpreadIndex >= state.spreads.length - 1;
+  if (delta > 0 && isLastSpread) {
+    navigateToChapter(1);
+  } else if (delta < 0 && state.currentSpreadIndex === 0) {
+    navigateToChapter(-1, true);
+  } else {
+    goToSpread(state.currentSpreadIndex + delta);
+  }
 }
 
 export function navigateToChapter(delta, goToLastPage = false) {
-    const currentChapterIndex = state.allChapterKeys.indexOf(state.currentChapter.number);
-    const nextChapterIndex = currentChapterIndex + delta;
-    if (nextChapterIndex >= 0 && nextChapterIndex < state.allChapterKeys.length) {
-        const nextChapterKey = state.allChapterKeys[nextChapterIndex];
-        let url = `/${slugify(state.seriesData.title)}/${nextChapterKey}`;
-        if (goToLastPage) url += '#last';
-        window.location.href = url;
-    } else {
-        if (delta < 0) {
-            alert("Il n'y a pas de chapitre précédent.");
-        } else if (delta > 0) {
-            alert("Il n'y a pas de prochain chapitre, il n'est peut-être pas encore disponible.");
-        }
-    }
+  const currentChapterIndex = state.allChapterKeys.indexOf(
+    state.currentChapter.number
+  );
+  const nextChapterIndex = currentChapterIndex + delta;
+  if (nextChapterIndex >= 0 && nextChapterIndex < state.allChapterKeys.length) {
+    const nextChapterKey = state.allChapterKeys[nextChapterIndex];
+    let url = `/${slugify(state.seriesData.title)}/${nextChapterKey}`;
+    if (goToLastPage) url += "#last";
+    window.location.href = url;
+  } else {
+    const message =
+      delta > 0
+        ? "Vous êtes au dernier chapitre disponible."
+        : "Ceci est le premier chapitre.";
+    console.log(message);
+  }
+}
+
+export function updateUIOnPageChange() {
+  const currentSpread = state.spreads[state.currentSpreadIndex] || [];
+  const firstPage = currentSpread.length > 0 ? currentSpread[0] + 1 : 0;
+  // La référence à 'dom' est maintenant correcte grâce à l'import
+  if (dom.pageCounter) {
+    dom.pageCounter.textContent = `Page ${firstPage} / ${state.pages.length}`;
+  }
 }

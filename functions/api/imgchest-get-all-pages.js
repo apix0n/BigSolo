@@ -2,7 +2,7 @@ export async function onRequest(context) {
   const { env } = context;
   const cacheKey = `imgchest_all_pages_combined`;
   const username = "Big_herooooo";
-  const maxPages = 8;
+  const maxPages = 9;
 
   console.log(`[IMG_CHEST] Incoming request → Checking KV key "${cacheKey}"`);
 

@@ -65,7 +65,7 @@ body.dark header#main-header {
 @media (min-width: 769px) {
   main > section:not(.full-width) {
     padding-left: 16rem;
-    padding-right: 3rem;
+    padding-right: 16rem;
   }
 }
 
@@ -130,7 +130,7 @@ section {
   }
 
   main {
-    padding: 1.5rem 7%;
+    padding: 0 15px 15px 15px;
   }
 
   section {

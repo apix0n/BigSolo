@@ -1,4 +1,4 @@
-// js/pages/series-detail/MangaReader/state.js
+// --- File: js/pages/series-detail/MangaReader/state.js ---
 
 // L'état global du lecteur, exporté pour être modifiable par les autres modules.
 export let state = {
@@ -11,13 +11,13 @@ export let state = {
   currentSpreadIndex: 0,
   chapterStats: { likes: 0, comments: [] },
   settings: {
-    // État des options principales (valeurs, pas indices)
-    mode: 'double', // 'single', 'double', 'webtoon'
-    fit: 'width',   // 'height', 'width', 'custom'
+    // État des options principales
+    mode: "double", // 'single', 'double', 'webtoon'
+    fit: "width", // 'height', 'width', 'custom'
 
     // État des options secondaires
     doublePageOffset: true,
-    direction: 'rtl', // 'ltr', 'rtl'
+    direction: "rtl", // 'ltr', 'rtl'
     stretch: false,
     limitWidth: true,
     limitHeight: false,
@@ -27,8 +27,8 @@ export let state = {
     customMaxHeight: 1080,
 
     // État de l'UI
-    infoSidebarOpen: true, // Ouvert par défaut pour la démo
-    settingsSidebarOpen: false
+    infoSidebarOpen: true,
+    settingsSidebarOpen: false,
   },
 };
 

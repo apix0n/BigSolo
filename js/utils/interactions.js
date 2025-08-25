@@ -1,3 +1,50 @@
+// --- Gestion des notes utilisateur (rating) ---
+const RATING_KEY_PREFIX = "series_rating_";
+
+/**
+ * Récupère la note locale de l'utilisateur pour une série
+ */
+export function getLocalSeriesRating(seriesSlug) {
+  const key = RATING_KEY_PREFIX + seriesSlug;
+  const val = localStorage.getItem(key);
+  if (!val) return null;
+  const parsed = parseFloat(val);
+  return isNaN(parsed) ? null : parsed;
+}
+
+/**
+ * Définit/modifie la note locale de l'utilisateur pour une série
+ * (et ajoute l'action à la file d'attente, en supprimant l'ancienne si besoin)
+ */
+export function setLocalSeriesRating(seriesSlug, value) {
+  const key = RATING_KEY_PREFIX + seriesSlug;
+  const old = getLocalSeriesRating(seriesSlug);
+  localStorage.setItem(key, value);
+  // Ajoute à la file d'attente une action unique (remplace l'ancienne si présente)
+  let queue = getActionQueue();
+  if (!queue[seriesSlug]) queue[seriesSlug] = [];
+  // Supprime toute ancienne action de type 'rate'
+  queue[seriesSlug] = queue[seriesSlug].filter((a) => a.type !== "rate");
+  queue[seriesSlug].push({ type: "rate", value });
+  saveActionQueue(queue);
+  console.log(
+    `[interactions.js] setLocalSeriesRating: ${seriesSlug} = ${value} (old: ${old})`
+  );
+}
+
+/**
+ * Supprime la note locale (si besoin)
+ */
+export function removeLocalSeriesRating(seriesSlug) {
+  const key = RATING_KEY_PREFIX + seriesSlug;
+  localStorage.removeItem(key);
+  let queue = getActionQueue();
+  if (queue[seriesSlug]) {
+    queue[seriesSlug] = queue[seriesSlug].filter((a) => a.type !== "rate");
+    saveActionQueue(queue);
+  }
+  console.log(`[interactions.js] removeLocalSeriesRating: ${seriesSlug}`);
+}
 // js/utils/interactions.js
 
 const ACTION_QUEUE_KEY = "bigsolo_action_queue";
@@ -207,7 +254,6 @@ window.addEventListener("pagehide", (event) => {
 
 // --- AJOUT : test avec beforeunload ---
 window.addEventListener("beforeunload", (event) => {
-  alert("beforeunload déclenché"); // juste pour voir si ça s'affiche
   console.log("[DEBUG][interactions.js][beforeunload] event déclenché");
   sendActionQueue();
 });

@@ -1,150 +1,70 @@
+<!-- --- File: templates/MangaReader.html --- -->
+
 <!DOCTYPE html>
 <html lang="fr">
+  <head>
+    <script>
+      (function () {
+        try {
+          var theme = localStorage.getItem("mv-theme");
+          var prefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)"
+          ).matches;
+          var htmlEl = document.documentElement;
+          if (theme === "dark" || (!theme && prefersDark)) {
+            htmlEl.classList.add("dark");
+          } else {
+            htmlEl.classList.remove("dark");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta charset="UTF-8" />
 
-<head>
-  <script>
-    (function () {
-      try {
-        var theme = localStorage.getItem('mv-theme');
-        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var htmlEl = document.documentElement;
-        if (theme === 'dark' || (!theme && prefersDark)) {
-          htmlEl.classList.add('dark');
-        } else {
-          htmlEl.classList.remove('dark');
-        }
-      } catch (e) { }
-    })();
-  </script>
-  <meta charset="UTF-8" />
+    <!-- ↓↓↓ SECTION GÉRÉE PAR LE MIDDLEWARE ↓↓↓ -->
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- DYNAMIC_OG_TAGS_PLACEHOLDER -->
+    <!-- ↑↑↑ FIN DE LA SECTION ↑↑↑ -->
 
-  <!-- ↓↓↓ SECTION GÉRÉE PAR LE MIDDLEWARE ↓↓↓ -->
-  <meta property="og:type" content="website" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <!-- DYNAMIC_OG_TAGS_PLACEHOLDER -->
-  <!-- ↑↑↑ FIN DE LA SECTION ↑↑↑ -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/png" href="/img/icon.png" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap"
-    rel="stylesheet" />
-  <link rel="icon" type="image/png" href="/img/icon.png" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/components/header.css" />
+    <link rel="stylesheet" href="/css/components/mobile-menu.css" />
+    <link rel="stylesheet" href="/css/components/reader.css" />
+    <link rel="stylesheet" href="/css/layout.css" />
+    <script src="/js/theme-init.js"></script>
+  </head>
 
-  <link rel="stylesheet" href="/css/style.css" />
-  <link rel="stylesheet" href="/css/components/header.css" />
-  <link rel="stylesheet" href="/css/components/mobile-menu.css" />
-  <link rel="stylesheet" href="/css/components/reader.css" />
-  <link rel="stylesheet" href="/css/layout.css" />
-  <script src="/js/theme-init.js"></script>
-</head>
+  <body id="readerpage">
+    <header id="main-header"></header>
+    <div class="mobile-menu-overlay" id="main-mobile-menu-overlay"></div>
 
-<body id="readerpage">
-  <header id="main-header"></header>
-  <div class="mobile-menu-overlay" id="main-mobile-menu-overlay"></div>
+    <main id="manga-reader-root">
+      <!-- Le JS va générer la structure complète du lecteur ici -->
+      <p style="padding: 3rem; text-align: center; color: var(--clr-text-sub)">
+        Initialisation du lecteur...
+      </p>
+    </main>
 
-  <main id="manga-reader-root">
-    <div id="global-reader-controls">
-      <button id="toggle-info-sidebar-btn" title="Informations"><i class="fas fa-info-circle"></i></button>
-      <button id="toggle-settings-sidebar-btn" title="Paramètres"><i class="fas fa-cog"></i></button>
-      <span id="live-page-counter">Page 1 / 1</span>
-    </div>
-
-    <div class="reader-layout-container">
-      <aside id="info-sidebar" class="reader-sidebar">
-        <div class="sidebar-content-wrapper">
-          <div id="info-series-link-group" class="control-group">
-            <a id="info-series-link" href="#"><i class="fas fa-arrow-left"></i> Kaoru Hana wa Rin to Saku</a>
-          </div>
-          <div id="info-chapters-group" class="control-group">
-            <h4 class="group-title">Chapitres</h4>
-            <div class="chapter-list-wrapper">
-              <div class="chapter-list">
-                <!-- Le JS injectera la liste des chapitres ici -->
-                <p>Chargement des chapitres...</p>
-              </div>
-            </div>
-          </div>
-          <div id="info-comments-group" class="control-group">
-            <h4 class="group-title">Commentaires</h4>
-            <div class="add-comment-box">
-              <textarea id="comment-textarea" placeholder="Ajouter un commentaire..." rows="1"></textarea>
-              <div class="add-comment-actions">
-                <button class="send-btn">Envoyer <i class="fas fa-paper-plane"></i></button>
-              </div>
-            </div>
-            <div class="comments-list">
-              <!-- Le JS injectera les commentaires ici -->
-              <p>Chargement des commentaires...</p>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      <aside id="settings-sidebar" class="reader-sidebar">
-        <div class="sidebar-content-wrapper">
-          <div id="settings-mode-group" class="control-group">
-            <h4 class="group-title">Mode de lecture</h4>
-            <button class="main-setting-btn" data-setting="mode"></button>
-            <div class="options-panel" id="mode-options-panel">
-              <button class="secondary-toggle-btn" data-sub-setting="doublePageOffset"><i
-                  class="check-icon far fa-square"></i> Décalage double page</button>
-              <button class="secondary-toggle-btn" data-sub-setting="direction"></button>
-            </div>
-          </div>
-          <div id="settings-fit-group" class="control-group">
-            <h4 class="group-title">Ajustement</h4>
-            <button class="main-setting-btn" data-setting="fit"></button>
-            <div class="options-panel" id="fit-options-panel">
-              <button class="secondary-toggle-btn" data-sub-setting="stretch"><i class="check-icon far fa-square"></i>
-                Étirer les petites pages</button>
-              <!-- Nouvelle structure sliders -->
-              <div class="slider-control" data-sub-setting="limitWidth">
-                <div class="slider-header">
-                  <i class="check-icon far fa-square"></i>
-                  <span class="slider-label">Limiter la largeur</span>
-                </div>
-                <div class="slider-body">
-                  <div class="PB-range-slider-div">
-                    <input type="range" min="400" max="3000" class="PB-range-slider" id="width-slider" step="10"
-                      disabled>
-                    <p class="PB-range-slidervalue">1200px</p>
-                  </div>
-                </div>
-              </div>
-              <div class="slider-control" data-sub-setting="limitHeight">
-                <div class="slider-header">
-                  <i class="check-icon far fa-square"></i>
-                  <span class="slider-label">Limiter la hauteur</span>
-                </div>
-                <div class="slider-body">
-                  <div class="PB-range-slider-div">
-                    <input type="range" min="400" max="3000" class="PB-range-slider" id="height-slider" step="10"
-                      disabled>
-                    <p class="PB-range-slidervalue">1080px</p>
-                  </div>
-                </div>
-              </div>
-              <!-- Fin nouvelle structure -->
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      <div class="reader-container">
-        <div class="reader-viewer-container">
-          <!-- Le JS injectera les images <img> ici -->
-          <p>Chargement des pages...</p>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <script id="reader-data-placeholder" type="application/json"><!-- READER_DATA_PLACEHOLDER --></script>
-  <script src="/js/index.js" type="module"></script>
-</body>
-
+    <script id="reader-data-placeholder" type="application/json">
+      <!-- READER_DATA_PLACEHOLDER -->
+    </script>
+    <script src="/js/index.js" type="module"></script>
+  </body>
 </html>
