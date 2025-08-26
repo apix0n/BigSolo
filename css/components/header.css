@@ -56,6 +56,10 @@
   letter-spacing: 1px;
 }
 
+header#main-header.is-hidden {
+  transform: translateY(-100%);
+}
+
 .site-title-link::after {
   content: none;
   /* Remove underline effect */

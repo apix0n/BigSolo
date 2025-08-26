@@ -2,7 +2,8 @@
 :root {
   --sidebar-info-width: 16rem;
   --sidebar-settings-width: 14rem;
-  --global-controls-height: 50px;
+  --global-controls-height: 4.5rem;
+  --global-controls-height-mobile: 4rem;
 }
 
 /* css/components/reader.css */
@@ -13,9 +14,7 @@ body#readerpage {
 
 #manga-reader-root {
   height: calc(100vh - 60px);
-  display: flex;
-  flex-direction: column;
-  position: relative;
+  position: relative; /* Le cadre de référence pour ses enfants */
   background-color: var(--clr-bg-reader);
 }
 
@@ -25,17 +24,16 @@ body#readerpage {
   top: 0;
   left: 0;
   height: var(--global-controls-height);
-  width: var(--sidebar-info-width);
-  background: transparent;
+  width: 100%; /* Prend toute la largeur */
+  background: var(--clr-bg-reader);
   z-index: 1001;
   display: flex;
   align-items: center;
-  /* - Debut correction */
-  padding: 1.5rem 0 0 1.5rem; /* Ajustement du padding pour être un peu plus joli */
-  box-sizing: border-box; /* S'assure que le padding est inclus dans la hauteur */
+  padding: 0 1.5rem;
   gap: 0.75rem;
-  /* - Fin correction */
+  box-sizing: border-box;
 }
+
 #global-reader-controls button {
   background: transparent;
   color: var(--clr-reader-invert);
@@ -80,12 +78,13 @@ body#readerpage {
 
 /* --- Layout Principal (Sidebars + Viewer) --- */
 .reader-layout-container {
+  position: absolute;
+  top: var(--global-controls-height);
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: flex;
-  flex-grow: 1; /* Cette ligne est cruciale, elle dit au conteneur de prendre TOUT l'espace restant */
-  min-height: 0; /* Empêche le conteneur de déborder si son contenu est trop grand */
-  position: relative;
   overflow: hidden;
-  /* On retire padding-top car les contrôles ne sont plus dans le même flux de layout */
 }
 
 /* --- NOUVELLE LOGIQUE D'ANIMATION POUR LES SIDEBARS --- */
@@ -94,13 +93,11 @@ body#readerpage {
   top: 0;
   left: 0;
   height: 100%;
-  margin-top: 3rem;
-  padding: 1.5rem 0 1.5rem 1.5rem;
+  padding: 0rem 0 1.5rem 1.5rem;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   min-width: 0;
-  /* La position de départ est gérée par le JS, mais on garde un transform pour la transition */
   transform: translateX(-100%);
   transition: transform 0.3s ease-in-out;
   z-index: 2;
@@ -113,7 +110,7 @@ body#readerpage {
 }
 
 #settings-sidebar {
-  padding: 1.5rem 0 0 1rem;
+  padding-left: 1rem;
   width: var(--sidebar-settings-width);
   z-index: 2;
 }
@@ -130,10 +127,9 @@ body#readerpage {
 }
 
 .reader-container {
-  margin-top: 4.5rem;
+  padding: 1rem;
   flex-grow: 1;
   min-width: 0;
-  overflow-y: auto;
   -webkit-user-select: none;
   user-select: none;
   margin-left: 0;
@@ -141,15 +137,15 @@ body#readerpage {
   position: relative;
   z-index: 1;
   height: 100%;
-  padding: 0 1rem 0.5rem 1rem;
+  /* On retire le padding ici car il sera sur le viewer */
 }
 
 .reader-viewer-container {
   background-color: var(--clr-bg-reader);
-  height: calc(100% - 4.5rem);
+  height: 100%;
   -webkit-user-select: none;
   user-select: none;
-  overflow: hidden; /* Important: on empêche son propre scroll, le scroll sera sur .reader-viewer */
+  overflow: hidden;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -800,4 +796,281 @@ body.dark .reader-viewer-container {
 .comment-like-action .fa-heart.liked,
 .comment-like-action span.liked {
   color: var(--clr-accent) !important;
+}
+
+.mobile-only {
+  display: none;
+}
+
+/* Par défaut, les éléments desktop sont visibles */
+.desktop-only {
+  display: block; /* ou flex, grid, etc. selon l'élément */
+}
+
+/***************************************/
+/* --- SECTION RESPONSIVE (MOBILE) --- */
+/***************************************/
+@media (max-width: 768px) {
+  /* --- Classes utilitaires pour le responsive --- */
+  .mobile-only {
+    display: flex;
+  }
+  .desktop-only {
+    display: none !important; /* Force le masquage */
+  }
+
+  /* --- Layout principal --- */
+  #global-reader-controls {
+    display: none;
+  }
+
+  /* Le conteneur racine devient le conteneur scrollable principal */
+  #manga-reader-root {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .reader-layout-container {
+    padding-top: 0;
+    flex-direction: column;
+    position: static; /* Reste dans le flux normal */
+  }
+
+  .reader-container {
+    margin-left: 0 !important;
+    padding: 0;
+    z-index: 1; /* Reste sous les overlays et barres */
+  }
+
+  /* On retire le scroll de ces conteneurs, car le parent scroll */
+  .reader-viewer,
+  .reader-viewer-container {
+    overflow: visible;
+  }
+
+  .reader-viewer {
+    padding: 0;
+  }
+
+  /* --- Barre d'actions mobile flottante et collante --- */
+  #mobile-reader-controls {
+    min-height: var(--global-controls-height-mobile, 88px);
+    position: sticky; /* Se colle en haut du conteneur scrollable (#manga-reader-root) */
+    top: 0;
+    z-index: 1000;
+    padding: 0.4rem 0.8rem;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    /* Le fond doit être solide pour ne pas voir le contenu défiler derrière */
+    background-color: var(--clr-bg-card);
+    transition: transform 0.3s ease-in-out;
+    transform: translateY(0);
+  }
+
+  /* La classe .is-hidden fait glisser la barre vers le haut */
+  #mobile-reader-controls.is-hidden {
+    transform: translateY(-100%);
+  }
+
+  .mrc-info-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 0.5rem;
+  }
+
+  .mrc-top-row,
+  .mrc-bottom-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .mrc-left-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .mrc-series-title {
+    color: var(--clr-text);
+    font-size: 1rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mrc-chapter-details {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mrc-chapter-number {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--clr-text);
+  }
+
+  .mrc-chapter-title {
+    font-size: 0.85rem;
+    color: var(--clr-text-fifth);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  #mobile-reader-controls button {
+    background: none;
+    border: none;
+    color: var(--clr-text);
+    padding: 0.25rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+
+  #mobile-toggle-settings-btn {
+    font-size: 1.5rem;
+  }
+
+  .mrc-page-counter {
+    color: var(--clr-text-sub);
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  /* Style du groupe de stats */
+  .mrc-stats-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .mrc-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--clr-text-sub);
+    cursor: pointer;
+  }
+
+  .mrc-likes-count,
+  .mrc-comments-count {
+    font-weight: 400;
+  }
+
+  .mrc-stat-item.liked {
+    color: var(--clr-accent);
+  }
+
+  /* --- Panneaux coulissants --- */
+  .reader-sidebar {
+    position: fixed;
+    /* Commence sous le header global du site */
+    top: 60px;
+    left: 0;
+    width: 90vw;
+    max-width: 350px;
+    /* Prend toute la hauteur disponible restante */
+    height: calc(100vh - 60px);
+    height: calc(100dvh - 60px);
+    background-color: var(--clr-bg-card);
+    z-index: 2000;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 0;
+    padding: 0;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .reader-sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .reader-sidebar .sidebar-content-wrapper {
+    padding: 1.05rem;
+    margin-top: 0;
+  }
+
+  .reader-sidebar .sidebar-header.mobile-only {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--clr-bg-card-invert);
+    flex-shrink: 0; /* Empêche le header de rétrécir */
+  }
+
+  .reader-sidebar .sidebar-header h4 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+
+  .reader-sidebar .sidebar-header .close-sidebar-btn {
+    background: none;
+    border: none;
+    color: var(--clr-text);
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    line-height: 1;
+  }
+
+  #settings-sidebar {
+    background-color: var(--clr-bg-reader);
+  }
+
+  #settings-sidebar #info-chapters-group {
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--clr-bg-card-invert);
+  }
+
+  #settings-sidebar #info-chapters-group .group-title.desktop-only {
+    display: none;
+  }
+
+  /* Overlay pour fermer les panneaux */
+  .mobile-sidebar-overlay {
+    position: fixed;
+    /* Commence sous le header principal pour ne pas le couvrir */
+    top: 60px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+
+  .mobile-sidebar-overlay.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* --- Section commentaires mobile --- */
+  #comments-mobile-section {
+    display: none;
+    padding: 1.5rem 1rem;
+    background-color: var(--clr-bg);
+  }
+
+  #comments-mobile-section.is-visible {
+    display: block;
+  }
 }

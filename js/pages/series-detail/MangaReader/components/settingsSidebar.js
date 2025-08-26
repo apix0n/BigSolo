@@ -23,9 +23,13 @@ function render() {
   if (!dom.settingsSidebar) return;
 
   dom.settingsSidebar.innerHTML = `
+        <div class="sidebar-header mobile-only">
+            <h4>Menu</h4>
+            <button class="close-sidebar-btn" title="Fermer"><i class="fas fa-times"></i></button>
+        </div>
         <div class="sidebar-content-wrapper">
             <div id="settings-mode-group" class="control-group">
-                <h4 class="group-title">Mode de lecture</h4>
+                <h4 class="group-title desktop-only">Mode de lecture</h4>
                 <button class="main-setting-btn" data-setting="mode"></button>
                 <div class="options-panel" id="mode-options-panel">
                     <button class="secondary-toggle-btn" data-sub-setting="doublePageOffset"><i class="check-icon far fa-square"></i> Décalage double page</button>
@@ -33,7 +37,7 @@ function render() {
                 </div>
             </div>
             <div id="settings-fit-group" class="control-group">
-                <h4 class="group-title">Ajustement</h4>
+                <h4 class="group-title desktop-only">Ajustement</h4>
                 <button class="main-setting-btn" data-setting="fit"></button>
                 <div class="options-panel" id="fit-options-panel">
                     <button class="secondary-toggle-btn" data-sub-setting="stretch"><i class="check-icon far fa-square"></i> Étirer les petites pages</button>
@@ -137,11 +141,20 @@ function attachEventListeners() {
         if (
           ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)
         ) {
-          e.stopPropagation(); // Empêche la navigation par flèches quand on utilise le slider
+          e.stopPropagation();
         }
       });
     }
   });
+
+  const closeBtn = qs(".close-sidebar-btn", dom.settingsSidebar);
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      // Logique de fermeture gérée dans reader.js pour centralisation
+      const event = new CustomEvent("close-sidebars");
+      document.dispatchEvent(event);
+    });
+  }
 }
 
 /**
@@ -149,7 +162,6 @@ function attachEventListeners() {
  */
 function updateAllUI() {
   console.log("[SettingsSidebar] Mise à jour de l'UI des paramètres.");
-  // Met à jour les boutons principaux (Mode, Ajustement)
   qsa(".main-setting-btn", dom.settingsSidebar).forEach((btn) => {
     const settingName = btn.dataset.setting;
     const config = settingsConfig[settingName];
@@ -161,25 +173,27 @@ function updateAllUI() {
     }
   });
 
-  // Met à jour les panneaux secondaires
   const { mode, fit } = state.settings;
-  qs(
+  const doublePageOffsetBtn = qs(
     '[data-sub-setting="doublePageOffset"]',
     dom.settingsSidebar
-  ).classList.toggle("disabled", mode !== "double");
-  qs('[data-sub-setting="direction"]', dom.settingsSidebar).classList.toggle(
-    "disabled",
-    mode === "webtoon"
   );
-  qs('[data-sub-setting="stretch"]', dom.settingsSidebar).classList.toggle(
-    "disabled",
-    fit !== "custom"
+  const directionBtn = qs(
+    '[data-sub-setting="direction"]',
+    dom.settingsSidebar
   );
+  const stretchBtn = qs('[data-sub-setting="stretch"]', dom.settingsSidebar);
+
+  if (doublePageOffsetBtn)
+    doublePageOffsetBtn.classList.toggle("disabled", mode !== "double");
+  if (directionBtn)
+    directionBtn.classList.toggle("disabled", mode === "webtoon");
+  if (stretchBtn) stretchBtn.classList.toggle("disabled", fit !== "custom");
+
   qsa(".slider-control", dom.settingsSidebar).forEach((control) => {
     control.classList.toggle("disabled", fit !== "custom");
   });
 
-  // Met à jour les toggles secondaires et sliders
   qsa(".secondary-toggle-btn", dom.settingsSidebar).forEach((btn) => {
     const subSetting = btn.dataset.subSetting;
     if (subSetting === "direction") {
@@ -217,4 +231,22 @@ function updateAllUI() {
     const valueSpan = control.querySelector(".PB-range-slidervalue");
     if (valueSpan) valueSpan.textContent = `${value}px`;
   });
+}
+
+/**
+ * Déplace le groupe de chapitres depuis info-sidebar vers settings-sidebar pour la vue mobile.
+ */
+export function moveChaptersForMobile() {
+  const chaptersGroup = dom.infoSidebar.querySelector("#info-chapters-group");
+  const settingsWrapper = dom.settingsSidebar.querySelector(
+    ".sidebar-content-wrapper"
+  );
+
+  if (chaptersGroup && settingsWrapper) {
+    // On déplace le bloc entier des chapitres au début du wrapper des paramètres
+    settingsWrapper.prepend(chaptersGroup);
+    console.log(
+      "[SettingsSidebar] Le bloc chapitres a été déplacé pour la vue mobile."
+    );
+  }
 }

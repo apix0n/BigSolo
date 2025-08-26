@@ -114,19 +114,17 @@ section {
   scrollbar-width: none;
 }
 
-@media (max-width: 1240px) {
-  .header-left-group {
-    gap: 0.8rem;
-  }
-}
-
 @media (max-width: 768px) {
-  .header-container {
-    padding: 0.6rem 5%;
-  }
-
   header#main-header {
     min-height: 55px;
+  }
+
+  .header-actions {
+    width: 4rem;
+  }
+
+  .header-left-group {
+    gap: 0.8rem;
   }
 
   main {
