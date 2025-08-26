@@ -68,6 +68,7 @@ html.dark {
   --series-fixed-cover-width-desktop: 180px;
   --series-fixed-cover-width-mobile: 120px;
   --mobile-carousel-card-aspect-ratio: 1.8;
+  --mobile-bars-height: 55px;
 }
 
 html.dark:root,
@@ -133,8 +134,6 @@ body {
 
 /* --- AJOUT POUR LE LECTEUR --- */
 body#readerpage {
-  /* Empêche le scroll de la page principale quand le lecteur est ouvert */
-  overflow: hidden;
 }
 
 img {

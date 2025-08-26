@@ -58,25 +58,18 @@ export async function initMangaReader() {
     loadSettings();
 
     isMobileView = window.innerWidth <= 768;
-    console.log(
-      `[Reader] Vue détectée : ${isMobileView ? "Mobile" : "Desktop"}`
-    );
-
     setupBaseLayout();
     initInfoSidebar();
     initSettingsSidebar();
     initViewer();
 
-    // - Debut correction
     // Le premier rendu du viewer crée le conteneur .reader-viewer
     renderViewer();
 
-    // Maintenant que .reader-viewer existe, on peut déplacer les éléments
     if (isMobileView) {
       moveCommentsForMobile();
       moveChaptersForMobile();
     }
-    // - Fin correction
 
     const seriesSlug = slugify(state.seriesData.title);
     const serverStats = await fetchSeriesStats(seriesSlug);
@@ -84,7 +77,6 @@ export async function initMangaReader() {
       likes: 0,
       comments: [],
     };
-
     updateChapterList();
     updateCommentsSection();
     updateGlobalLikeButton();
@@ -102,21 +94,35 @@ export async function initMangaReader() {
     }
   } catch (error) {
     handleError(`Impossible de charger le lecteur : ${error.message}`);
-    console.error(error);
+    console.error(error.stack); // Affiche la pile d'appels complète de l'erreur
   }
 }
 
 function setupBaseLayout() {
   dom.root = qs("#manga-reader-root");
 
-  dom.root.innerHTML = `
-      <div id="global-reader-controls" class="desktop-only">
-          <button id="toggle-info-sidebar-btn" title="Informations"><i class="fas fa-info-circle"></i></button>
-          <button id="toggle-settings-sidebar-btn" title="Paramètres"><i class="fas fa-cog"></i></button>
-          <button id="toggle-chapters-like" title="J'aime ce chapitre"><i class="fas fa-heart"></i></button>
-          <span id="live-page-counter"></span>
+  if (isMobileView) {
+    // Structure pour le mobile, avec le wrapper
+    document.body.insertAdjacentHTML(
+      "afterbegin",
+      `
+      <div id="reader-bars-wrapper" class="mobile-only">
+        <!-- Le header sera déplacé ici par le JS global -->
+        <div id="mobile-reader-controls"></div>
       </div>
-      <div id="mobile-reader-controls" class="mobile-only"></div>
+    `
+    );
+    const header = qs("body > #main-header");
+    const wrapper = qs("#reader-bars-wrapper");
+    if (header && wrapper) {
+      wrapper.prepend(header);
+    } else {
+      console.warn(
+        "[setupBaseLayout] Header ou Wrapper non trouvé pour le déplacement mobile."
+      );
+    }
+
+    dom.root.innerHTML = `
       <div class="reader-layout-container">
           <aside id="info-sidebar" class="reader-sidebar"></aside>
           <aside id="settings-sidebar" class="reader-sidebar"></aside>
@@ -127,23 +133,48 @@ function setupBaseLayout() {
           </div>
       </div>
       <div class="mobile-sidebar-overlay mobile-only"></div>
-      `;
+    `;
+  } else {
+    // Structure pour le desktop, comme à l'origine
+    dom.root.innerHTML = `
+      <div id="global-reader-controls" class="desktop-only">
+          <button id="toggle-info-sidebar-btn" title="Informations"><i class="fas fa-info-circle"></i></button>
+          <button id="toggle-settings-sidebar-btn" title="Paramètres"><i class="fas fa-cog"></i></button>
+          <button id="toggle-chapters-like" title="J'aime ce chapitre"><i class="fas fa-heart"></i></button>
+          <span id="live-page-counter"></span>
+      </div>
+      <div class="reader-layout-container">
+          <aside id="info-sidebar" class="reader-sidebar"></aside>
+          <aside id="settings-sidebar" class="reader-sidebar"></aside>
+          <div class="reader-container">
+              <div class="reader-viewer-container">
+                  <p style="color: var(--clr-text-sub);">Chargement...</p>
+              </div>
+          </div>
+      </div>
+    `;
+  }
 
   Object.assign(dom, {
     infoSidebar: qs("#info-sidebar"),
     settingsSidebar: qs("#settings-sidebar"),
     viewerContainer: qs(".reader-viewer-container"),
-    toggleInfoBtn: qs("#toggle-info-sidebar-btn"),
-    toggleSettingsBtn: qs("#toggle-settings-sidebar-btn"),
-    toggleLikeBtn: qs("#toggle-chapters-like"),
-    mobileControls: qs("#mobile-reader-controls"),
     mobileSidebarOverlay: qs(".mobile-sidebar-overlay"),
   });
 
   if (isMobileView) {
+    Object.assign(dom, {
+      barsWrapper: qs("#reader-bars-wrapper"),
+      mobileControls: qs("#mobile-reader-controls"),
+    });
     renderMobileControls();
   } else {
-    dom.pageCounter = qs("#live-page-counter");
+    Object.assign(dom, {
+      toggleInfoBtn: qs("#toggle-info-sidebar-btn"),
+      toggleSettingsBtn: qs("#toggle-settings-sidebar-btn"),
+      toggleLikeBtn: qs("#toggle-chapters-like"),
+      pageCounter: qs("#live-page-counter"),
+    });
     updateLayout();
   }
 }
@@ -193,7 +224,9 @@ function renderMobileControls() {
 }
 
 function updateLayout() {
-  if (isMobileView) return;
+  if (isMobileView) {
+    return;
+  }
   let infoWidth = 0;
   let settingsWidth = 0;
   const rootStyle = getComputedStyle(document.documentElement);
@@ -233,7 +266,7 @@ function initializeGlobalEvents() {
   document.addEventListener("keydown", handleKeyDown);
 
   const scrollContainer = isMobileView
-    ? dom.root
+    ? window // Le scroll est sur la fenêtre en mobile
     : dom.viewerContainer &&
       dom.viewerContainer.querySelector(".reader-viewer");
   if (scrollContainer) {
@@ -241,7 +274,11 @@ function initializeGlobalEvents() {
       "scroll",
       (event) => {
         if (state.settings.mode === "webtoon") {
-          handleWebtoonScroll(event.currentTarget);
+          // Sur mobile, event.currentTarget est 'window', on utilise dom.root
+          const target = isMobileView
+            ? document.documentElement
+            : event.currentTarget;
+          handleWebtoonScroll(target);
         }
       },
       { passive: true }
@@ -273,31 +310,41 @@ function initializeDesktopEvents() {
 
 function initializeMobileEvents() {
   const readerContainer = dom.viewerContainer?.parentElement;
-  let lastScrollY = dom.root.scrollTop;
+  const barsWrapper = dom.barsWrapper;
+  let lastScrollY = window.scrollY;
+
+  if (barsWrapper) barsWrapper.classList.remove("is-hidden");
+  document.body.classList.remove("bars-hidden");
 
   if (readerContainer) {
     readerContainer.addEventListener("click", (e) => {
-      if (e.target.closest("#mobile-reader-controls")) return;
-
-      const header = document.getElementById("main-header");
-      if (header) header.classList.toggle("is-hidden-mobile");
-      dom.mobileControls.classList.toggle("is-hidden");
+      if (e.target.closest("#reader-bars-wrapper")) return;
+      const shouldBeHidden = !barsWrapper.classList.contains("is-hidden");
+      barsWrapper.classList.toggle("is-hidden", shouldBeHidden);
+      document.body.classList.toggle("bars-hidden", shouldBeHidden);
     });
   }
 
-  dom.root.addEventListener(
+  window.addEventListener(
     "scroll",
     () => {
-      const currentScrollY = dom.root.scrollTop;
-      const header = document.getElementById("main-header");
-      if (!dom.settingsSidebar.classList.contains("is-open")) {
-        if (currentScrollY > lastScrollY && currentScrollY > 100) {
-          if (header) header.classList.add("is-hidden-mobile");
-          dom.mobileControls.classList.add("is-hidden");
-        } else if (currentScrollY < lastScrollY) {
-          if (header) header.classList.remove("is-hidden-mobile");
-          dom.mobileControls.classList.remove("is-hidden");
-        }
+      const currentScrollY = window.scrollY;
+      const isScrollingDown = currentScrollY > lastScrollY;
+      const scrollThreshold = 10;
+
+      if (Math.abs(currentScrollY - lastScrollY) < scrollThreshold) {
+        lastScrollY = currentScrollY;
+        return;
+      }
+
+      if (
+        dom.settingsSidebar &&
+        !dom.settingsSidebar.classList.contains("is-open")
+      ) {
+        const shouldBeHidden = isScrollingDown && currentScrollY > 150;
+        if (barsWrapper)
+          barsWrapper.classList.toggle("is-hidden", shouldBeHidden);
+        document.body.classList.toggle("bars-hidden", shouldBeHidden);
       }
       lastScrollY = currentScrollY;
     },
@@ -314,10 +361,7 @@ function initializeMobileEvents() {
       commentsSection.scrollIntoView({ behavior: "smooth" });
     }
   });
-
   dom.mobileSidebarOverlay.addEventListener("click", closeAllSidebars);
-
-  // Écouteur d'événement personnalisé pour fermer les sidebars
   document.addEventListener("close-sidebars", closeAllSidebars);
 }
 
@@ -374,13 +418,16 @@ function handleWebtoonScroll(scrollTarget) {
   if (scrollTimeout) window.cancelAnimationFrame(scrollTimeout);
 
   scrollTimeout = window.requestAnimationFrame(() => {
-    const triggerPoint = scrollTarget.clientHeight * 0.25;
+    const scrollTop = isMobileView ? window.scrollY : scrollTarget.scrollTop;
+    const clientHeight = isMobileView
+      ? window.innerHeight
+      : scrollTarget.clientHeight;
+    const triggerPoint = clientHeight * 0.25;
+
     let closestImageIndex = -1;
     let minDistance = Infinity;
     qsa(".reader-viewer-container img").forEach((img, index) => {
-      const distance = Math.abs(
-        img.offsetTop - scrollTarget.scrollTop - triggerPoint
-      );
+      const distance = Math.abs(img.offsetTop - scrollTop - triggerPoint);
       if (distance < minDistance) {
         minDistance = distance;
         closestImageIndex = index;
@@ -405,9 +452,6 @@ function saveReadingProgress() {
   if (seriesSlug && chapterNumber) {
     try {
       localStorage.setItem(`reading-progress-${seriesSlug}`, chapterNumber);
-      console.log(
-        `[Reader] Progression sauvegardée : ${seriesSlug} -> Ch. ${chapterNumber}`
-      );
     } catch (e) {
       console.warn(
         "[Reader] Erreur lors de la sauvegarde de la progression:",

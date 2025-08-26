@@ -23,6 +23,31 @@
   min-height: 60px;
 }
 
+header#main-header {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.55);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 500;
+  min-height: 60px;
+  /* - Debut modification */
+  transition: transform 0.3s ease-in-out; /* Assure que la transition est définie */
+  /* - Fin modification */
+  @media (max-width: 768px) {
+    position: fixed;
+  }
+}
+
+header#main-header.is-hidden {
+  transform: translateY(
+    -100%
+  ); /* Chaque élément se cache par rapport à sa propre hauteur */
+}
+
 /* Nouveau bloc pour centrer le logo dans le padding gauche */
 .header-logo-center {
   flex: 0 0 auto;
@@ -54,10 +79,6 @@
   color: var(--clr-bg-invert);
   font-weight: 800;
   letter-spacing: 1px;
-}
-
-header#main-header.is-hidden {
-  transform: translateY(-100%);
 }
 
 .site-title-link::after {

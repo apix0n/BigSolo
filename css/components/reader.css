@@ -3,13 +3,7 @@
   --sidebar-info-width: 16rem;
   --sidebar-settings-width: 14rem;
   --global-controls-height: 4.5rem;
-  --global-controls-height-mobile: 4rem;
-}
-
-/* css/components/reader.css */
-
-body#readerpage {
-  overflow: hidden;
+  --global-controls-height-mobile: var(--mobile-bars-height, 55px);
 }
 
 #manga-reader-root {
@@ -812,6 +806,11 @@ body.dark .reader-viewer-container {
 /***************************************/
 @media (max-width: 768px) {
   /* --- Classes utilitaires pour le responsive --- */
+
+  body#readerpage main {
+    padding: 0;
+  }
+
   .mobile-only {
     display: flex;
   }
@@ -819,51 +818,81 @@ body.dark .reader-viewer-container {
     display: none !important; /* Force le masquage */
   }
 
-  /* --- Layout principal --- */
+  /* Le conteneur racine devient le conteneur scrollable principal */
+  #manga-reader-root {
+    padding-top: 0;
+  }
+
   #global-reader-controls {
     display: none;
   }
 
-  /* Le conteneur racine devient le conteneur scrollable principal */
-  #manga-reader-root {
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
-
   .reader-layout-container {
+    /* On retire le padding-top qui est maintenant sur le parent */
     padding-top: 0;
     flex-direction: column;
-    position: static; /* Reste dans le flux normal */
+    position: static;
+  }
+
+  #mobile-reader-controls.is-hidden + .reader-layout-container {
+    margin-top: calc(var(--global-controls-height-mobile) * -1);
   }
 
   .reader-container {
-    margin-left: 0 !important;
-    padding: 0;
-    z-index: 1; /* Reste sous les overlays et barres */
+    padding-top: calc(
+      var(--mobile-bars-height) + var(--global-controls-height-mobile)
+    );
+    transition: padding-top 0.3s ease-in-out;
   }
 
-  /* On retire le scroll de ces conteneurs, car le parent scroll */
+  body.bars-hidden .reader-container {
+    padding-top: 0;
+  }
+
+  .reader-layout-container,
   .reader-viewer,
   .reader-viewer-container {
     overflow: visible;
+    position: static;
   }
 
   .reader-viewer {
     padding: 0;
   }
 
+  #reader-bars-wrapper {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    transition: transform 0.3s ease-in-out;
+    flex-wrap: wrap;
+  }
+
+  #reader-bars-wrapper.is-hidden {
+    transform: translateY(-100%);
+  }
+
+  #reader-bars-wrapper > #main-header {
+    width: 100%;
+    position: static;
+  }
+
   /* --- Barre d'actions mobile flottante et collante --- */
   #mobile-reader-controls {
-    min-height: var(--global-controls-height-mobile, 88px);
-    position: sticky; /* Se colle en haut du conteneur scrollable (#manga-reader-root) */
-    top: 0;
-    z-index: 1000;
+    min-height: var(--global-controls-height-mobile);
+    position: static;
+    top: var(--mobile-bars-height);
+    left: 0;
+    width: 100%;
+    z-index: 999; /* Un z-index légèrement inférieur à celui du header principal (500->999) */
     padding: 0.4rem 0.8rem;
     box-sizing: border-box;
     display: flex;
     align-items: center;
     gap: 1.1rem;
-    /* Le fond doit être solide pour ne pas voir le contenu défiler derrière */
     background-color: var(--clr-bg-card);
     transition: transform 0.3s ease-in-out;
     transform: translateY(0);
@@ -879,7 +908,7 @@ body.dark .reader-viewer-container {
     display: flex;
     flex-direction: column;
     min-width: 0;
-    gap: 0.5rem;
+    gap: 0.2rem;
   }
 
   .mrc-top-row,
@@ -978,21 +1007,17 @@ body.dark .reader-viewer-container {
   /* --- Panneaux coulissants --- */
   .reader-sidebar {
     position: fixed;
-    /* Commence sous le header global du site */
-    top: 60px;
+    top: 0;
     left: 0;
     width: 90vw;
     max-width: 350px;
-    /* Prend toute la hauteur disponible restante */
-    height: calc(100vh - 60px);
-    height: calc(100dvh - 60px);
+    height: 100vh; /* Prend toute la hauteur */
     background-color: var(--clr-bg-card);
     z-index: 2000;
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     margin: 0;
     padding: 0;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
   }
 
   .reader-sidebar.is-open {
@@ -1043,9 +1068,10 @@ body.dark .reader-viewer-container {
 
   /* Overlay pour fermer les panneaux */
   .mobile-sidebar-overlay {
+    /* - Debut modification */
     position: fixed;
-    /* Commence sous le header principal pour ne pas le couvrir */
-    top: 60px;
+    top: calc(var(--mobile-bars-height) + var(--global-controls-height-mobile));
+    pointer-events: none;
     left: 0;
     right: 0;
     bottom: 0;
@@ -1056,6 +1082,7 @@ body.dark .reader-viewer-container {
     transition: opacity 0.3s ease;
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
+    /* - Fin modification */
   }
 
   .mobile-sidebar-overlay.is-visible {

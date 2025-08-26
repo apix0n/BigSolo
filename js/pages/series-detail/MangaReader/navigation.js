@@ -52,7 +52,32 @@ export function goToSpread(spreadIndex, isInitializing = false) {
       // On s'assure que l'image est bien dans le DOM avant de scroller
       const imageInDom = qs(`.reader-viewer img:nth-child(${pageIndex + 1})`);
       if (imageInDom) {
-        imageInDom.scrollIntoView({ behavior, block: "start" });
+        const isMobile = window.innerWidth <= 768;
+        if (isInitializing && isMobile) {
+          // --- NOUVELLE LOGIQUE DE SCROLL POUR MOBILE ---
+          // On calcule la position exacte de l'image par rapport au document.
+          const imageTopOffset =
+            imageInDom.getBoundingClientRect().top + window.scrollY;
+          // On calcule la hauteur totale des barres sticky.
+          const barsHeight =
+            (document.getElementById("main-header")?.offsetHeight || 0) +
+            (dom.mobileControls?.offsetHeight || 0);
+          // On scrolle à la position de l'image MOINS la hauteur des barres.
+          window.scrollTo({
+            top: imageTopOffset - barsHeight,
+            behavior: "auto", // Comportement instantané au chargement
+          });
+          console.log(
+            `[Navigation] Mobile Init: Scrolling manuel vers ${
+              imageTopOffset - barsHeight
+            }px`
+          );
+        } else {
+          // --- LOGIQUE ORIGINELLE POUR DESKTOP OU SCROLL MANUEL ---
+          const behavior = isInitializing ? "auto" : "smooth";
+          imageInDom.scrollIntoView({ behavior, block: "start" });
+        }
+        // - Fin modification
       } else {
         console.warn(
           `[Navigation] Tentative de scroll vers une image non trouvée dans le DOM (index ${pageIndex})`

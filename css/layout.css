@@ -116,7 +116,7 @@ section {
 
 @media (max-width: 768px) {
   header#main-header {
-    min-height: 55px;
+    min-height: var(--mobile-bars-height);
   }
 
   .header-actions {

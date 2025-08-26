@@ -79,7 +79,7 @@ if __name__ == "__main__":
         print("Utilisation : py summary.py <chemin_vers_le_dossier>")
         sys.exit(1)
     
-    chemin_du_projet = sys.argv[1]
+    chemin_du_projet = " ".join(sys.argv[1:]).strip('"').strip("'")
     nom_du_fichier_resume = "summary.txt"
     
     # Listes d'éléments à ignorer
