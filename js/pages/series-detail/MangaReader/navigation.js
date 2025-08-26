@@ -129,8 +129,15 @@ export function navigateToChapter(delta, goToLastPage = false) {
 export function updateUIOnPageChange() {
   const currentSpread = state.spreads[state.currentSpreadIndex] || [];
   const firstPage = currentSpread.length > 0 ? currentSpread[0] + 1 : 0;
+  const pageCounterText = `Page ${firstPage} / ${state.pages.length}`;
   // La référence à 'dom' est maintenant correcte grâce à l'import
   if (dom.pageCounter) {
-    dom.pageCounter.textContent = `Page ${firstPage} / ${state.pages.length}`;
+    dom.pageCounter.textContent = pageCounterText;
+  }
+
+  // Mise à jour de la bulle webtoon (elle n'existe qu'en mobile)
+  if (dom.webtoonPageBubble) {
+    // On n'affiche que le numéro de la page actuelle pour garder la bulle petite
+    dom.webtoonPageBubble.textContent = `${firstPage}/${state.pages.length}`;
   }
 }

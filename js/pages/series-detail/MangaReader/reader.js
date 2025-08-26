@@ -31,6 +31,22 @@ import {
 
 let isMobileView = false;
 
+function updateBarsInteractivity() {
+  console.log("[Reader] Mise à jour de l'interactivité des barres.");
+  const isWebtoonMobile = isMobileView && state.settings.mode === "webtoon";
+
+  // On ajoute une classe sur le body pour savoir si les animations sont actives
+  document.body.classList.toggle("bars-interactive", isWebtoonMobile);
+
+  // Si les animations ne sont PAS actives, on s'assure que les barres sont visibles
+  if (!isWebtoonMobile && dom.barsWrapper) {
+    dom.barsWrapper.classList.remove("is-hidden");
+    document.body.classList.remove("bars-hidden");
+  }
+}
+
+let savedScrollY = 0;
+
 export async function initMangaReader() {
   const dataPlaceholder = qs("#reader-data-placeholder");
   if (
@@ -85,6 +101,7 @@ export async function initMangaReader() {
     }
 
     initializeGlobalEvents();
+    updateBarsInteractivity();
 
     const initialPageNumber = getInitialPageNumberFromUrl();
     await fetchAndLoadPages(initialPageNumber);
@@ -133,6 +150,7 @@ function setupBaseLayout() {
           </div>
       </div>
       <div class="mobile-sidebar-overlay mobile-only"></div>
+      <div id="webtoon-page-bubble" class="mobile-only"></div>
     `;
   } else {
     // Structure pour le desktop, comme à l'origine
@@ -166,6 +184,7 @@ function setupBaseLayout() {
     Object.assign(dom, {
       barsWrapper: qs("#reader-bars-wrapper"),
       mobileControls: qs("#mobile-reader-controls"),
+      webtoonPageBubble: qs("#webtoon-page-bubble"), // On ajoute la bulle au DOM
     });
     renderMobileControls();
   } else {
@@ -183,7 +202,7 @@ function renderMobileControls() {
   if (!dom.mobileControls) return;
   dom.mobileControls.innerHTML = `
       <button id="mobile-toggle-settings-btn" title="Paramètres et Chapitres">
-          <i class="fas fa-bars"></i>
+          <i class="fas fa-cog"></i>
       </button>
       <div class="mrc-info-wrapper">
           <div class="mrc-top-row">
@@ -264,6 +283,7 @@ function initializeGlobalEvents() {
     initializeDesktopEvents();
   }
   document.addEventListener("keydown", handleKeyDown);
+  document.addEventListener("readerModeChanged", updateBarsInteractivity);
 
   const scrollContainer = isMobileView
     ? window // Le scroll est sur la fenêtre en mobile
@@ -318,6 +338,7 @@ function initializeMobileEvents() {
 
   if (readerContainer) {
     readerContainer.addEventListener("click", (e) => {
+      if (!document.body.classList.contains("bars-interactive")) return;
       if (e.target.closest("#reader-bars-wrapper")) return;
       const shouldBeHidden = !barsWrapper.classList.contains("is-hidden");
       barsWrapper.classList.toggle("is-hidden", shouldBeHidden);
@@ -328,6 +349,7 @@ function initializeMobileEvents() {
   window.addEventListener(
     "scroll",
     () => {
+      if (!document.body.classList.contains("bars-interactive")) return;
       const currentScrollY = window.scrollY;
       const isScrollingDown = currentScrollY > lastScrollY;
       const scrollThreshold = 10;
@@ -371,6 +393,11 @@ function toggleSidebar(sidebarToOpen) {
   if (!isAlreadyOpen) {
     sidebarToOpen.classList.add("is-open");
     dom.mobileSidebarOverlay.classList.add("is-visible");
+    savedScrollY = window.scrollY;
+    document.documentElement.classList.add("sidebar-is-open"); // Ajoute la classe sur <html>
+    document.body.classList.add("sidebar-is-open");
+    // On applique un style pour que le body ne remonte pas en haut
+    document.body.style.top = `-${savedScrollY}px`;
   }
 }
 
@@ -379,6 +406,14 @@ function closeAllSidebars() {
   if (dom.settingsSidebar) dom.settingsSidebar.classList.remove("is-open");
   if (dom.mobileSidebarOverlay)
     dom.mobileSidebarOverlay.classList.remove("is-visible");
+  if (document.body.classList.contains("sidebar-is-open")) {
+    document.documentElement.classList.remove("sidebar-is-open");
+    document.body.classList.remove("sidebar-is-open");
+    // On retire le style inline qui n'est plus nécessaire
+    document.body.style.top = "";
+    // On restaure la position de scroll
+    window.scrollTo(0, savedScrollY);
+  }
 }
 
 function setupMobileCommentsObserver() {

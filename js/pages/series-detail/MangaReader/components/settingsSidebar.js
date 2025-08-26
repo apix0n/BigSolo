@@ -23,10 +23,6 @@ function render() {
   if (!dom.settingsSidebar) return;
 
   dom.settingsSidebar.innerHTML = `
-        <div class="sidebar-header mobile-only">
-            <h4>Menu</h4>
-            <button class="close-sidebar-btn" title="Fermer"><i class="fas fa-times"></i></button>
-        </div>
         <div class="sidebar-content-wrapper">
             <div id="settings-mode-group" class="control-group">
                 <h4 class="group-title desktop-only">Mode de lecture</h4>
@@ -87,6 +83,7 @@ function attachEventListeners() {
 
       if (settingName === "mode") {
         calculateSpreads();
+        document.dispatchEvent(new CustomEvent("readerModeChanged"));
       }
       renderViewer();
       saveSettings();

@@ -68,7 +68,7 @@ html.dark {
   --series-fixed-cover-width-desktop: 180px;
   --series-fixed-cover-width-mobile: 120px;
   --mobile-carousel-card-aspect-ratio: 1.8;
-  --mobile-bars-height: 55px;
+  --mobile-bars-height: 60px;
 }
 
 html.dark:root,

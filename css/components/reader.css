@@ -3,7 +3,7 @@
   --sidebar-info-width: 16rem;
   --sidebar-settings-width: 14rem;
   --global-controls-height: 4.5rem;
-  --global-controls-height-mobile: var(--mobile-bars-height, 55px);
+  --global-controls-height-mobile: var(--mobile-bars-height, 60px);
 }
 
 #manga-reader-root {
@@ -839,9 +839,10 @@ body.dark .reader-viewer-container {
   }
 
   .reader-container {
-    padding-top: calc(
-      var(--mobile-bars-height) + var(--global-controls-height-mobile)
-    );
+    padding: calc(
+        var(--mobile-bars-height) + var(--global-controls-height-mobile)
+      )
+      0 0 0;
     transition: padding-top 0.3s ease-in-out;
   }
 
@@ -887,7 +888,8 @@ body.dark .reader-viewer-container {
     top: var(--mobile-bars-height);
     left: 0;
     width: 100%;
-    z-index: 999; /* Un z-index légèrement inférieur à celui du header principal (500->999) */
+    z-index: 999;
+    height: var(--mobile-bars-height);
     padding: 0.4rem 0.8rem;
     box-sizing: border-box;
     display: flex;
@@ -908,7 +910,6 @@ body.dark .reader-viewer-container {
     display: flex;
     flex-direction: column;
     min-width: 0;
-    gap: 0.2rem;
   }
 
   .mrc-top-row,
@@ -1007,17 +1008,54 @@ body.dark .reader-viewer-container {
   /* --- Panneaux coulissants --- */
   .reader-sidebar {
     position: fixed;
-    top: 0;
+    /* - Debut modification */
+    /* Ils commencent SOUS les deux barres */
+    top: calc(var(--mobile-bars-height) + var(--global-controls-height-mobile));
+    /* Ils prennent la hauteur RESTANTE */
+    height: calc(
+      100vh - (var(--mobile-bars-height) + var(--global-controls-height-mobile))
+    );
+    height: calc(
+      100dvh -
+        (var(--mobile-bars-height) + var(--global-controls-height-mobile))
+    );
+    /* - Fin modification */
     left: 0;
     width: 90vw;
     max-width: 350px;
-    height: 100vh; /* Prend toute la hauteur */
     background-color: var(--clr-bg-card);
     z-index: 2000;
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    margin: 0;
-    padding: 0;
+  }
+
+  #info-chapters-group .chapter-list-wrapper {
+    max-height: 250px;
+  }
+
+  .chapter-number {
+    font-size: 0.95rem;
+  }
+
+  .chapter-title {
+    font-size: 0.8rem;
+  }
+
+  .reader-sidebar .control-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .reader-sidebar .sidebar-content-wrapper .control-group:last-child {
+    margin-bottom: 0;
+  }
+
+  .chapter-stats-details {
+    padding-top: 0.3rem;
+    margin-top: 0.1rem;
+  }
+
+  #info-chapters-group .chapter-list a {
+    padding: 0.4rem 0.8rem;
   }
 
   .reader-sidebar.is-open {
@@ -1027,39 +1065,53 @@ body.dark .reader-viewer-container {
   .reader-sidebar .sidebar-content-wrapper {
     padding: 1.05rem;
     margin-top: 0;
+    overscroll-behavior-y: contain;
   }
 
-  .reader-sidebar .sidebar-header.mobile-only {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--clr-bg-card-invert);
-    flex-shrink: 0; /* Empêche le header de rétrécir */
+  #webtoon-page-bubble {
+    position: fixed;
+    bottom: 0px;
+    left: 50%;
+    /* Centrage horizontal parfait */
+    transform: translateX(-50%);
+
+    /* Apparence */
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #ffffff;
+    border-radius: 999px; /* Pour un cercle parfait */
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+
+    /* Animation et état initial */
+    opacity: 0;
+    pointer-events: none; /* Non cliquable */
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    z-index: 1001; /* Au-dessus du lecteur, mais sous les sidebars */
   }
 
-  .reader-sidebar .sidebar-header h4 {
-    margin: 0;
-    font-size: 1.2rem;
+  body.bars-interactive
+    #reader-bars-wrapper.is-hidden
+    ~ main
+    #webtoon-page-bubble {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0); /* Animation d'apparition */
   }
 
-  .reader-sidebar .sidebar-header .close-sidebar-btn {
-    background: none;
-    border: none;
-    color: var(--clr-text);
-    font-size: 1.5rem;
-    padding: 0.5rem;
-    line-height: 1;
+  html.sidebar-is-open {
+    overflow: hidden;
+  }
+
+  body.sidebar-is-open {
+    position: fixed;
+    inset: 0;
   }
 
   #settings-sidebar {
     background-color: var(--clr-bg-reader);
-  }
-
-  #settings-sidebar #info-chapters-group {
-    padding-bottom: 1.5rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid var(--clr-bg-card-invert);
+    padding: 0;
   }
 
   #settings-sidebar #info-chapters-group .group-title.desktop-only {
@@ -1068,26 +1120,24 @@ body.dark .reader-viewer-container {
 
   /* Overlay pour fermer les panneaux */
   .mobile-sidebar-overlay {
-    /* - Debut modification */
     position: fixed;
     top: calc(var(--mobile-bars-height) + var(--global-controls-height-mobile));
-    pointer-events: none;
+    bottom: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
     z-index: 1999;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
-    /* - Fin modification */
   }
 
   .mobile-sidebar-overlay.is-visible {
     opacity: 1;
     pointer-events: auto;
+    z-index: 1;
   }
 
   /* --- Section commentaires mobile --- */
