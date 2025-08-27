@@ -41,31 +41,24 @@ export function goToSpread(spreadIndex, isInitializing = false) {
   );
 
   if (state.settings.mode === "webtoon") {
-    // En mode webtoon, on ne re-render pas, on scroll directement
     const pageIndex = state.spreads[state.currentSpreadIndex]?.[0];
     if (pageIndex !== undefined && domImages[pageIndex]) {
-      // Utilise 'auto' pour un positionnement instantané au chargement
       const behavior = isInitializing ? "auto" : "smooth";
       console.log(
         `[Navigation] Webtoon: Scrolling vers l'image index ${pageIndex}`
       );
-      // On s'assure que l'image est bien dans le DOM avant de scroller
       const imageInDom = qs(`.reader-viewer img:nth-child(${pageIndex + 1})`);
       if (imageInDom) {
         const isMobile = window.innerWidth <= 768;
         if (isInitializing && isMobile) {
-          // --- NOUVELLE LOGIQUE DE SCROLL POUR MOBILE ---
-          // On calcule la position exacte de l'image par rapport au document.
           const imageTopOffset =
             imageInDom.getBoundingClientRect().top + window.scrollY;
-          // On calcule la hauteur totale des barres sticky.
           const barsHeight =
             (document.getElementById("main-header")?.offsetHeight || 0) +
             (dom.mobileControls?.offsetHeight || 0);
-          // On scrolle à la position de l'image MOINS la hauteur des barres.
           window.scrollTo({
             top: imageTopOffset - barsHeight,
-            behavior: "auto", // Comportement instantané au chargement
+            behavior: "auto",
           });
           console.log(
             `[Navigation] Mobile Init: Scrolling manuel vers ${
@@ -73,11 +66,9 @@ export function goToSpread(spreadIndex, isInitializing = false) {
             }px`
           );
         } else {
-          // --- LOGIQUE ORIGINELLE POUR DESKTOP OU SCROLL MANUEL ---
           const behavior = isInitializing ? "auto" : "smooth";
           imageInDom.scrollIntoView({ behavior, block: "start" });
         }
-        // - Fin modification
       } else {
         console.warn(
           `[Navigation] Tentative de scroll vers une image non trouvée dans le DOM (index ${pageIndex})`
@@ -85,7 +76,6 @@ export function goToSpread(spreadIndex, isInitializing = false) {
       }
     }
   } else {
-    // Pour les autres modes, on re-render la planche
     renderViewer();
   }
   updateUIOnPageChange();
@@ -138,5 +128,27 @@ export function updateUIOnPageChange() {
 
   if (dom.webtoonPageBubble) {
     dom.webtoonPageBubble.textContent = webtoonBubbleText;
+  }
+
+  const isMobile = window.innerWidth <= 768;
+  if (isMobile) {
+    const commentsSection = qs("#comments-mobile-section");
+    const interactionsSection = qs("#interactions-share");
+    if (commentsSection && interactionsSection) {
+      const isPagedMode =
+        state.settings.mode === "single" || state.settings.mode === "double";
+
+      if (isPagedMode) {
+        const shouldBeVisible =
+          state.currentSpreadIndex >= state.spreads.length - 2;
+        commentsSection.classList.toggle("is-visible", shouldBeVisible);
+        interactionsSection.classList.toggle("is-visible", shouldBeVisible);
+        console.log(
+          `[UI Update] Paged mode. Spread ${state.currentSpreadIndex + 1}/${
+            state.spreads.length
+          }. Footer sections visible: ${shouldBeVisible}`
+        );
+      }
+    }
   }
 }

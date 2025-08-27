@@ -15,7 +15,7 @@ import {
   init as initInfoSidebar,
   updateChapterList,
   updateCommentsSection,
-  updateGlobalLikeButton,
+  updateAllChapterLikeButtons,
   handleGlobalLike,
   moveCommentsForMobile,
   updateMobileBarStats,
@@ -77,6 +77,8 @@ export async function initMangaReader() {
     renderViewer();
 
     if (isMobileView) {
+      renderInteractionsShare();
+      setupInteractionsShareListeners();
       moveCommentsForMobile();
       moveChaptersForMobile();
     }
@@ -89,7 +91,7 @@ export async function initMangaReader() {
     };
     updateChapterList();
     updateCommentsSection();
-    updateGlobalLikeButton();
+    updateAllChapterLikeButtons();
     if (isMobileView) {
       updateMobileBarStats();
     }
@@ -101,7 +103,7 @@ export async function initMangaReader() {
     await fetchAndLoadPages(initialPageNumber);
 
     if (isMobileView) {
-      setupMobileCommentsObserver();
+      updateMobileFooterSectionsVisibility();
     }
   } catch (error) {
     handleError(`Impossible de charger le lecteur : ${error.message}`);
@@ -135,6 +137,8 @@ function setupBaseLayout() {
               <div class="reader-viewer-container">
                   <p style="color: var(--clr-text-sub);">Chargement...</p>
               </div>
+              <section id="interactions-share"></section>
+              <section id="comments-mobile-section"></section>
           </div>
       </div>
       <div class="mobile-sidebar-overlay mobile-only"></div>
@@ -189,7 +193,7 @@ function renderMobileControls() {
   if (!dom.mobileControls) return;
   dom.mobileControls.innerHTML = `
       <button id="mobile-toggle-settings-btn" title="Paramètres et Chapitres">
-          <i class="fas fa-bars"></i>
+          <i class="fas fa-cog"></i>
       </button>
       <div class="mrc-info-wrapper">
           <div class="mrc-top-row">
@@ -229,6 +233,82 @@ function renderMobileControls() {
   });
 }
 
+function renderInteractionsShare() {
+  const container = qs("#interactions-share");
+  if (!container) return;
+  container.innerHTML = `
+        <div class="interactions-share-wrapper">
+            <button id="share-like-btn" class="interaction-btn">
+                <i class="fas fa-heart"></i> J'aime
+            </button>
+            <button id="share-link-btn" class="interaction-btn">
+                <i class="fas fa-share-alt"></i> Partager
+            </button>
+            <button id="copy-link-btn" class="interaction-btn">
+                <i class="fas fa-copy"></i> Copier
+            </button>
+        </div>
+    `;
+}
+
+function setupInteractionsShareListeners() {
+  const likeBtn = qs("#share-like-btn");
+  const shareBtn = qs("#share-link-btn");
+  const copyBtn = qs("#copy-link-btn");
+
+  if (likeBtn) {
+    likeBtn.addEventListener("click", handleGlobalLike);
+  }
+
+  const seriesSlug = slugify(state.seriesData.title);
+  const chapterNumber = state.currentChapter.number;
+  const shareUrl = `${window.location.origin}/${seriesSlug}/${chapterNumber}`;
+  const shareTitle = `${state.seriesData.title} - Chapitre ${chapterNumber}`;
+  const shareText = `Lis le chapitre ${chapterNumber} de ${state.seriesData.title} sur BigSolo !`;
+
+  if (shareBtn) {
+    shareBtn.addEventListener("click", async () => {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: shareTitle,
+            text: shareText,
+            url: shareUrl,
+          });
+        } catch (error) {
+          console.error("Erreur lors du partage :", error);
+        }
+      } else {
+        // Fallback pour les navigateurs non compatibles (copier le lien)
+        copyLinkToClipboard(copyBtn, shareUrl);
+      }
+    });
+  }
+
+  if (copyBtn) {
+    copyBtn.addEventListener("click", () =>
+      copyLinkToClipboard(copyBtn, shareUrl)
+    );
+  }
+}
+
+function copyLinkToClipboard(button, url) {
+  navigator.clipboard
+    .writeText(url)
+    .then(() => {
+      const originalText = button.innerHTML;
+      button.innerHTML = `<i class="fas fa-check"></i> Copié !`;
+      button.disabled = true;
+      setTimeout(() => {
+        button.innerHTML = originalText;
+        button.disabled = false;
+      }, 2000);
+    })
+    .catch((err) => {
+      console.error("Impossible de copier le lien :", err);
+    });
+}
+
 function updateLayout() {
   if (isMobileView) return;
   let infoWidth = 0,
@@ -262,7 +342,6 @@ function updateLayout() {
 }
 
 function initializeGlobalEvents() {
-  // - Debut modification (Fonction entièrement réécrite)
   console.log("[initializeGlobalEvents] Début de la fonction.");
 
   if (isMobileView) {
@@ -270,7 +349,6 @@ function initializeGlobalEvents() {
       "[initializeGlobalEvents] Initialisation des événements pour MOBILE."
     );
     initializeMobileEvents();
-    // Sur mobile, l'élément qui scroll est la fenêtre (window)
     window.addEventListener(
       "scroll",
       () => {
@@ -283,7 +361,6 @@ function initializeGlobalEvents() {
       "[initializeGlobalEvents] Initialisation des événements pour DESKTOP."
     );
     initializeDesktopEvents();
-    // Sur desktop, l'élément qui scroll est .reader-viewer-container (dom.viewerContainer)
     const scrollContainer = dom.viewerContainer;
     if (scrollContainer) {
       console.log(
@@ -308,8 +385,11 @@ function initializeGlobalEvents() {
 
   document.addEventListener("keydown", handleKeyDown);
   document.addEventListener("readerModeChanged", updateBarsInteractivity);
+  document.addEventListener(
+    "readerModeChanged",
+    updateMobileFooterSectionsVisibility
+  );
   console.log("[initializeGlobalEvents] Fin de la fonction.");
-  // - Fin modification
 }
 
 function initializeDesktopEvents() {
@@ -410,36 +490,40 @@ function closeAllSidebars() {
   if (dom.mobileSidebarOverlay)
     dom.mobileSidebarOverlay.classList.remove("is-visible");
   if (document.body.classList.contains("sidebar-is-open")) {
+    console.log(
+      `[LOG] Fermeture sidebar. Scroll à restaurer à: ${savedScrollY}px`
+    );
+
     document.documentElement.style.scrollBehavior = "auto";
+
     document.documentElement.classList.remove("sidebar-is-open");
     document.body.classList.remove("sidebar-is-open");
     document.body.style.top = "";
+
     window.scrollTo(0, savedScrollY);
+
     setTimeout(() => {
+      console.log("[LOG] Réactivation du scroll-behavior.");
       document.documentElement.style.scrollBehavior = "";
     }, 0);
   }
 }
 
-function setupMobileCommentsObserver() {
-  const viewer = qs(".reader-viewer");
-  if (!viewer) return;
-  const images = qsa("img", viewer);
-  if (images.length < 2) {
-    qs("#comments-mobile-section")?.classList.add("is-visible");
-    return;
-  }
-  const targetImage = images[images.length - 2];
-  const observer = new IntersectionObserver(
-    (entries) => {
-      if (entries[0].isIntersecting) {
-        qs("#comments-mobile-section")?.classList.add("is-visible");
-        observer.unobserve(targetImage);
-      }
-    },
-    { threshold: 0.1 }
+function updateMobileFooterSectionsVisibility() {
+  if (!isMobileView) return;
+
+  const commentsSection = qs("#comments-mobile-section");
+  const interactionsSection = qs("#interactions-share");
+  if (!commentsSection || !interactionsSection) return;
+
+  const isWebtoonMode = state.settings.mode === "webtoon";
+
+  commentsSection.classList.toggle("is-visible", isWebtoonMode);
+  interactionsSection.classList.toggle("is-visible", isWebtoonMode);
+
+  console.log(
+    `[Visibility] Mode is '${state.settings.mode}'. Footer sections visibility set to: ${isWebtoonMode}`
   );
-  observer.observe(targetImage);
 }
 
 function handleKeyDown(e) {
@@ -454,7 +538,6 @@ function handleKeyDown(e) {
 
 let scrollTimeout = null;
 function handleWebtoonScroll(scrollTarget) {
-  // - Debut modification (Fonction entièrement réécrite)
   if (document.documentElement.classList.contains("sidebar-is-open")) {
     return;
   }
@@ -472,22 +555,15 @@ function handleWebtoonScroll(scrollTarget) {
       clientHeight = scrollTarget.clientHeight;
     }
 
-    // Log pour le débogage sur desktop
-    if (!isMobileView) {
-    }
-
     const triggerPoint = scrollTop + clientHeight * 0.25;
     let closestImageIndex = -1;
 
-    // Utilisons une simple boucle for pour plus de performance et de clarté
     const imagesInViewer = qsa(".reader-viewer img");
     for (let i = 0; i < imagesInViewer.length; i++) {
       const img = imagesInViewer[i];
-      // Si le point de déclenchement est passé le haut de l'image, elle est candidate
       if (img.offsetTop <= triggerPoint) {
         closestImageIndex = i;
       } else {
-        // Comme les images sont ordonnées, on peut s'arrêter dès qu'on a dépassé le point
         break;
       }
     }
@@ -498,15 +574,12 @@ function handleWebtoonScroll(scrollTarget) {
         newSpreadIndex !== undefined &&
         newSpreadIndex !== state.currentSpreadIndex
       ) {
-        if (!isMobileView) {
-        }
         state.currentSpreadIndex = newSpreadIndex;
         updateUIOnPageChange();
         updateUrlForCurrentPage();
       }
     }
   });
-  // - Fin modification
 }
 
 function saveReadingProgress() {

@@ -1087,7 +1087,7 @@ body.dark .reader-viewer-container {
     -webkit-backdrop-filter: blur(4px);
 
     /* Animation et état initial */
-    opacity: 0;
+    opacity: 1;
     pointer-events: none; /* Non cliquable */
     transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
     z-index: 1001; /* Au-dessus du lecteur, mais sous les sidebars */
@@ -1144,11 +1144,110 @@ body.dark .reader-viewer-container {
   /* --- Section commentaires mobile --- */
   #comments-mobile-section {
     display: none;
-    padding: 1.5rem 1rem;
+    padding: 1rem;
     background-color: var(--clr-bg);
   }
 
   #comments-mobile-section.is-visible {
+    margin-top: 0;
     display: block;
+  }
+
+  #comments-mobile-section h4 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  #comments-mobile-section .add-comment-box {
+    background-color: var(--clr-bg-card);
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 1.5rem;
+  }
+
+  #comments-mobile-section textarea {
+    background-color: transparent;
+    border: none;
+    color: var(--clr-text);
+    outline: none;
+    caret-color: var(--clr-text);
+    padding: 10px;
+  }
+
+  /* Style pour le texte indicatif (placeholder) */
+  #comments-mobile-section textarea::placeholder {
+    color: var(--clr-text-sub);
+    opacity: 0.7;
+  }
+
+  /* Désactive le curseur et change l'opacité quand le textarea est en lecture seule */
+  #comments-mobile-section textarea:read-only {
+    width: 100%;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  #comments-mobile-section .add-comment-actions {
+    display: flex;
+    justify-content: flex-end; /* Aligne le bouton à droite */
+    padding-top: 8px;
+  }
+
+  #comments-mobile-section .send-btn {
+    background-color: var(--clr-bg-card-invert);
+    color: var(--clr-text-invert);
+    padding: 8px 12px; /* Taille du bouton ajustée */
+    border-radius: 6px;
+    border: none;
+    font-weight: 600;
+  }
+
+  #comments-mobile-section .send-btn:hover {
+    filter: brightness(0.9);
+  }
+  #interactions-share {
+    display: none; /* Caché par défaut */
+    padding: 1rem 1rem 0 1rem;
+    background-color: var(--clr-bg);
+  }
+
+  #interactions-share.is-visible {
+    margin: 0;
+    display: block;
+  }
+
+  .interactions-share-wrapper {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+  }
+
+  .interaction-btn {
+    flex: 1; /* Les boutons partagent l'espace équitablement */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.7rem;
+    border-radius: 8px;
+    border: 1.5px solid rgba(var(--clr-text-rgb), 0.1);
+    background-color: var(--clr-bg-card);
+    color: var(--clr-text-sub);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  }
+
+  .interaction-btn:hover {
+    background-color: rgba(var(--clr-text-rgb), 0.05);
+    border-color: rgba(var(--clr-text-rgb), 0.2);
+    color: var(--clr-text);
+  }
+
+  #share-like-btn.liked {
+    background-color: rgba(var(--clr-accent-rgb), 0.1);
+    border-color: var(--clr-accent);
+    color: var(--clr-accent);
   }
 }
