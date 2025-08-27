@@ -19,7 +19,7 @@
   left: 0;
   height: var(--global-controls-height);
   width: 100%; /* Prend toute la largeur */
-  background: var(--clr-bg-reader);
+  background: transparent;
   z-index: 1001;
   display: flex;
   align-items: center;
@@ -78,7 +78,6 @@
   left: 0;
   right: 0;
   display: flex;
-  overflow: hidden;
 }
 
 /* --- NOUVELLE LOGIQUE D'ANIMATION POUR LES SIDEBARS --- */
@@ -121,6 +120,7 @@
 }
 
 .reader-container {
+  top: -4.5rem;
   padding: 1rem;
   flex-grow: 1;
   min-width: 0;
@@ -130,7 +130,7 @@
   transition: margin-left 0.3s ease-in-out;
   position: relative;
   z-index: 1;
-  height: 100%;
+  height: calc(100% + 4.5rem);
   /* On retire le padding ici car il sera sur le viewer */
 }
 
@@ -139,7 +139,7 @@
   height: 100%;
   -webkit-user-select: none;
   user-select: none;
-  overflow: hidden;
+  overflow-y: auto; /* MODIFIÉ: C'est LUI qui devient scrollable */
   -webkit-overflow-scrolling: touch;
 }
 
@@ -159,7 +159,6 @@ body.dark .reader-viewer-container {
   align-items: center;
   height: 100%; /* On s'assure qu'il utilise toute la hauteur du parent */
   box-sizing: border-box;
-  overflow-y: auto; /* Permet le scroll pour le mode webtoon */
 }
 
 .reader-viewer img {
@@ -844,6 +843,8 @@ body.dark .reader-viewer-container {
       )
       0 0 0;
     transition: padding-top 0.3s ease-in-out;
+    height: 100%;
+    top: 0;
   }
 
   body.bars-hidden .reader-container {
@@ -1073,7 +1074,7 @@ body.dark .reader-viewer-container {
     bottom: 0px;
     left: 50%;
     /* Centrage horizontal parfait */
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(100%);
 
     /* Apparence */
     background-color: rgba(0, 0, 0, 0.6);

@@ -6,11 +6,11 @@ import { fetchAndLoadPages } from "./data.js";
 import {
   getInitialPageNumberFromUrl,
   updateUIOnPageChange,
+  updateUrlForCurrentPage,
 } from "./navigation.js";
 import { loadSettings, saveSettings } from "./settings.js";
 import { fetchSeriesStats } from "../../../utils/interactions.js";
 
-// Importe les initialiseurs et les fonctions de mise à jour des composants
 import {
   init as initInfoSidebar,
   updateChapterList,
@@ -32,13 +32,8 @@ import {
 let isMobileView = false;
 
 function updateBarsInteractivity() {
-  console.log("[Reader] Mise à jour de l'interactivité des barres.");
   const isWebtoonMobile = isMobileView && state.settings.mode === "webtoon";
-
-  // On ajoute une classe sur le body pour savoir si les animations sont actives
   document.body.classList.toggle("bars-interactive", isWebtoonMobile);
-
-  // Si les animations ne sont PAS actives, on s'assure que les barres sont visibles
   if (!isWebtoonMobile && dom.barsWrapper) {
     dom.barsWrapper.classList.remove("is-hidden");
     document.body.classList.remove("bars-hidden");
@@ -79,7 +74,6 @@ export async function initMangaReader() {
     initSettingsSidebar();
     initViewer();
 
-    // Le premier rendu du viewer crée le conteneur .reader-viewer
     renderViewer();
 
     if (isMobileView) {
@@ -111,7 +105,7 @@ export async function initMangaReader() {
     }
   } catch (error) {
     handleError(`Impossible de charger le lecteur : ${error.message}`);
-    console.error(error.stack); // Affiche la pile d'appels complète de l'erreur
+    console.error(error.stack);
   }
 }
 
@@ -119,12 +113,10 @@ function setupBaseLayout() {
   dom.root = qs("#manga-reader-root");
 
   if (isMobileView) {
-    // Structure pour le mobile, avec le wrapper
     document.body.insertAdjacentHTML(
       "afterbegin",
       `
       <div id="reader-bars-wrapper" class="mobile-only">
-        <!-- Le header sera déplacé ici par le JS global -->
         <div id="mobile-reader-controls"></div>
       </div>
     `
@@ -133,10 +125,6 @@ function setupBaseLayout() {
     const wrapper = qs("#reader-bars-wrapper");
     if (header && wrapper) {
       wrapper.prepend(header);
-    } else {
-      console.warn(
-        "[setupBaseLayout] Header ou Wrapper non trouvé pour le déplacement mobile."
-      );
     }
 
     dom.root.innerHTML = `
@@ -153,7 +141,6 @@ function setupBaseLayout() {
       <div id="webtoon-page-bubble" class="mobile-only"></div>
     `;
   } else {
-    // Structure pour le desktop, comme à l'origine
     dom.root.innerHTML = `
       <div id="global-reader-controls" class="desktop-only">
           <button id="toggle-info-sidebar-btn" title="Informations"><i class="fas fa-info-circle"></i></button>
@@ -184,7 +171,7 @@ function setupBaseLayout() {
     Object.assign(dom, {
       barsWrapper: qs("#reader-bars-wrapper"),
       mobileControls: qs("#mobile-reader-controls"),
-      webtoonPageBubble: qs("#webtoon-page-bubble"), // On ajoute la bulle au DOM
+      webtoonPageBubble: qs("#webtoon-page-bubble"),
     });
     renderMobileControls();
   } else {
@@ -202,7 +189,7 @@ function renderMobileControls() {
   if (!dom.mobileControls) return;
   dom.mobileControls.innerHTML = `
       <button id="mobile-toggle-settings-btn" title="Paramètres et Chapitres">
-          <i class="fas fa-cog"></i>
+          <i class="fas fa-bars"></i>
       </button>
       <div class="mrc-info-wrapper">
           <div class="mrc-top-row">
@@ -243,11 +230,9 @@ function renderMobileControls() {
 }
 
 function updateLayout() {
-  if (isMobileView) {
-    return;
-  }
-  let infoWidth = 0;
-  let settingsWidth = 0;
+  if (isMobileView) return;
+  let infoWidth = 0,
+    settingsWidth = 0;
   const rootStyle = getComputedStyle(document.documentElement);
   const infoWidthRem = parseFloat(
     rootStyle.getPropertyValue("--sidebar-info-width")
@@ -277,33 +262,54 @@ function updateLayout() {
 }
 
 function initializeGlobalEvents() {
-  if (isMobileView) {
-    initializeMobileEvents();
-  } else {
-    initializeDesktopEvents();
-  }
-  document.addEventListener("keydown", handleKeyDown);
-  document.addEventListener("readerModeChanged", updateBarsInteractivity);
+  // - Debut modification (Fonction entièrement réécrite)
+  console.log("[initializeGlobalEvents] Début de la fonction.");
 
-  const scrollContainer = isMobileView
-    ? window // Le scroll est sur la fenêtre en mobile
-    : dom.viewerContainer &&
-      dom.viewerContainer.querySelector(".reader-viewer");
-  if (scrollContainer) {
-    scrollContainer.addEventListener(
+  if (isMobileView) {
+    console.log(
+      "[initializeGlobalEvents] Initialisation des événements pour MOBILE."
+    );
+    initializeMobileEvents();
+    // Sur mobile, l'élément qui scroll est la fenêtre (window)
+    window.addEventListener(
       "scroll",
-      (event) => {
-        if (state.settings.mode === "webtoon") {
-          // Sur mobile, event.currentTarget est 'window', on utilise dom.root
-          const target = isMobileView
-            ? document.documentElement
-            : event.currentTarget;
-          handleWebtoonScroll(target);
-        }
+      () => {
+        if (state.settings.mode === "webtoon") handleWebtoonScroll(window);
       },
       { passive: true }
     );
+  } else {
+    console.log(
+      "[initializeGlobalEvents] Initialisation des événements pour DESKTOP."
+    );
+    initializeDesktopEvents();
+    // Sur desktop, l'élément qui scroll est .reader-viewer-container (dom.viewerContainer)
+    const scrollContainer = dom.viewerContainer;
+    if (scrollContainer) {
+      console.log(
+        "[initializeGlobalEvents] [DESKTOP] Écouteur de scroll attaché à",
+        scrollContainer
+      );
+      scrollContainer.addEventListener(
+        "scroll",
+        (event) => {
+          if (state.settings.mode === "webtoon") {
+            handleWebtoonScroll(event.currentTarget);
+          }
+        },
+        { passive: true }
+      );
+    } else {
+      console.error(
+        "[initializeGlobalEvents] [DESKTOP] Erreur: dom.viewerContainer non trouvé pour l'écouteur de scroll."
+      );
+    }
   }
+
+  document.addEventListener("keydown", handleKeyDown);
+  document.addEventListener("readerModeChanged", updateBarsInteractivity);
+  console.log("[initializeGlobalEvents] Fin de la fonction.");
+  // - Fin modification
 }
 
 function initializeDesktopEvents() {
@@ -353,12 +359,10 @@ function initializeMobileEvents() {
       const currentScrollY = window.scrollY;
       const isScrollingDown = currentScrollY > lastScrollY;
       const scrollThreshold = 10;
-
       if (Math.abs(currentScrollY - lastScrollY) < scrollThreshold) {
         lastScrollY = currentScrollY;
         return;
       }
-
       if (
         dom.settingsSidebar &&
         !dom.settingsSidebar.classList.contains("is-open")
@@ -394,9 +398,8 @@ function toggleSidebar(sidebarToOpen) {
     sidebarToOpen.classList.add("is-open");
     dom.mobileSidebarOverlay.classList.add("is-visible");
     savedScrollY = window.scrollY;
-    document.documentElement.classList.add("sidebar-is-open"); // Ajoute la classe sur <html>
+    document.documentElement.classList.add("sidebar-is-open");
     document.body.classList.add("sidebar-is-open");
-    // On applique un style pour que le body ne remonte pas en haut
     document.body.style.top = `-${savedScrollY}px`;
   }
 }
@@ -407,12 +410,14 @@ function closeAllSidebars() {
   if (dom.mobileSidebarOverlay)
     dom.mobileSidebarOverlay.classList.remove("is-visible");
   if (document.body.classList.contains("sidebar-is-open")) {
+    document.documentElement.style.scrollBehavior = "auto";
     document.documentElement.classList.remove("sidebar-is-open");
     document.body.classList.remove("sidebar-is-open");
-    // On retire le style inline qui n'est plus nécessaire
     document.body.style.top = "";
-    // On restaure la position de scroll
     window.scrollTo(0, savedScrollY);
+    setTimeout(() => {
+      document.documentElement.style.scrollBehavior = "";
+    }, 0);
   }
 }
 
@@ -449,36 +454,59 @@ function handleKeyDown(e) {
 
 let scrollTimeout = null;
 function handleWebtoonScroll(scrollTarget) {
+  // - Debut modification (Fonction entièrement réécrite)
+  if (document.documentElement.classList.contains("sidebar-is-open")) {
+    return;
+  }
   if (state.settings.mode !== "webtoon") return;
   if (scrollTimeout) window.cancelAnimationFrame(scrollTimeout);
 
   scrollTimeout = window.requestAnimationFrame(() => {
-    const scrollTop = isMobileView ? window.scrollY : scrollTarget.scrollTop;
-    const clientHeight = isMobileView
-      ? window.innerHeight
-      : scrollTarget.clientHeight;
-    const triggerPoint = clientHeight * 0.25;
+    let scrollTop, clientHeight;
 
+    if (isMobileView) {
+      scrollTop = window.scrollY;
+      clientHeight = window.innerHeight;
+    } else {
+      scrollTop = scrollTarget.scrollTop;
+      clientHeight = scrollTarget.clientHeight;
+    }
+
+    // Log pour le débogage sur desktop
+    if (!isMobileView) {
+    }
+
+    const triggerPoint = scrollTop + clientHeight * 0.25;
     let closestImageIndex = -1;
-    let minDistance = Infinity;
-    qsa(".reader-viewer-container img").forEach((img, index) => {
-      const distance = Math.abs(img.offsetTop - scrollTop - triggerPoint);
-      if (distance < minDistance) {
-        minDistance = distance;
-        closestImageIndex = index;
+
+    // Utilisons une simple boucle for pour plus de performance et de clarté
+    const imagesInViewer = qsa(".reader-viewer img");
+    for (let i = 0; i < imagesInViewer.length; i++) {
+      const img = imagesInViewer[i];
+      // Si le point de déclenchement est passé le haut de l'image, elle est candidate
+      if (img.offsetTop <= triggerPoint) {
+        closestImageIndex = i;
+      } else {
+        // Comme les images sont ordonnées, on peut s'arrêter dès qu'on a dépassé le point
+        break;
       }
-    });
+    }
+
     if (closestImageIndex !== -1) {
       const newSpreadIndex = state.pageToSpreadMap[closestImageIndex];
       if (
         newSpreadIndex !== undefined &&
         newSpreadIndex !== state.currentSpreadIndex
       ) {
+        if (!isMobileView) {
+        }
         state.currentSpreadIndex = newSpreadIndex;
         updateUIOnPageChange();
+        updateUrlForCurrentPage();
       }
     }
   });
+  // - Fin modification
 }
 
 function saveReadingProgress() {
