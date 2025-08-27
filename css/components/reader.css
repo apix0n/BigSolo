@@ -121,7 +121,7 @@
 
 .reader-container {
   top: -4.5rem;
-  padding: 1rem;
+  padding: 1rem 0 1rem 1rem;
   flex-grow: 1;
   min-width: 0;
   -webkit-user-select: none;
@@ -286,8 +286,17 @@ body.dark .reader-viewer-container {
 .reader-viewer.webtoon-mode {
   justify-content: flex-start; /* Aligne le contenu en haut */
   flex-direction: column;
-  gap: 10px;
 }
+
+.reader-viewer.webtoon-mode img {
+  margin-bottom: 10px;
+}
+
+/* ...sauf la toute dernière, pour qu'elle colle à la section suivante. */
+.reader-viewer.webtoon-mode img:last-child {
+  margin-bottom: 0;
+}
+
 .reader-viewer.webtoon-mode::after {
   content: "";
   display: block;
@@ -1166,6 +1175,7 @@ body.dark .reader-viewer-container {
   }
 
   #comments-mobile-section textarea {
+    width: 100%;
     background-color: transparent;
     border: none;
     color: var(--clr-text);
@@ -1228,15 +1238,19 @@ body.dark .reader-viewer-container {
     align-items: center;
     justify-content: center;
     gap: 0.6rem;
-    padding: 0.7rem;
+    padding: 0.6rem;
     border-radius: 8px;
-    border: 1.5px solid rgba(var(--clr-text-rgb), 0.1);
+    border: 1.5px solid var(--clr-bg-card-invert);
     background-color: var(--clr-bg-card);
     color: var(--clr-text-sub);
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  }
+
+  .interaction-btn:first-child {
+    border-color: var(--clr-accent);
   }
 
   .interaction-btn:hover {
@@ -1249,5 +1263,16 @@ body.dark .reader-viewer-container {
     background-color: rgba(var(--clr-accent-rgb), 0.1);
     border-color: var(--clr-accent);
     color: var(--clr-accent);
+  }
+
+  body.footer-focused #reader-bars-wrapper {
+    transform: translateY(-100%);
+  }
+
+  /* Et on cache la bulle de page du mode webtoon */
+  body.footer-focused #webtoon-page-bubble {
+    opacity: 0;
+    transform: translateX(-50%) translateY(100%);
+    transition-delay: 0s; /* S'assure qu'elle disparaît immédiatement */
   }
 }

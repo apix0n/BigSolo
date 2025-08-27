@@ -20,6 +20,7 @@ export function init() {
 function render() {
   if (!dom.infoSidebar) return;
   const seriesSlug = slugify(state.seriesData.title);
+  // - Debut modification (Restauration de la section commentaires pour le desktop)
   dom.infoSidebar.innerHTML = `
       <div class="sidebar-header mobile-only">
           <h4>Chapitres</h4>
@@ -35,9 +36,25 @@ function render() {
               <h4 class="group-title desktop-only">Chapitres</h4>
               <div class="chapter-list-wrapper"><div class="chapter-list"><p>Chargement...</p></div></div>
           </div>
+          <!-- Section commentaires desktop (restaurée) -->
+          <div id="info-comments-group" class="control-group desktop-only">
+              <h4 class="group-title">Commentaires</h4>
+              <div class="add-comment-box">
+                  <textarea id="comment-textarea" placeholder="Ajouter un commentaire..." rows="1"></textarea>
+                  <div class="add-comment-actions"><button id="comment-send-btn" class="send-btn">Envoyer <i class="fas fa-paper-plane"></i></button></div>
+              </div>
+              <div id="comments-list">
+                  <p>Chargement...</p>
+              </div>
+          </div>
       </div>`;
 
+  // On réassigne les sélecteurs DOM qui avaient été supprimés
   dom.chapterList = qs(".chapter-list", dom.infoSidebar);
+  dom.commentsList = qs("#comments-list", dom.infoSidebar);
+  dom.commentTextarea = qs("#comment-textarea", dom.infoSidebar);
+  dom.commentSendBtn = qs("#comment-send-btn", dom.infoSidebar);
+  // - Fin modification
 }
 
 function attachEventListeners() {
@@ -57,6 +74,21 @@ function attachEventListeners() {
       }
     });
   }
+  // - Debut modification (Restauration des écouteurs pour les commentaires desktop)
+  if (dom.commentSendBtn) {
+    dom.commentSendBtn.addEventListener("click", handleCommentSubmit);
+  }
+  if (dom.commentTextarea) {
+    dom.commentTextarea.addEventListener("input", () => {
+      dom.commentTextarea.style.height = "auto";
+      const newHeight = Math.min(dom.commentTextarea.scrollHeight, 120);
+      dom.commentTextarea.style.height = `${newHeight}px`;
+    });
+  }
+  if (dom.commentsList) {
+    dom.commentsList.addEventListener("click", handleCommentLike);
+  }
+  // - Fin modification
 
   const closeBtn = qs(".close-sidebar-btn", dom.infoSidebar);
   if (closeBtn) {
@@ -292,7 +324,6 @@ export function updateAllChapterLikeButtons() {
   const interactionKey = `interactions_${seriesSlug}_${chapterNumber}`;
   const isLiked = !!getLocalInteractionState(interactionKey).liked;
 
-  // Cible tous les boutons et conteneurs de like potentiels
   const likeButtons = qsa(
     "#toggle-chapters-like, #mobile-like-stat, #share-like-btn"
   );

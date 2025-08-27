@@ -279,7 +279,6 @@ function setupInteractionsShareListeners() {
           console.error("Erreur lors du partage :", error);
         }
       } else {
-        // Fallback pour les navigateurs non compatibles (copier le lien)
         copyLinkToClipboard(copyBtn, shareUrl);
       }
     });
@@ -414,62 +413,97 @@ function initializeDesktopEvents() {
   dom.toggleLikeBtn.addEventListener("click", handleGlobalLike);
 }
 
+// - Debut modification
 function initializeMobileEvents() {
   const readerContainer = dom.viewerContainer?.parentElement;
   const barsWrapper = dom.barsWrapper;
+  const interactionsSection = qs("#interactions-share");
+  const commentsSection = qs("#comments-mobile-section");
   let lastScrollY = window.scrollY;
 
-  if (barsWrapper) barsWrapper.classList.remove("is-hidden");
-  document.body.classList.remove("bars-hidden");
+  // --- Logique de focus sur le footer ---
+  const handleFooterFocus = () => {
+    if (!document.body.classList.contains("footer-focused")) {
+      console.log("[Mobile Events] Focusing on footer sections, hiding bars.");
+      document.body.classList.add("footer-focused");
+    }
+  };
 
-  if (readerContainer) {
-    readerContainer.addEventListener("click", (e) => {
-      if (!document.body.classList.contains("bars-interactive")) return;
-      if (e.target.closest("#reader-bars-wrapper")) return;
-      const shouldBeHidden = !barsWrapper.classList.contains("is-hidden");
-      barsWrapper.classList.toggle("is-hidden", shouldBeHidden);
-      document.body.classList.toggle("bars-hidden", shouldBeHidden);
-    });
+  if (interactionsSection) {
+    interactionsSection.addEventListener("pointerdown", handleFooterFocus);
+  }
+  if (commentsSection) {
+    commentsSection.addEventListener("pointerdown", handleFooterFocus);
   }
 
+  // --- Logique de scroll et d'interaction avec les barres ---
   window.addEventListener(
     "scroll",
     () => {
-      if (!document.body.classList.contains("bars-interactive")) return;
       const currentScrollY = window.scrollY;
       const isScrollingDown = currentScrollY > lastScrollY;
       const scrollThreshold = 10;
-      if (Math.abs(currentScrollY - lastScrollY) < scrollThreshold) {
-        lastScrollY = currentScrollY;
-        return;
-      }
+
+      // Si on remonte, on affiche toujours les barres et on retire le focus du footer
       if (
-        dom.settingsSidebar &&
-        !dom.settingsSidebar.classList.contains("is-open")
+        !isScrollingDown &&
+        Math.abs(currentScrollY - lastScrollY) > scrollThreshold
       ) {
-        const shouldBeHidden = isScrollingDown && currentScrollY > 150;
-        if (barsWrapper)
-          barsWrapper.classList.toggle("is-hidden", shouldBeHidden);
-        document.body.classList.toggle("bars-hidden", shouldBeHidden);
+        if (document.body.classList.contains("footer-focused")) {
+          console.log(
+            "[Mobile Events] Scrolling up, revealing bars from footer focus."
+          );
+          document.body.classList.remove("footer-focused");
+        }
+        if (barsWrapper) barsWrapper.classList.remove("is-hidden");
+        document.body.classList.remove("bars-hidden");
+      }
+      // Si on descend (et que le mode interactif est activé)
+      else if (
+        isScrollingDown &&
+        document.body.classList.contains("bars-interactive")
+      ) {
+        // On cache les barres seulement si le footer n'est pas focus et qu'on a assez scrollé
+        if (
+          !document.body.classList.contains("footer-focused") &&
+          currentScrollY > 150
+        ) {
+          if (barsWrapper) barsWrapper.classList.add("is-hidden");
+          document.body.classList.add("bars-hidden");
+        }
       }
       lastScrollY = currentScrollY;
     },
     { passive: true }
   );
 
+  // --- Logique des clics sur les boutons des barres ---
+  if (readerContainer) {
+    readerContainer.addEventListener("click", (e) => {
+      if (!document.body.classList.contains("bars-interactive")) return;
+      if (e.target.closest("#reader-bars-wrapper")) return;
+      if (document.body.classList.contains("footer-focused")) return; // Ne pas réafficher si on clique sur le viewer alors que le footer est focus
+
+      const shouldBeHidden = !barsWrapper.classList.contains("is-hidden");
+      barsWrapper.classList.toggle("is-hidden", shouldBeHidden);
+      document.body.classList.toggle("bars-hidden", shouldBeHidden);
+    });
+  }
+
   dom.mobileSettingsBtn.addEventListener("click", () =>
     toggleSidebar(dom.settingsSidebar)
   );
   dom.mobileLikeStat.addEventListener("click", handleGlobalLike);
   dom.mobileCommentsStat.addEventListener("click", () => {
-    const commentsSection = qs("#comments-mobile-section");
     if (commentsSection) {
       commentsSection.scrollIntoView({ behavior: "smooth" });
+      handleFooterFocus(); // On active aussi le focus
     }
   });
   dom.mobileSidebarOverlay.addEventListener("click", closeAllSidebars);
   document.addEventListener("close-sidebars", closeAllSidebars);
 }
+// - Fin modification
 
 function toggleSidebar(sidebarToOpen) {
   const isAlreadyOpen = sidebarToOpen.classList.contains("is-open");
