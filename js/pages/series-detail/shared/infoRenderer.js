@@ -23,11 +23,17 @@ export function renderSeriesInfo(
     `[InfoRenderer] Rendu des informations pour la vue : ${viewType}`
   );
 
+  const animeData = seriesData.anime?.[0];
+
   renderBannerAndCover(viewContainer, seriesData, viewType);
-  renderTitlesAndTags(viewContainer, seriesData, viewType);
-  renderCreatorInfo(viewContainer, seriesData, viewType);
-  renderDescription(viewContainer, seriesData);
+  renderTitlesAndTags(viewContainer, seriesData, animeData, viewType);
+  renderCreatorInfo(viewContainer, seriesData, animeData, viewType);
+  renderDescription(viewContainer, seriesData, viewType);
   renderRatingComponent(viewContainer, seriesData, seriesStats);
+
+  if (viewType === "anime") {
+    renderOpEdButtons(viewContainer, animeData);
+  }
 }
 
 // --- Fonctions de rendu spécifiques ---
@@ -35,24 +41,45 @@ export function renderSeriesInfo(
 function renderBannerAndCover(container, seriesData, viewType) {
   const banner = qs("#hero-banner-section", container);
   const coverImg = qs(".detail-cover", container);
-  const animeData = seriesData.anime?.[0];
+  const seriesSlug = seriesData.slug;
 
-  const coverUrl =
-    viewType === "anime" && animeData?.cover_an
-      ? animeData.cover_an
-      : seriesData.cover;
+  const mangaCoverUrl = seriesData.cover;
+  let primaryCoverUrl;
+
+  if (viewType === "anime") {
+    primaryCoverUrl = `/img/anime/${seriesSlug}/cover.jpg`;
+  } else {
+    primaryCoverUrl = mangaCoverUrl;
+  }
 
   if (banner) {
-    banner.style.setProperty("--hero-banner-bg", `url('${coverUrl}')`);
+    banner.style.setProperty("--hero-banner-bg", `url('${primaryCoverUrl}')`);
   }
   if (coverImg) {
-    coverImg.src = coverUrl || "";
+    coverImg.src = primaryCoverUrl;
     coverImg.alt = `Couverture de ${seriesData.title}`;
+
+    if (viewType === "anime") {
+      coverImg.onerror = () => {
+        console.warn(
+          `Image de couverture anime non trouvée à ${primaryCoverUrl}. Utilisation du fallback manga.`
+        );
+        coverImg.src = mangaCoverUrl;
+        if (banner) {
+          banner.style.setProperty(
+            "--hero-banner-bg",
+            `url('${mangaCoverUrl}')`
+          );
+        }
+        coverImg.onerror = null;
+      };
+    } else {
+      coverImg.onerror = null;
+    }
   }
 }
 
-function renderTitlesAndTags(container, seriesData, viewType) {
-  const animeData = seriesData.anime?.[0];
+function renderTitlesAndTags(container, seriesData, animeData, viewType) {
   const data = viewType === "anime" ? animeData : seriesData;
 
   const jpTitleElem = qs(".detail-jp-title", container);
@@ -70,24 +97,34 @@ function renderTitlesAndTags(container, seriesData, viewType) {
 
   const statusElem = qs(".status-indicator", container);
   if (statusElem) {
-    const statusText = data.release_status || data.status_an || "?";
+    const statusText =
+      (viewType === "anime"
+        ? animeData?.status_an
+        : seriesData.release_status) || "?";
     const isFinished = statusText.toLowerCase().includes("fini");
+    let dateText =
+      (viewType === "anime"
+        ? animeData?.date_start_an
+        : seriesData.release_year) || "";
     statusElem.innerHTML = `<span class="status-dot${
       isFinished ? " finished" : ""
-    }"></span>${statusText}`;
+    }"></span>${statusText} ${dateText ? `- ${dateText}` : ""}`;
   }
 
   const yearElem = qs(".release-year", container);
-  if (yearElem)
-    yearElem.textContent = data.release_year || data.date_start_an || "?";
+  if (yearElem) {
+    yearElem.style.display = "none";
+    const separator = qs(".year-separator", container);
+    if (separator) separator.style.display = "none";
+  }
 }
 
-function renderCreatorInfo(container, seriesData, viewType) {
+function renderCreatorInfo(container, seriesData, animeData, viewType) {
   const metaElem = qs(".detail-meta.detail-creator-info", container);
   if (!metaElem) return;
 
   if (viewType === "anime") {
-    const studio = seriesData.anime?.[0]?.studios_an?.join(", ") || "?";
+    const studio = animeData?.studios_an?.join(", ") || "?";
     metaElem.innerHTML = `Studio : ${studio}`;
   } else {
     if (
@@ -106,33 +143,81 @@ function renderCreatorInfo(container, seriesData, viewType) {
   }
 }
 
-function renderDescription(container, seriesData) {
+function renderDescription(container, seriesData, viewType) {
+  const animeData = seriesData.anime?.[0];
+  const descData = viewType === "anime" ? animeData : seriesData;
+
   const descElem = qs(".detail-description", container);
   if (descElem) {
     descElem.textContent =
-      seriesData.description || "Aucune description disponible.";
+      descData.description || "Aucune description disponible.";
   }
-  // Logique du bouton "Afficher plus" (pour les infos supplémentaires)
-  const btnRow = qs(".series-see-more-row", container);
-  const btn = qs(".series-see-more-btn", container);
-  const moreInfos = qs(".series-more-infos", container);
-  if (!btn || !moreInfos || !btnRow) return;
 
-  const altTitles = (seriesData.alternative_titles || []).join(", ");
-  moreInfos.innerHTML = `
-    <div><strong>Type :</strong> ${seriesData.manga_type || "?"}</div>
-    <div><strong>Magazine :</strong> ${seriesData.magazine || "?"}</div>
-    <div><strong>Titres alternatifs :</strong> ${altTitles || "—"}</div>
-  `;
-  btn.addEventListener(
-    "click",
-    () => {
-      btnRow.classList.add("hide");
-      moreInfos.style.display = "block";
-    },
-    { once: true }
-  );
+  const btnRow = qs(".series-see-more-row", container);
+  const moreInfos = qs(".series-more-infos", container);
+  if (viewType === "anime") {
+    if (btnRow) btnRow.style.display = "none";
+    if (moreInfos) moreInfos.style.display = "none";
+  } else {
+    if (!btnRow || !moreInfos) return;
+    const altTitles = (seriesData.alternative_titles || []).join(", ");
+    moreInfos.innerHTML = `
+          <div><strong>Type :</strong> ${seriesData.manga_type || "?"}</div>
+          <div><strong>Magazine :</strong> ${seriesData.magazine || "?"}</div>
+          <div><strong>Titres alternatifs :</strong> ${altTitles || "—"}</div>
+        `;
+    if (!btnRow.dataset.listenerAttached) {
+      btnRow.addEventListener(
+        "click",
+        () => {
+          btnRow.classList.add("hide");
+          moreInfos.style.display = "block";
+        },
+        { once: true }
+      );
+      btnRow.dataset.listenerAttached = "true";
+    }
+  }
 }
+
+// - Debut modification (Fonction entièrement réécrite)
+function renderOpEdButtons(container, animeData) {
+  if (!animeData || (!animeData.op_an && !animeData.ed_an)) return;
+
+  const actionsContainer = qs("#reading-actions-container", container);
+  if (!actionsContainer) return;
+
+  // 1. Créer le conteneur wrapper pour les boutons OP/ED
+  const opEdWrapper = document.createElement("div");
+  opEdWrapper.className = "op-ed-buttons-wrapper";
+
+  const createButton = (item, type, index) => {
+    const btn = document.createElement("a");
+    btn.href = item.youtube_url_op_an;
+    btn.target = "_blank";
+    btn.rel = "noopener noreferrer";
+    btn.className = "detail-action-btn op-ed-btn";
+    btn.title = `${item.title_op_fr_an} - ${item.author_op_an}`;
+    btn.innerHTML = `<i class="fab fa-youtube"></i> ${type} ${
+      (animeData.op_an.length > 1 || animeData.ed_an.length > 1) && index > 0
+        ? index + 1
+        : ""
+    }`;
+    return btn;
+  };
+
+  // 2. Ajouter les boutons au wrapper
+  (animeData.op_an || []).forEach((op, i) =>
+    opEdWrapper.appendChild(createButton(op, "Opening", i))
+  );
+  (animeData.ed_an || []).forEach((ed, i) =>
+    opEdWrapper.appendChild(createButton(ed, "Ending", i))
+  );
+
+  // 3. Ajouter le wrapper complet au conteneur d'actions principal
+  actionsContainer.appendChild(opEdWrapper);
+}
+// - Fin modification
 
 function renderRatingComponent(container, seriesData, seriesStats) {
   const ratingContainer = qs("#series-rating-container", container);
@@ -142,12 +227,9 @@ function renderRatingComponent(container, seriesData, seriesStats) {
     );
     return;
   }
-
-  const seriesSlug = seriesData.slug; // Le slug est ajouté dans le routeur
+  const seriesSlug = seriesData.slug;
   const serverRating = seriesStats?.stats?.ratings || { average: 0, count: 0 };
   const userRating = getLocalSeriesRating(seriesSlug);
-
-  // Injecte le HTML du composant
   ratingContainer.innerHTML = `
         <button id="series-rating-btn" class="detail-action-btn detail-action-btn--rate" type="button" data-slug="${seriesSlug}">
             <i class="fa-solid fa-star rating-star"></i>
@@ -168,8 +250,6 @@ function renderRatingComponent(container, seriesData, seriesStats) {
             </ul>
         </div>
     `;
-
-  // Initialise le composant avec sa logique interne
   setupRatingComponentLogic(seriesSlug, serverRating, userRating);
 }
 
@@ -198,21 +278,16 @@ function setupRatingComponentLogic(
   const tooltip = qs("#series-rating-tooltip");
   const menu = qs("#series-rating-menu");
   const avgSpan = qs(".series-rating-average", btn);
-
   let currentServerRating = { ...serverRating };
   let currentUserRating = initialUserRating;
-
   function updateDisplay() {
     let totalVotes = currentServerRating.count || 0;
     let totalScore = (currentServerRating.average || 0) * totalVotes;
-
     if (currentUserRating !== null) {
       totalVotes++;
       totalScore += currentUserRating;
     }
-
     const displayAvg = totalVotes > 0 ? totalScore / totalVotes : 0;
-
     avgSpan.textContent = (Math.round(displayAvg * 10) / 10).toLocaleString(
       "fr-FR",
       { minimumFractionDigits: 1, maximumFractionDigits: 1 }
@@ -220,15 +295,12 @@ function setupRatingComponentLogic(
     tooltip.textContent = `${totalVotes} vote${totalVotes > 1 ? "s" : ""}`;
     btn.classList.toggle("accent", currentUserRating !== null);
   }
-
-  // Événements du composant
   btn.addEventListener("mouseenter", (e) => {
     tooltip.classList.add("visible");
     positionTooltip(e);
   });
   btn.addEventListener("mousemove", positionTooltip);
   btn.addEventListener("mouseleave", () => tooltip.classList.remove("visible"));
-
   function positionTooltip(e) {
     const tRect = tooltip.getBoundingClientRect();
     let left = e.clientX + 16;
@@ -239,12 +311,10 @@ function setupRatingComponentLogic(
     tooltip.style.left = `${left}px`;
     tooltip.style.top = `${top}px`;
   }
-
   let menuOpen = false;
   btn.addEventListener("click", (e) => {
     e.stopPropagation();
     menuOpen = !menuOpen;
-    // ***** CORRECTION ICI *****
     menu.classList.toggle("visible", menuOpen);
     if (menuOpen) {
       const rect = btn.getBoundingClientRect();
@@ -252,33 +322,25 @@ function setupRatingComponentLogic(
       menu.style.left = `${rect.left}px`;
     }
   });
-
   document.addEventListener("click", (e) => {
     if (menuOpen && !menu.contains(e.target)) {
       menuOpen = false;
-      // ***** CORRECTION ICI *****
       menu.classList.remove("visible");
     }
   });
-
   menu.querySelectorAll("li[data-score]").forEach((li) => {
     li.addEventListener("click", () => {
       const scoreValue = li.dataset.score;
-
       if (scoreValue === "remove") {
         currentUserRating = null;
       } else {
         currentUserRating = parseInt(scoreValue, 10);
       }
-
       setLocalSeriesRating(seriesSlug, currentUserRating);
       updateDisplay();
       menuOpen = false;
-      // ***** CORRECTION ICI *****
       menu.classList.remove("visible");
     });
   });
-
-  // Affichage initial
   updateDisplay();
 }

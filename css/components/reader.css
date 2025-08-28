@@ -162,7 +162,7 @@ body.dark .reader-viewer-container {
 .reader-viewer img {
   max-width: 100%;
   height: auto;
-  margin: auto;
+  margin-top: auto;
 }
 .reader-viewer.stretch img {
   width: 100%;

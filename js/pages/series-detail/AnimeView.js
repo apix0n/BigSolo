@@ -11,10 +11,69 @@ import { renderSeriesInfo } from "./shared/infoRenderer.js";
 import { renderActionButtons } from "./shared/actionButtons.js";
 import { initListControls } from "./shared/listControls.js";
 import { fetchStats } from "./shared/statsManager.js";
+import { initMainScrollObserver } from "../../components/observer.js";
 
 let currentSeriesData = null;
 let currentSeriesStats = null;
 let viewContainer = null;
+let resizeObserver = null;
+
+/**
+ * Configure la logique de déplacement des éléments pour le responsive.
+ * @param {HTMLElement} container - Le conteneur principal de la vue.
+ */
+function setupResponsiveLayout(container) {
+  if (resizeObserver) {
+    resizeObserver.disconnect();
+  }
+
+  const elementsToMove = {
+    metadata: {
+      element: qs(".series-metadata-container", container),
+      desktopParent: qs(".hero-info-top", container),
+      mobileTarget: qs("#mobile-tags-target", container),
+    },
+    actions: {
+      element: qs("#reading-actions-container", container),
+      desktopParent: qs(".hero-info-bottom", container),
+      mobileTarget: qs("#mobile-actions-target", container),
+    },
+    description: {
+      element: qs("#description-wrapper", container),
+      desktopParent: qs("#series-info-section", container),
+      mobileTarget: qs("#mobile-description-target", container),
+    },
+  };
+
+  if (!elementsToMove.description.mobileTarget) {
+    const descTarget = document.createElement("div");
+    descTarget.id = "mobile-description-target";
+    qs(".mobile-only-targets", container).appendChild(descTarget);
+    elementsToMove.description.mobileTarget = descTarget;
+  }
+
+  const updatePositions = () => {
+    const isMobile = window.innerWidth <= 768;
+    for (const key in elementsToMove) {
+      const { element, desktopParent, mobileTarget } = elementsToMove[key];
+      if (element && desktopParent && mobileTarget) {
+        if (isMobile && element.parentElement !== mobileTarget) {
+          mobileTarget.appendChild(element);
+        } else if (!isMobile && element.parentElement !== desktopParent) {
+          if (key === "description") {
+            desktopParent.appendChild(element);
+          } else {
+            desktopParent.appendChild(element);
+          }
+        }
+      }
+    }
+  };
+
+  resizeObserver = new ResizeObserver(updatePositions);
+  resizeObserver.observe(document.body);
+  updatePositions();
+}
 
 /**
  * Point d'entrée pour le rendu de la vue Anime.
@@ -25,6 +84,12 @@ export async function render(mainContainer, seriesData) {
   console.log("[AnimeView] Début du rendu.");
   currentSeriesData = seriesData;
   viewContainer = mainContainer;
+
+  if (!seriesData.anime || seriesData.anime.length === 0) {
+    viewContainer.innerHTML =
+      "<p class='loading-message'>Aucune information sur l'anime disponible pour cette série.</p>";
+    return;
+  }
 
   const statsPromise = fetchStats(currentSeriesData.slug);
 
@@ -46,6 +111,9 @@ export async function render(mainContainer, seriesData) {
     sort: { type: "number", order: "desc" },
     search: "",
   });
+
+  // Appel de la fonction de réorganisation responsive
+  setupResponsiveLayout(viewContainer);
 }
 
 function handleFilterOrSortChange(controls) {
@@ -88,6 +156,7 @@ function displayEpisodeList({ sort, search }) {
   }
 
   attachEpisodeItemEventListeners(container);
+  initMainScrollObserver(".chapters-list-container .chapter-card-list-item");
 }
 
 function renderEpisodeItem(episodeData) {
@@ -103,16 +172,15 @@ function renderEpisodeItem(episodeData) {
     displayLikes++;
   }
 
-  // Note: La vue Anime n'a pas de compteur de vues ou de commentaires pour l'instant.
+  const episodeNumberHtml = `Épisode ${episodeData.indice_ep}`;
+
   return `
     <a href="/${seriesSlug}/episodes/${
     episodeData.indice_ep
   }" class="chapter-card-list-item" data-episode-id="${episodeData.indice_ep}">
       <div class="chapter-card-list-top">
         <div class="chapter-card-list-left">
-          <span class="chapter-card-list-number">Épisode ${
-            episodeData.indice_ep
-          }</span>
+          <span class="chapter-card-list-number">${episodeNumberHtml}</span>
         </div>
       </div>
       <div class="chapter-card-list-bottom">
@@ -152,7 +220,7 @@ function attachEpisodeItemEventListeners(container) {
 }
 
 function handleLikeToggle(seriesSlug, episodeNum, likeButton) {
-  const episodeId = `ep-${episodeNum}`; // Clé unique pour les épisodes
+  const episodeId = `ep-${episodeNum}`;
   const interactionKey = `interactions_${seriesSlug}_${episodeId}`;
   const localState = getLocalInteractionState(interactionKey);
   const isLiked = !!localState.liked;
@@ -167,7 +235,7 @@ function handleLikeToggle(seriesSlug, episodeNum, likeButton) {
 
   queueAction(seriesSlug, {
     type: !isLiked ? "like" : "unlike",
-    chapter: episodeId, // On envoie la clé unique
+    chapter: episodeId,
   });
 
   console.log(
