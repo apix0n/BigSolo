@@ -155,8 +155,6 @@ body.dark .reader-viewer-container {
 
 .reader-viewer {
   display: flex;
-  justify-content: center;
-  align-items: center;
   height: 100%; /* On s'assure qu'il utilise toute la hauteur du parent */
   box-sizing: border-box;
 }
@@ -164,6 +162,7 @@ body.dark .reader-viewer-container {
 .reader-viewer img {
   max-width: 100%;
   height: auto;
+  margin: auto;
 }
 .reader-viewer.stretch img {
   width: 100%;
@@ -798,6 +797,20 @@ body.dark .reader-viewer-container {
 .comment-like-action .fa-heart.liked,
 .comment-like-action span.liked {
   color: var(--clr-accent) !important;
+}
+
+.image-placeholder {
+  width: 100%;
+  max-width: 500px; /* Limite la largeur pour ne pas être énorme */
+  background-color: rgba(var(--clr-text-rgb), 0.05);
+  border: 1px dashed rgba(var(--clr-text-rgb), 0.1);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: rgba(var(--clr-text-rgb), 0.2);
+  margin: 0 auto;
 }
 
 .mobile-only {

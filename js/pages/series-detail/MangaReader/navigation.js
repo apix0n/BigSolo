@@ -3,6 +3,8 @@
 import { qs, slugify } from "../../../utils/domUtils.js";
 import { state, dom, domImages } from "./state.js";
 import { render as renderViewer } from "./components/viewer.js";
+// On importe calculateSpreads pour pouvoir recalculer la mise en page
+import { calculateSpreads } from "./data.js";
 
 let urlUpdateTimeout = null;
 
@@ -34,57 +36,87 @@ export function updateUrlForCurrentPage() {
   }, 150);
 }
 
+// - Debut modification (Fonction entièrement réécrite)
 export function goToSpread(spreadIndex, isInitializing = false) {
-  state.currentSpreadIndex = Math.max(
+  // 1. Déterminer la planche cible et la page de référence (notre "ancre")
+  const targetSpreadIndex = Math.max(
     0,
     Math.min(spreadIndex, state.spreads.length - 1)
   );
+  const targetSpreadIndices = state.spreads[targetSpreadIndex] || [];
+  if (targetSpreadIndices.length === 0) return;
+  const anchorPageIndex = targetSpreadIndices[0];
 
-  if (state.settings.mode === "webtoon") {
-    const pageIndex = state.spreads[state.currentSpreadIndex]?.[0];
-    if (pageIndex !== undefined && domImages[pageIndex]) {
-      const behavior = isInitializing ? "auto" : "smooth";
-      console.log(
-        `[Navigation] Webtoon: Scrolling vers l'image index ${pageIndex}`
+  // 2. Charger les images de la planche cible si elles ne le sont pas déjà
+  const imagesToLoadPromises = [];
+  targetSpreadIndices.forEach((pageIndex) => {
+    const img = domImages[pageIndex];
+    if (img && !img.complete && !img.src) {
+      imagesToLoadPromises.push(
+        new Promise((resolve) => {
+          img.onload = img.onerror = () => resolve();
+          img.src = state.pages[pageIndex];
+        })
       );
-      const imageInDom = qs(`.reader-viewer img:nth-child(${pageIndex + 1})`);
-      if (imageInDom) {
-        const isMobile = window.innerWidth <= 768;
-        if (isInitializing && isMobile) {
-          const imageTopOffset =
-            imageInDom.getBoundingClientRect().top + window.scrollY;
-          const barsHeight =
-            (document.getElementById("main-header")?.offsetHeight || 0) +
-            (dom.mobileControls?.offsetHeight || 0);
-          window.scrollTo({
-            top: imageTopOffset - barsHeight,
-            behavior: "auto",
-          });
-          console.log(
-            `[Navigation] Mobile Init: Scrolling manuel vers ${
-              imageTopOffset - barsHeight
-            }px`
-          );
-        } else {
-          const behavior = isInitializing ? "auto" : "smooth";
-          imageInDom.scrollIntoView({ behavior, block: "start" });
-        }
-      } else {
-        console.warn(
-          `[Navigation] Tentative de scroll vers une image non trouvée dans le DOM (index ${pageIndex})`
-        );
-      }
     }
-  } else {
-    renderViewer();
-  }
-  updateUIOnPageChange();
+  });
 
-  if (!isInitializing && state.settings.mode !== "webtoon") {
-    dom.viewerContainer.scrollTop = 0;
+  const onImagesReady = () => {
+    // 3. (CORRECTION) Une fois les images chargées, recalculer la structure si on est en mode double
+    if (state.settings.mode === "double") {
+      calculateSpreads(true);
+    }
+
+    // 4. Retrouver le bon index de planche après le recalcul potentiel
+    const finalSpreadIndex = state.pageToSpreadMap[anchorPageIndex];
+    state.currentSpreadIndex = finalSpreadIndex;
+
+    // 5. Procéder au rendu et au positionnement
+    if (state.settings.mode === "webtoon") {
+      const pageIndex = state.spreads[finalSpreadIndex]?.[0];
+      if (pageIndex !== undefined) {
+        const imageInDom = qs(`.reader-viewer img:nth-child(${pageIndex + 1})`);
+        if (imageInDom) {
+          const behavior = isInitializing ? "auto" : "smooth";
+          const isMobile = window.innerWidth <= 768;
+
+          if (isInitializing && isMobile) {
+            const imageTopOffset =
+              imageInDom.getBoundingClientRect().top + window.scrollY;
+            const barsHeight =
+              (document.getElementById("main-header")?.offsetHeight || 0) +
+              (dom.mobileControls?.offsetHeight || 0);
+            window.scrollTo({
+              top: imageTopOffset - barsHeight,
+              behavior: "auto",
+            });
+          } else {
+            imageInDom.scrollIntoView({ behavior, block: "start" });
+          }
+        }
+      }
+    } else {
+      renderViewer();
+    }
+
+    updateUIOnPageChange();
+
+    if (!isInitializing && state.settings.mode !== "webtoon") {
+      dom.viewerContainer.scrollTop = 0;
+    }
+    updateUrlForCurrentPage();
+  };
+
+  if (imagesToLoadPromises.length > 0) {
+    if (state.settings.mode !== "webtoon") {
+      dom.viewerContainer.innerHTML = `<p class="image-placeholder" style="aspect-ratio: 4/3; width: 80%;"><i class="fas fa-spinner fa-spin"></i></p>`;
+    }
+    Promise.all(imagesToLoadPromises).then(onImagesReady);
+  } else {
+    onImagesReady();
   }
-  updateUrlForCurrentPage();
 }
+// - Fin modification
 
 export function changeSpread(delta) {
   const isLastSpread = state.currentSpreadIndex >= state.spreads.length - 1;
@@ -93,6 +125,7 @@ export function changeSpread(delta) {
   } else if (delta < 0 && state.currentSpreadIndex === 0) {
     navigateToChapter(-1, true);
   } else {
+    // On passe l'index de la planche suivante/précédente à goToSpread
     goToSpread(state.currentSpreadIndex + delta);
   }
 }
