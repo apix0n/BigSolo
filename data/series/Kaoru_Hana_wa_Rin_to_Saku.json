@@ -3,11 +3,17 @@
   "description": "Deux lycées que tout oppose se font face : Chidori, le repaire des garçons cancres, et Kikyô, l'établissement prestigieux des filles d'élite. Rintarô, élève de Chidori, sympathise avec Kaoruko, une cliente de la pâtisserie familiale. Alors qu'un lien se tisse entre eux, il découvre qu'elle étudie à Kikyô... et qu'ils sont censés se détester. Leur relation naissante pourra-t-elle survivre à la haine qui oppose leurs écoles ?",
   "artist": "Saka Mikami",
   "author": "Saka Mikami",
-  "cover": "https://meo.comick.pictures/O8kJK5.jpg",
+  "cover": "https://meo.comick.pictures/GXm0op.jpg",
   "manga_type": "Shonen",
   "magazine": "Pocket Magazine",
   "release_year": 2021,
-  "tags": ["Comédie", "Drame", "Ecole", "Romance", "Tranche de vie"],
+  "tags": [
+    "Comédie",
+    "Drame",
+    "Ecole",
+    "Romance",
+    "Tranche de vie"
+  ],
   "jp_title": "薫る花は凛と咲く",
   "alternative_titles": [
     "薫る花は凛と咲く",
@@ -16,6 +22,11 @@
   ],
   "release_status": "En cours",
   "covers_gallery": [
+    {
+      "url_hq": "https://meo.comick.pictures/GXm0op.jpg",
+      "url_lq": "https://meo.comick.pictures/GXm0op-s.jpg",
+      "volume": "19"
+    },
     {
       "url_hq": "https://meo.comick.pictures/O8kJK5.jpg",
       "url_lq": "https://meo.comick.pictures/O8kJK5-s.jpg",
@@ -149,7 +160,9 @@
       "cover_an": "https://i.imgur.com/q5dLTZD.jpeg",
       "type_an": "TV",
       "status_an": "En cours",
-      "studios_an": ["CloverWorks"],
+      "studios_an": [
+        "CloverWorks"
+      ],
       "date_start_an": "06/07/2025",
       "op_an": [
         {
@@ -167,7 +180,13 @@
           "youtube_url_op_an": "https://www.youtube.com/watch?v=W4fND8qaTtE"
         }
       ],
-      "tags": ["Comédie", "Drame", "Ecole", "Romance", "Tranche de vie"],
+      "tags": [
+        "Comédie",
+        "Drame",
+        "Ecole",
+        "Romance",
+        "Tranche de vie"
+      ],
       "description": "Deux lycées que tout oppose se font face : Chidori, le repaire des garçons cancres, et Kikyô, l'établissement prestigieux des filles d'élite. Rintarô, élève de Chidori, sympathise avec Kaoruko, une cliente de la pâtisserie familiale. Alors qu'un lien se tisse entre eux, il découvre qu'elle étudie à Kikyô... et qu'ils sont censés se détester. Leur relation naissante pourra-t-elle survivre à la haine qui oppose leurs écoles ?"
     }
   ],
@@ -1372,22 +1391,6 @@
         "Big_herooooo": "/proxy/api/imgchest/chapter/9249wro2byn"
       }
     },
-    "127.5": {
-      "title": "Extra volume 17",
-      "volume": "17",
-      "last_updated": "1749481200",
-      "groups": {
-        "Big_herooooo": "/proxy/api/imgchest/chapter/agyv9e9ab78"
-      }
-    },
-    "127.6": {
-      "title": "Extra volume 17 - Full.Colo",
-      "volume": "17",
-      "last_updated": "1750528200",
-      "groups": {
-        "Big_herooooo": "/proxy/api/imgchest/chapter/n87wxdpbgyx"
-      }
-    },
     "128": {
       "title": "Bonté d'âme",
       "volume": "17",
@@ -1438,7 +1441,7 @@
     },
     "134": {
       "title": "Les soucis de Subaru",
-      "volume": "",
+      "volume": "18",
       "last_updated": "1734912000",
       "groups": {
         "Big_herooooo": "/proxy/api/imgchest/chapter/vj4jkarm378"
@@ -1446,7 +1449,7 @@
     },
     "135": {
       "title": "Examens de premier trimestre",
-      "volume": "",
+      "volume": "18",
       "last_updated": "1735862400",
       "groups": {
         "Big_herooooo": "/proxy/api/imgchest/chapter/wl7lgvewxyx"
@@ -1454,7 +1457,7 @@
     },
     "136": {
       "title": "Sortie au Zoo",
-      "volume": "",
+      "volume": "18",
       "last_updated": "1737244800",
       "groups": {
         "Big_herooooo": "/proxy/api/imgchest/chapter/ej7mwxge9yd"
@@ -1462,7 +1465,7 @@
     },
     "137": {
       "title": "Retour à la plage",
-      "volume": "",
+      "volume": "18",
       "last_updated": "1737676800",
       "groups": {
         "Big_herooooo": "/proxy/api/imgchest/chapter/9rydmwv2ayk"
@@ -1470,7 +1473,7 @@
     },
     "138": {
       "title": "Émotions naissantes",
-      "volume": "",
+      "volume": "18",
       "last_updated": "1738540800",
       "groups": {
         "Big_herooooo": "/proxy/api/imgchest/chapter/ljyqxlnkd42"
@@ -1478,7 +1481,7 @@
     },
     "139": {
       "title": "Plus qu'un ami",
-      "volume": "",
+      "volume": "18",
       "last_updated": "1739059200",
       "groups": {
         "Big_herooooo": "/proxy/api/imgchest/chapter/6eyr9jpnxyp"
@@ -1486,7 +1489,7 @@
     },
     "140": {
       "title": "Qu'est-ce que l'Amour ?",
-      "volume": "",
+      "volume": "18",
       "last_updated": "1740787200",
       "groups": {
         "Big_herooooo": "/proxy/api/imgchest/chapter/qb4zezap54j"
@@ -1494,7 +1497,7 @@
     },
     "141": {
       "title": "Mots d'affection",
-      "volume": "",
+      "volume": "18",
       "last_updated": "1740787200",
       "groups": {
         "Big_herooooo": "/proxy/api/imgchest/chapter/qe4gjgoqq4j"
@@ -1644,12 +1647,20 @@
         "Big_herooooo": "/proxy/api/imgchest/chapter/bp455abdn45"
       }
     },
-    "159.5": {
-      "title": "L'affaire de la glace",
-      "volume": "",
-      "last_updated": "1754838000",
+    "127.5": {
+      "title": "Extra volume 17",
+      "volume": "17",
+      "last_updated": "1749481200",
       "groups": {
-        "Big_herooooo": "/proxy/api/imgchest/chapter/agyvrewak78"
+        "Big_herooooo": "/proxy/api/imgchest/chapter/agyv9e9ab78"
+      }
+    },
+    "127.6": {
+      "title": "Extra volume 17 - Full.Colo",
+      "volume": "17",
+      "last_updated": "1750528200",
+      "groups": {
+        "Big_herooooo": "/proxy/api/imgchest/chapter/n87wxdpbgyx"
       }
     },
     "2.5": {
@@ -1975,6 +1986,14 @@
       "last_updated": "1709164800",
       "groups": {
         "Big_herooooo": "/proxy/api/imgchest/chapter/lqye2e9ozyd"
+      }
+    },
+    "136.5": {
+      "title": "L'affaire de la glace",
+      "volume": "18",
+      "last_updated": "1754838000",
+      "groups": {
+        "Big_herooooo": "/proxy/api/imgchest/chapter/agyvrewak78"
       }
     }
   }
