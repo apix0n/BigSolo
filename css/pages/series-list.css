@@ -521,9 +521,10 @@
 }
 
 .chapters-list-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
+  justify-content: flex-start;
 }
 
 .chapters-list-container .chapter-card-list-item {
@@ -537,8 +538,8 @@
   background: var(--clr-bg-card);
   border-radius: 4px;
   min-width: 0;
-  width: 100%;
-  max-width: 100%;
+  flex: 1 1 260px;
+  max-width: 330px;
   padding: 1.1rem;
   display: flex;
   flex-direction: column;
@@ -550,6 +551,27 @@
 .chapter-card-list-item:hover {
   background: var(--clr-bg-card-invert);
   color: var(--clr-text-invert);
+}
+
+.chapter-card-list-number {
+  display: flex;
+  align-items: baseline; /* Aligne sur la ligne de base du texte */
+  gap: 0.5em; /* Espace entre "Vol." et "Ch." */
+}
+
+.volume-prefix {
+  font-weight: 400;
+  color: var(--clr-text-sub);
+}
+
+.chapter-card-list-item:hover .volume-prefix {
+  color: var(--clr-text-sub-invert);
+}
+
+.chapter-card-list-item.licensed-chapter {
+  opacity: 0.4 !important;
+  pointer-events: none; /* Désactive clics et hover */
+  cursor: not-allowed;
 }
 
 .chapter-card-list-item:hover .chapter-card-list-number {
@@ -658,9 +680,10 @@ a.chapter-card-list-item {
   background: var(--clr-bg-card);
   border-radius: 4px;
   min-width: 0;
-  width: 100%;
-  max-width: 100%;
+  flex: 1 1 260px;
+  max-width: 330px;
   padding: 1.1rem;
+  display: flex;
   justify-content: space-between;
   transition: background 0.18s, color 0.18s;
   cursor: pointer;
@@ -853,7 +876,7 @@ a.chapter-card-list-item:hover {
 
   #series-info-section {
     margin-top: 0rem;
-    top: 15px;
+    top: unset;
     flex-direction: column; /* Assure que les enfants (major-container, description...) sont empilés */
     color: #fff; /* Le texte de base dans cette section sera blanc */
     margin-bottom: 0px;

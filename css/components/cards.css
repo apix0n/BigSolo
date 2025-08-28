@@ -131,9 +131,8 @@
   flex-direction: column;
   justify-content: flex-end;
   cursor: pointer;
-  transition:
-    transform 0.6s cubic-bezier(.4, 1, .3, 1),
-    box-shadow 0.6s cubic-bezier(.4, 1, .3, 1);
+  transition: transform 0.6s cubic-bezier(0.4, 1, 0.3, 1),
+    box-shadow 0.6s cubic-bezier(0.4, 1, 0.3, 1);
   background-size: cover;
   background-position: center;
   z-index: 1;
@@ -147,12 +146,14 @@
   bottom: 0;
   width: 100%;
   height: 52%;
-  background: linear-gradient(to top,
-      rgba(0, 0, 0, 0.7) 0%,
-      rgba(0, 0, 0, 0.4) 50%,
-      transparent 100%);
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    transparent 100%
+  );
   z-index: 2;
-  transition: height 0.6s cubic-bezier(.4, 1, .3, 1);
+  transition: height 0.6s cubic-bezier(0.4, 1, 0.3, 1);
   pointer-events: none;
 }
 
@@ -191,9 +192,8 @@
   opacity: 0;
   max-height: 0;
   overflow: hidden;
-  transition:
-    opacity 0.6s cubic-bezier(.4, 1, .3, 1),
-    max-height 0.6s cubic-bezier(.4, 1, .3, 1);
+  transition: opacity 0.6s cubic-bezier(0.4, 1, 0.3, 1),
+    max-height 0.6s cubic-bezier(0.4, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
@@ -249,10 +249,7 @@
   font-size: 0.85rem;
   font-weight: 700;
   text-decoration: none;
-  transition:
-    background 0.18s,
-    color 0.18s,
-    border-color 0.18s;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
   cursor: pointer;
   outline: none;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
@@ -294,155 +291,76 @@
 
 @media (max-width: 768px) {
   .series-grid {
-    gap: 1.1rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Deux colonnes flexibles */
+    gap: 1rem; /* Espace entre les cartes */
   }
 
   .series-card {
-    max-width: 100%;
-    min-width: 0;
+    /* Dimensions et layout */
     width: 100%;
-    height: 200px;
+    /* --- CORRECTION CLÉ : On annule les contraintes du desktop --- */
+    min-width: 0;
+    max-width: none;
+    /* ----------------------------------------------------------- */
+    height: auto;
+    aspect-ratio: 2 / 3; /* Ratio portrait */
     border-radius: 8px;
-    /* Format paysage, image de fond toujours visible */
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    background-size: cover;
-    background-position: center;
-    position: relative;
+    justify-content: flex-end; /* Pousse le contenu en bas */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    /* On retire les animations de survol */
+    transform: none !important;
+    transition: none;
   }
 
   .series-card::before {
-    /* Dégradé inversé : foncé en haut, clair en bas */
-    height: 100% !important;
-    background: linear-gradient(to bottom,
-        rgba(0, 0, 0, 0.7) 0%,
-        rgba(0, 0, 0, 0.4) 50%,
-        transparent 100%);
+    height: 85% !important;
     transition: none;
   }
 
   .series-card .series-content {
-    /* Prend toute la hauteur, position absolue */
-    position: absolute;
-    inset: 0;
-    z-index: 3;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: stretch;
-    width: 100%;
-    height: 100%;
-    color: #fff;
-    background: none;
-  }
-
-  .series-card .series-title,
-  .series-card .series-tags {
-    /* Bloc du haut gauche */
-    margin: 0;
-    padding: 0;
+    padding: 0.6rem;
   }
 
   .series-card .series-title {
-    font-size: 1.45rem;
-    font-weight: 800;
-    color: #fff;
-    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
-    margin-bottom: 0.3rem;
-    margin-top: 0.7rem;
-    margin-left: 0.9rem;
-    margin-right: 0.9rem;
-    line-height: 1.18;
+    font-size: 1.1rem;
+    line-height: 1.2;
+    margin-bottom: 0.4rem;
+  }
+
+  .series-card .series-extra {
+    opacity: 1 !important;
+    max-height: none !important;
+    pointer-events: auto;
+    gap: 0.5rem;
     transition: none;
   }
 
   .series-card .series-tags {
-    margin-left: 0.9rem;
-    margin-bottom: 0.7rem;
+    margin-top: 0;
     gap: 0.25rem;
-    flex-wrap: wrap;
   }
 
   .series-card .series-tags .tag {
-    font-size: 0.7rem;
-    padding: 0.18em 0.7em;
-    border-radius: 999px;
-    margin: 0 0.15em 0.15em 0;
-    background: rgba(255, 255, 255, 0.25);
-    color: #fff;
-    font-weight: 600;
-    box-shadow: none;
-  }
-
-  .series-card .series-extra {
-    /* Toujours visible, pas d'animation */
-    opacity: 1 !important;
-    max-height: none !important;
-    pointer-events: auto;
-    margin: 0;
-    gap: 0;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    font-size: 0.65rem;
+    padding: 0.2em 0.6em;
   }
 
   .series-card .series-actions {
-    /* Bas de la carte, centré, pleine largeur */
-    width: 100%;
-    display: flex;
-    gap: 0.6rem;
-    justify-content: center;
-    align-items: flex-end;
-    margin-bottom: 0.7rem;
-    padding: 0 0.7rem;
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    z-index: 4;
+    gap: 0.5rem;
+    flex-wrap: wrap;
   }
 
   .series-card .series-action-btn {
-    font-size: 0.82rem;
-    padding: 0.45em 0.8em;
+    font-size: 0.75rem;
+    padding: 0.4em 0.6em;
     border-radius: 6px;
-    flex: 1 1 0;
-    min-width: 0;
-    width: 100%;
-    justify-content: center;
-    text-align: center;
-    margin: 0;
-    box-shadow: none;
-    position: relative;
-    z-index: 0;
-    overflow: visible;
-    background: none;
-    border: 2px solid #fff;
-    color: #fff !important;
-    backdrop-filter: blur(1px);
-    -webkit-backdrop-filter: blur(1px);
-    background: rgba(0, 0, 0, 0.1);
   }
 
-  .series-card .series-action-btn>* {
-    position: relative;
-    z-index: 1;
-    color: inherit;
+  .series-tooltip-description {
+    display: none !important;
   }
-
-  /* Supprime le gap vertical entre tags et boutons */
-  .series-card .series-extra>*:not(:last-child) {
-    margin-bottom: 0;
-  }
-}
-
-/* Supprime l'ancien design horizontal et les tooltips JS */
-.series-card .series-info,
-.series-card .action-buttons,
-.series-card .series-description,
-.series-card .tags-overflow,
-.series-tooltip {
-  display: none !important;
 }
