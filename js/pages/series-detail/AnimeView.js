@@ -28,9 +28,9 @@ function setupResponsiveLayout(container) {
   }
 
   const elementsToMove = {
-    metadata: {
-      element: qs(".series-metadata-container", container),
-      desktopParent: qs(".hero-info-top", container),
+    tags: {
+      element: qs(".detail-tags", container),
+      desktopParent: qs(".series-metadata-container", container),
       mobileTarget: qs("#mobile-tags-target", container),
     },
     actions: {
@@ -172,7 +172,18 @@ function renderEpisodeItem(episodeData) {
     displayLikes++;
   }
 
-  const episodeNumberHtml = `Épisode ${episodeData.indice_ep}`;
+  // --- Nouvelle logique pour l'affichage du numéro de saison/épisode ---
+  let episodeNumberHtml;
+  // On vérifie si la saison est présente et est un nombre valide
+  if (episodeData.saison_ep && !isNaN(episodeData.saison_ep)) {
+    episodeNumberHtml = `
+      <span class="volume-prefix">Saison ${episodeData.saison_ep}</span>
+      <span class="chapter-prefix">Épisode ${episodeData.indice_ep}</span>
+    `;
+  } else {
+    // Fallback si saison_ep n'est pas défini
+    episodeNumberHtml = `Épisode ${episodeData.indice_ep}`;
+  }
 
   return `
     <a href="/${seriesSlug}/episodes/${

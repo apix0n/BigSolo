@@ -143,6 +143,7 @@ function renderCreatorInfo(container, seriesData, animeData, viewType) {
   }
 }
 
+// - Debut modification (Fonction entièrement réécrite)
 function renderDescription(container, seriesData, viewType) {
   const animeData = seriesData.anime?.[0];
   const descData = viewType === "anime" ? animeData : seriesData;
@@ -155,39 +156,37 @@ function renderDescription(container, seriesData, viewType) {
 
   const btnRow = qs(".series-see-more-row", container);
   const moreInfos = qs(".series-more-infos", container);
+
+  // Si la vue est 'anime', on cache toute la section "plus d'infos" (bouton et contenu).
   if (viewType === "anime") {
     if (btnRow) btnRow.style.display = "none";
     if (moreInfos) moreInfos.style.display = "none";
   } else {
-    if (!btnRow || !moreInfos) return;
-    const altTitles = (seriesData.alternative_titles || []).join(", ");
-    moreInfos.innerHTML = `
-          <div><strong>Type :</strong> ${seriesData.manga_type || "?"}</div>
-          <div><strong>Magazine :</strong> ${seriesData.magazine || "?"}</div>
-          <div><strong>Titres alternatifs :</strong> ${altTitles || "—"}</div>
-        `;
-    if (!btnRow.dataset.listenerAttached) {
-      btnRow.addEventListener(
-        "click",
-        () => {
-          btnRow.classList.add("hide");
-          moreInfos.style.display = "block";
-        },
-        { once: true }
-      );
-      btnRow.dataset.listenerAttached = "true";
+    // Si la vue est 'manga', on s'assure que le bouton est visible
+    // et on se contente de remplir le contenu. L'accordéon JS/CSS gère le reste.
+    if (btnRow) btnRow.style.display = "flex";
+    if (moreInfos) {
+      const altTitles = (seriesData.alternative_titles || []).join(", ");
+      moreInfos.innerHTML = `
+              <div><strong>Type :</strong> ${seriesData.manga_type || "?"}</div>
+              <div><strong>Magazine :</strong> ${
+                seriesData.magazine || "?"
+              }</div>
+              <div><strong>Titres alternatifs :</strong> ${
+                altTitles || "—"
+              }</div>
+            `;
     }
   }
 }
+// - Fin modification
 
-// - Debut modification (Fonction entièrement réécrite)
 function renderOpEdButtons(container, animeData) {
   if (!animeData || (!animeData.op_an && !animeData.ed_an)) return;
 
   const actionsContainer = qs("#reading-actions-container", container);
   if (!actionsContainer) return;
 
-  // 1. Créer le conteneur wrapper pour les boutons OP/ED
   const opEdWrapper = document.createElement("div");
   opEdWrapper.className = "op-ed-buttons-wrapper";
 
@@ -206,7 +205,6 @@ function renderOpEdButtons(container, animeData) {
     return btn;
   };
 
-  // 2. Ajouter les boutons au wrapper
   (animeData.op_an || []).forEach((op, i) =>
     opEdWrapper.appendChild(createButton(op, "Opening", i))
   );
@@ -214,17 +212,13 @@ function renderOpEdButtons(container, animeData) {
     opEdWrapper.appendChild(createButton(ed, "Ending", i))
   );
 
-  // 3. Ajouter le wrapper complet au conteneur d'actions principal
   actionsContainer.appendChild(opEdWrapper);
 }
-// - Fin modification
 
 function renderRatingComponent(container, seriesData, seriesStats) {
   const ratingContainer = qs("#series-rating-container", container);
   if (!ratingContainer) {
-    console.warn(
-      "[InfoRenderer] Conteneur de notation #series-rating-container introuvable."
-    );
+    console.warn("[InfoRenderer] Conteneur de notation introuvable.");
     return;
   }
   const seriesSlug = seriesData.slug;

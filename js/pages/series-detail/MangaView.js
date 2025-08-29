@@ -16,6 +16,7 @@ import {
   preloadAllImgChestViewsOnce,
   updateAllVisibleChapterViews,
 } from "./shared/statsManager.js";
+import { initAccordion } from "./shared/accordion.js";
 import { renderItemNumber } from "./shared/itemNumberRenderer.js";
 
 let currentSeriesData = null;
@@ -51,6 +52,12 @@ export async function render(mainContainer, seriesData) {
     "manga"
   );
   initListControls(viewContainer, handleFilterOrSortChange);
+
+  initAccordion({
+    buttonSelector: ".series-see-more-btn",
+    contentSelector: ".series-more-infos",
+    context: viewContainer,
+  });
 
   displayChapterList({
     sort: { type: "number", order: "desc" },
@@ -261,10 +268,10 @@ function handleLikeToggle(seriesSlug, chapterId, likeButton) {
 function setupResponsiveLayout(container) {
   // 1. Identifier tous les éléments à déplacer et leurs parents/cibles
   const elementsToMove = {
-    metadata: {
-      element: qs(".series-metadata-container", container),
-      desktopParent: qs(".hero-info-top", container),
-      mobileTarget: qs("#mobile-tags-target", container), // Les tags et le statut iront ici
+    tags: {
+      element: qs(".detail-tags", container),
+      desktopParent: qs(".series-metadata-container", container), // Son parent d'origine
+      mobileTarget: qs("#mobile-tags-target", container), // Sa cible mobile
     },
     actions: {
       element: qs("#reading-actions-container", container),

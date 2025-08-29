@@ -414,22 +414,20 @@
   border: 1.5px solid var(--clr-bg-card-invert);
 }
 
-.op-ed-btn {
-  background-color: rgba(var(--clr-accent-rgb), 0.1);
-  color: var(--clr-accent);
-  border-color: rgba(var(--clr-accent-rgb), 0.3);
+.op-ed-buttons-wrapper {
+  display: flex;
+  gap: 1rem;
 }
 
-.op-ed-btn:hover,
-.op-ed-btn:focus {
-  background-color: var(--clr-accent);
+.op-ed-btn {
+  background-color: rgba(var(--clr-accent-rgb), 0.1);
   color: var(--clr-text);
   border-color: var(--clr-accent);
 }
 
 .op-ed-btn .fa-youtube {
-  color: #ff0000; /* Couleur rouge de YouTube */
-  font-size: 1.2em; /* Icône un peu plus grande */
+  color: #ff0000;
+  font-size: 1.2em;
 }
 
 .op-ed-btn:hover .fa-youtube,
@@ -443,6 +441,13 @@
 .reading-action-button:focus {
   background-color: var(--clr-bg-card-invert);
   color: var(--clr-text-invert);
+}
+
+.op-ed-btn:hover,
+.op-ed-btn:focus {
+  background-color: var(--clr-accent);
+  color: var(--clr-text);
+  border-color: var(--clr-accent);
 }
 
 /* --- SECTION LISTE DES CHAPITRES --- */
@@ -495,18 +500,16 @@
   border-bottom: 3px solid;
 }
 
+.chapter-tab-btn:hover {
+  color: var(--clr-text-sub);
+}
+
 .chapter-tab-btn.active,
 .chapter-tab-btn:focus {
   font-weight: 700;
   color: var(--clr-text);
   border-bottom: 3px solid var(--clr-text);
   background: none;
-}
-
-/* Centrage à gauche du texte */
-.chapter-tab-btn {
-  justify-content: flex-start;
-  text-align: left;
 }
 
 .search-chapter input[type="text"] {
@@ -777,6 +780,10 @@ a.chapter-card-list-item:hover {
     display: none; /* On cache le texte sur mobile */
   }
 
+  .hero-titles {
+    margin-bottom: 0;
+  }
+
   .sort-chapter-btn i {
     font-size: 1.1rem; /* On peut agrandir un peu l'icône */
     margin: 0; /* On retire la marge de l'icône */
@@ -798,11 +805,10 @@ a.chapter-card-list-item:hover {
   justify-content: center;
   align-items: center;
   width: 100%;
-  border-top: 2px solid rgba(var(--clr-text-rgb), 0.15);
+  /* Le séparateur est maintenant sur le conteneur du bouton */
+  border-top: 1px solid rgba(var(--clr-text-rgb), 0.1);
   margin-top: 0.5rem;
-  padding-top: 0.7rem;
-  transition: max-height 0.3s, opacity 0.3s;
-  overflow: hidden;
+  padding-top: 1rem;
 }
 
 .series-see-more-row.hide {
@@ -812,53 +818,41 @@ a.chapter-card-list-item:hover {
 }
 
 .series-see-more-btn {
+  background: none;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.8em;
-  font-size: 0.8rem;
-  font-weight: 500;
-  background: rgba(var(--clr-text-rgb), 0.15);
-  color: #fff;
-  border: none;
-  border-radius: 0 0 8px 8px;
-  padding: 0.3em 1em;
+  gap: 0.5em;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--clr-text-sub);
   cursor: pointer;
-  transition: background 0.18s, color 0.18s;
-  margin-top: -0.9em;
-  z-index: 2;
-  position: relative;
+  padding: 0; /* Le padding est maintenant sur la row */
+  transition: color 0.2s ease;
 }
 
-.series-see-more-btn .see-more-label {
-  padding: 0 0.7em;
-  white-space: nowrap;
-  font-size: 1em;
+.series-see-more-btn:hover {
+  color: var(--clr-text);
 }
 
 .series-see-more-btn i {
-  font-size: 1.1em;
-  vertical-align: middle;
+  transition: transform 0.3s ease-in-out;
 }
 
-.series-see-more-btn:hover,
-.series-see-more-btn:focus {
-  background: rgba(var(--clr-text-rgb), 0.45);
-  color: #fff;
+.series-see-more-btn i.rotated {
+  transform: rotate(180deg);
 }
 
 .series-more-infos {
-  margin-top: -0.9rem;
-  border-radius: 0 0 10px 10px;
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.4s ease-in-out;
   font-size: 0.95rem;
   width: 100%;
-  display: none;
-  animation: fadeInMoreInfos 0.25s;
-  /* Style identique à la description principale */
   color: var(--clr-text-sub);
   line-height: 1.8;
-  padding-right: 11.5rem;
-  box-sizing: border-box;
+  padding-top: 0;
 }
 
 @keyframes fadeInMoreInfos {
@@ -939,7 +933,6 @@ a.chapter-card-list-item:hover {
   }
 
   /* Cacher les conteneurs desktop qui seront déplacés par le JS */
-  .hero-info-text-container .series-metadata-container,
   .hero-info-text-container #reading-actions-container,
   #description-wrapper {
     display: none;
@@ -996,11 +989,36 @@ a.chapter-card-list-item:hover {
     opacity: 0.9;
   }
 
+  .series-metadata-container {
+    margin-bottom: 0;
+  }
+
+  .series-status-year {
+    display: flex; /* S'assure qu'il est visible */
+  }
+
+  .hero-info-top .detail-tags {
+    display: none;
+  }
+
+  #mobile-status-target {
+    display: none;
+  }
+
+  .status-indicator {
+    font-size: 0.9rem;
+  }
+
+  .status-indicator .status-dot {
+    width: 0.4em;
+    height: 0.4em;
+  }
+
   /* --- Styles pour les conteneurs cibles remplis par le JS --- */
 
   /* Conteneur pour les tags */
   #mobile-tags-target {
-    margin-top: 1.2rem;
+    margin-top: 15px;
   }
   #mobile-tags-target .series-metadata-container {
     display: block; /* On remet l'affichage */
@@ -1009,10 +1027,6 @@ a.chapter-card-list-item:hover {
     display: none; /* On cache le statut/année car on l'affiche séparément */
   }
 
-  /* Conteneur pour le statut et l'année */
-  #mobile-status-target {
-    margin-top: 1rem;
-  }
   #mobile-status-target .series-metadata-container {
     display: flex; /* On remet l'affichage */
     justify-content: center;
@@ -1027,7 +1041,7 @@ a.chapter-card-list-item:hover {
 
   /* Conteneur pour les boutons d'action */
   #mobile-actions-target {
-    margin-top: 0rem;
+    margin-top: 10px;
   }
   #mobile-actions-target #reading-actions-container {
     margin-top: 0rem;
@@ -1105,7 +1119,7 @@ a.chapter-card-list-item:hover {
 
   /* --- BLOC 2 : LISTE DES CHAPITRES --- */
   .series-chapters-list {
-    margin-top: 3rem;
+    margin-top: 2rem;
   }
 
   .chapters-list-header {
