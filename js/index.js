@@ -192,6 +192,14 @@ async function routeAndInitPage() {
       await initMangaReader();
       break;
 
+    case "playerpage":
+      console.log("[Index] Initializing Anime Player page.");
+      const { initAnimePlayer } = await import(
+        "./pages/series-detail/AnimePlayer/player.js"
+      );
+      await initAnimePlayer();
+      break;
+
     case "dashboardpage":
       console.log("[Index] Initializing Admin Dashboard page.");
       const { initDashboardPage } = await import("./pages/dashboard.js");

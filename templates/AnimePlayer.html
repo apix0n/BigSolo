@@ -1,12 +1,69 @@
-<div class="anime-player-view">
-  <div class="player-container">
-    <div id="video-player-wrapper"></div>
-  </div>
-  <div class="player-info">
-    <h2 id="player-episode-title"></h2>
-  </div>
-  <div class="episodes-playlist">
-    <h3>Épisodes</h3>
-    <div id="playlist-container"></div>
-  </div>
-</div>
+<!-- --- File: templates/AnimePlayer.html --- -->
+
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <script>
+      (function () {
+        try {
+          var theme = localStorage.getItem("mv-theme");
+          var prefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)"
+          ).matches;
+          var htmlEl = document.documentElement;
+          if (theme === "dark" || (!theme && prefersDark)) {
+            htmlEl.classList.add("dark");
+          } else {
+            htmlEl.classList.remove("dark");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- DYNAMIC_OG_TAGS_PLACEHOLDER -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/png" href="/img/icon.png" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/components/header.css" />
+    <link rel="stylesheet" href="/css/components/mobile-menu.css" />
+    <!-- On utilise une base de reader.css pour la structure mais on ajoute un CSS spécifique -->
+    <link rel="stylesheet" href="/css/components/reader.css" />
+    <link rel="stylesheet" href="/css/components/player.css" />
+    <link rel="stylesheet" href="/css/layout.css" />
+    <script src="/js/theme-init.js"></script>
+  </head>
+
+  <!-- L'ID du body est crucial pour le routeur JS -->
+  <body id="playerpage">
+    <header id="main-header"></header>
+    <div class="mobile-menu-overlay" id="main-mobile-menu-overlay"></div>
+
+    <main id="anime-player-root">
+      <!-- Le JS va générer la structure complète du lecteur ici -->
+      <p style="padding: 3rem; text-align: center; color: var(--clr-text-sub)">
+        Initialisation du lecteur vidéo...
+      </p>
+    </main>
+
+    <script id="player-data-placeholder" type="application/json">
+      <!-- PLAYER_DATA_PLACEHOLDER -->
+    </script>
+    <script src="/js/index.js" type="module"></script>
+  </body>
+</html>

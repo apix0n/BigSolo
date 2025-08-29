@@ -1,0 +1,165 @@
+/* --- File: css/components/player.css --- */
+
+#anime-player-root {
+  height: calc(100vh - 60px);
+  position: relative;
+  background-color: var(--clr-bg-reader);
+}
+
+.player-main-content {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.video-player-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* Ratio 16:9 pour la vidéo */
+  background-color: #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.video-player-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* --- Styles de la Sidebar (copiés et scopés depuis reader.css) --- */
+
+#playerpage #info-sidebar .group-title.collapsible {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+#playerpage #info-sidebar .group-title .volume-arrow {
+  transition: transform 0.3s ease;
+}
+
+#playerpage #info-sidebar .group-title.is-open .volume-arrow {
+  transform: rotate(180deg);
+}
+
+#playerpage #info-sidebar .chapter-list-wrapper {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-out;
+}
+
+#playerpage #info-sidebar .chapter-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+#playerpage #info-sidebar .chapter-list a {
+  background: var(--clr-bg-card);
+  border-radius: 4px;
+  padding: 0.6rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+#playerpage #info-sidebar .chapter-list a:hover {
+  background: var(--clr-bg-reader-invert);
+}
+
+#playerpage #info-sidebar .chapter-list a:hover .chapter-number,
+#playerpage #info-sidebar .chapter-list a:hover .chapter-title {
+  color: var(--clr-text-invert);
+}
+
+#playerpage #info-sidebar .chapter-info-main {
+  display: flex;
+  width: 100%;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+#playerpage #info-sidebar .chapter-number {
+  font-weight: 700;
+  color: var(--clr-text-fifth);
+  min-width: 30px;
+  transition: color 0.2s ease;
+}
+
+#playerpage #info-sidebar .chapter-title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-left: 0.5rem;
+  flex-grow: 1;
+  color: var(--clr-text);
+  transition: color 0.2s ease;
+}
+
+#playerpage #info-sidebar .chapter-stats-details {
+  font-size: 0.75rem;
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+  border-top: 1.5px solid var(--clr-bg-reader);
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  color: var(--clr-text-sub);
+}
+
+#playerpage #info-sidebar .chapter-stats-details span {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+#playerpage #info-sidebar .chapter-stats-details .detail-chapter-likes.liked,
+#playerpage #info-sidebar .chapter-stats-details .detail-chapter-likes.liked i,
+#playerpage
+  #info-sidebar
+  .chapter-stats-details
+  .detail-chapter-likes.liked
+  .likes-count {
+  color: var(--clr-accent);
+}
+
+#playerpage #info-sidebar .chapter-list a.active {
+  background: var(--clr-bg-reader-invert);
+}
+
+#playerpage #info-sidebar .chapter-list a.active .chapter-number,
+#playerpage #info-sidebar .chapter-list a.active .chapter-title {
+  color: var(--clr-text-invert);
+}
+
+#playerpage #info-sidebar .chapter-list a.active .chapter-stats-details {
+  color: var(--clr-bg-reader);
+}
+
+#playerpage #info-sidebar .chapter-list a.active .chapter-stats-details i {
+  color: var(--clr-bg-reader);
+}
+
+/* --- Section Responsive --- */
+@media (max-width: 768px) {
+  .player-main-content {
+    padding: 1rem;
+    gap: 1rem;
+  }
+}

@@ -1,16 +1,16 @@
-// functions/_middleware.js
+// --- File: functions/_middleware.js ---
 
 function slugify(text) {
   if (!text) return "";
   return text
     .toString()
-    .normalize("NFD") // Sépare les caractères de leurs accents (ex: "é" -> "e" + "´")
-    .replace(/[\u0300-\u036f]/g, "") // Supprime les accents et diacritiques
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .trim()
-    .replace(/[\s\u3000]+/g, "_") // Remplace les espaces (normaux et idéographiques) par un underscore
-    .replace(/[^\w-]+/g, "") // Supprime les caractères non autorisés
-    .replace(/--+/g, "_"); // Nettoie les tirets multiples (au cas où)
+    .replace(/[\s\u3000]+/g, "_")
+    .replace(/[^\w-]+/g, "")
+    .replace(/--+/g, "_");
 }
 
 function generateMetaTags(meta) {
@@ -37,6 +37,33 @@ function generateMetaTags(meta) {
   `;
 }
 
+function enrichEpisodesWithAbsoluteIndex(episodes) {
+  if (!episodes || episodes.length === 0) return [];
+  const episodesBySeason = episodes.reduce((acc, ep) => {
+    const season = ep.saison_ep || 1;
+    if (!acc[season]) acc[season] = [];
+    acc[season].push(ep);
+    return acc;
+  }, {});
+
+  const sortedSeasons = Object.keys(episodesBySeason).sort(
+    (a, b) => parseInt(a) - parseInt(b)
+  );
+  let absoluteIndexCounter = 1;
+  let enrichedEpisodes = [];
+
+  sortedSeasons.forEach((seasonNum) => {
+    const seasonEpisodes = episodesBySeason[seasonNum].sort(
+      (a, b) => a.indice_ep - b.indice_ep
+    );
+    seasonEpisodes.forEach((ep) => {
+      enrichedEpisodes.push({ ...ep, absolute_index: absoluteIndexCounter });
+      absoluteIndexCounter++;
+    });
+  });
+  return enrichedEpisodes;
+}
+
 export async function onRequest(context) {
   const { request, env, next } = context;
   const url = new URL(request.url);
@@ -45,13 +72,11 @@ export async function onRequest(context) {
     originalPathname.endsWith("/") && originalPathname.length > 1
       ? originalPathname.slice(0, -1)
       : originalPathname;
-  // on retire ".html" si présent
   if (pathname.endsWith(".html")) {
     pathname = pathname.slice(0, -5);
   }
-  if (pathname === "/index") pathname = "/"; // Traite "index" comme racine
+  if (pathname === "/index") pathname = "/";
 
-  // --- GESTION SPÉCIFIQUE DES URLS DE LA GALERIE ---
   if (pathname.startsWith("/galerie")) {
     const metaData = {
       title: "Galerie - BigSolo",
@@ -69,7 +94,6 @@ export async function onRequest(context) {
     });
   }
 
-  // Gestion des pages statiques
   const staticPageMeta = {
     "/": {
       title: "Accueil - BigSolo",
@@ -98,7 +122,6 @@ export async function onRequest(context) {
     });
   }
 
-  // Ignorer les assets connus pour ne pas faire de traitement inutile
   const knownPrefixes = [
     "/css/",
     "/js/",
@@ -113,14 +136,12 @@ export async function onRequest(context) {
     return next();
   }
 
-  // --- LOGIQUE DE ROUTAGE DYNAMIQUE POUR LES SÉRIES ET LE LECTEUR ---
   try {
     const pathSegments = originalPathname.split("/").filter(Boolean);
-    if (pathSegments.length === 0) return next(); // C'est la page d'accueil, déjà gérée
+    if (pathSegments.length === 0) return next();
 
     const seriesSlug = pathSegments[0];
 
-    // Charger la config et les données de toutes les séries une seule fois
     const config = await env.ASSETS.fetch(
       new URL("/data/config.json", url.origin)
     ).then((res) => res.json());
@@ -128,10 +149,7 @@ export async function onRequest(context) {
     const allSeriesDataPromises = seriesFiles.map((filename) =>
       env.ASSETS.fetch(new URL(`/data/series/${filename}`, url.origin))
         .then((res) => res.json().then((data) => ({ data, filename })))
-        .catch((e) => {
-          console.error(`Failed to load ${filename}`, e);
-          return null;
-        })
+        .catch(() => null)
     );
     const allSeriesResults = (await Promise.all(allSeriesDataPromises)).filter(
       Boolean
@@ -140,7 +158,7 @@ export async function onRequest(context) {
       (s) => s && s.data && slugify(s.data.title) === seriesSlug
     );
 
-    if (!foundSeries) return next(); // Laisser Cloudflare Pages gérer la 404
+    if (!foundSeries) return next();
 
     const seriesData = foundSeries.data;
     const jsonFilename = foundSeries.filename;
@@ -150,7 +168,6 @@ export async function onRequest(context) {
       url.origin
     ).toString();
 
-    // ROUTE 1: LECTEUR DE CHAPITRE (ex: /nom-de-serie/123 ou /nom-de-serie/123/5)
     const isChapterRoute =
       (pathSegments.length === 2 || pathSegments.length === 3) &&
       !isNaN(parseFloat(pathSegments[1]));
@@ -164,7 +181,6 @@ export async function onRequest(context) {
           image: ogImageUrl,
         };
 
-        // Remplacement ici : on sert le nouveau template
         const assetUrl = new URL("/templates/MangaReader.html", url.origin);
         let html = await env.ASSETS.fetch(assetUrl).then((res) => res.text());
 
@@ -186,48 +202,73 @@ export async function onRequest(context) {
       }
     }
 
-    // --- NOUVELLE SECTION POUR GÉRER LES ÉPISODES ---
     const isEpisodeRoute =
       pathSegments.length > 1 && pathSegments[1] === "episodes";
-    if (isEpisodeRoute) {
-      let metaData;
-      const animeInfo =
-        seriesData.anime && seriesData.anime[0] ? seriesData.anime[0] : null;
 
+    if (isEpisodeRoute) {
       if (pathSegments.length === 3) {
-        // C'est une page de lecteur d'épisode
-        const episodeNumber = pathSegments[2];
-        metaData = {
-          title: `Épisode ${episodeNumber} de ${seriesData.title} - BigSolo`,
-          description: `Regardez l'épisode ${episodeNumber} de l'anime ${seriesData.title}.`,
-          image: animeInfo?.cover_an || ogImageUrl,
-        };
+        const absoluteEpisodeIndex = pathSegments[2];
+        const allEpisodesEnriched = enrichEpisodesWithAbsoluteIndex(
+          seriesData.episodes
+        );
+        const currentEpisode = allEpisodesEnriched.find(
+          (ep) => String(ep.absolute_index) === absoluteEpisodeIndex
+        );
+
+        if (currentEpisode) {
+          const animeInfo = seriesData.anime?.[0];
+          const metaData = {
+            title: `S${currentEpisode.saison_ep || 1} Épisode ${
+              currentEpisode.indice_ep
+            } de ${seriesData.title} - BigSolo`,
+            description: `Regardez l'épisode ${
+              currentEpisode.indice_ep
+            } de la saison ${currentEpisode.saison_ep || 1} de l'anime ${
+              seriesData.title
+            }.`,
+            image: animeInfo?.cover_an || ogImageUrl,
+          };
+
+          const assetUrl = new URL("/templates/AnimePlayer.html", url.origin);
+          let html = await env.ASSETS.fetch(assetUrl).then((res) => res.text());
+
+          const tags = generateMetaTags({ ...metaData, url: url.href });
+          html = html.replace("<!-- DYNAMIC_OG_TAGS_PLACEHOLDER -->", tags);
+
+          const playerPayload = {
+            series: seriesData,
+            episodeNumber: absoluteEpisodeIndex,
+          };
+          html = html.replace(
+            "<!-- PLAYER_DATA_PLACEHOLDER -->",
+            JSON.stringify(playerPayload)
+          );
+
+          return new Response(html, {
+            headers: { "Content-Type": "text/html;charset=UTF-8" },
+          });
+        }
+        return next();
       } else {
-        // C'est la liste des épisodes
-        metaData = {
+        const metaData = {
           title: `Épisodes de ${seriesData.title} - BigSolo`,
           description: `Liste de tous les épisodes de l'anime ${seriesData.title}.`,
-          image: animeInfo?.cover_an || ogImageUrl,
+          image: seriesData.anime?.[0]?.cover_an || ogImageUrl,
         };
+        const assetUrl = new URL("/series-detail.html", url.origin);
+        let html = await env.ASSETS.fetch(assetUrl).then((res) => res.text());
+        const tags = generateMetaTags({ ...metaData, url: url.href });
+        html = html.replace("<!-- DYNAMIC_OG_TAGS_PLACEHOLDER -->", tags);
+        html = html.replace(
+          "<!-- SERIES_DATA_PLACEHOLDER -->",
+          JSON.stringify(seriesData)
+        );
+        return new Response(html, {
+          headers: { "Content-Type": "text/html;charset=UTF-8" },
+        });
       }
-      // Dans tous les cas (liste ou lecteur), on sert la page de détail qui contient le routeur JS
-      const assetUrl = new URL("/series-detail.html", url.origin);
-      let html = await env.ASSETS.fetch(assetUrl).then((res) => res.text());
-
-      const tags = generateMetaTags({ ...metaData, url: url.href });
-      html = html.replace("<!-- DYNAMIC_OG_TAGS_PLACEHOLDER -->", tags);
-      html = html.replace(
-        "<!-- SERIES_DATA_PLACEHOLDER -->",
-        JSON.stringify(seriesData)
-      );
-
-      return new Response(html, {
-        headers: { "Content-Type": "text/html;charset=UTF-8" },
-      });
     }
-    // --- FIN DE LA NOUVELLE SECTION ---
 
-    // ROUTE 2: GALERIE DE COUVERTURES (ex: /nom-de-serie/cover)
     if (pathSegments.length > 1 && pathSegments[1] === "cover") {
       const metaData = {
         title: `Couvertures de ${seriesData.title} - BigSolo`,
@@ -244,7 +285,6 @@ export async function onRequest(context) {
       });
     }
 
-    // ROUTE 3: PAGE DE DÉTAIL DE LA SÉRIE (ex: /nom-de-serie)
     if (pathSegments.length === 1) {
       const metaData = {
         title: `${seriesData.title} - BigSolo`,
@@ -272,6 +312,5 @@ export async function onRequest(context) {
     );
   }
 
-  // Si aucune route ne correspond, on passe la main
   return next();
 }
