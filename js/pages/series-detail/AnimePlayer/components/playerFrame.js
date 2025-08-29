@@ -15,15 +15,12 @@ export function render() {
     embedUrl = `https://drive.google.com/file/d/${currentEpisode.id}/preview`;
   }
 
-  // - Debut modification
-  // On trouve l'index de l'épisode actuel pour déterminer le précédent et le suivant
   const currentIndex = allEpisodes.findIndex(
     (ep) => ep.absolute_index === currentEpisode.absolute_index
   );
   const prevEpisode = allEpisodes[currentIndex - 1];
   const nextEpisode = allEpisodes[currentIndex + 1];
 
-  // On construit les boutons de navigation mobile
   const mobileNavHtml = `
     <div class="episode-navigation mobile-only">
       ${
@@ -38,14 +35,14 @@ export function render() {
       }
     </div>
   `;
-  // - Fin modification
 
+  // La balise iframe est simplifiée pour une meilleure compatibilité
   container.innerHTML = `
     <div class="player-main-content">
       <div class="video-player-wrapper">
         ${
           embedUrl
-            ? `<iframe src="${embedUrl}" scrolling="no" frameborder="0" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer"></iframe>`
+            ? `<iframe src="${embedUrl}" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>`
             : "<p>Source vidéo non disponible.</p>"
         }
       </div>
