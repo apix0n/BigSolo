@@ -14,14 +14,17 @@ export function init() {
   }
 }
 
+// - Debut modification (Fonction entièrement réécrite)
 /**
  * Gère le rendu des images dans la visionneuse en fonction de l'état actuel.
+ * Affiche des placeholders pour les images non encore chargées.
  */
 export function render() {
   console.log(
     "[ViewerComponent] Rendu des images pour la planche :",
     state.currentSpreadIndex
   );
+
   const viewer = document.createElement("div");
   const {
     mode,
@@ -36,56 +39,65 @@ export function render() {
 
   viewer.className = `reader-viewer ${mode}-mode fit-${fit} ${direction}-mode`;
   if (stretch) viewer.classList.add("stretch");
-  const currentSpread = state.spreads[state.currentSpreadIndex] || [];
-  const isSingleImageSpread = currentSpread.length === 1;
+
+  let imagesToRenderIndices = [];
+  if (mode === "webtoon") {
+    // En webtoon, on affiche toutes les images (ou leurs placeholders)
+    imagesToRenderIndices = domImages.map((_, index) => index);
+  } else {
+    imagesToRenderIndices = state.spreads[state.currentSpreadIndex] || [];
+  }
+
+  const isSingleImageSpread = imagesToRenderIndices.length === 1;
   let isLandscape = false;
   if (isSingleImageSpread) {
-    const imgElement = domImages[currentSpread[0]];
-    if (imgElement) {
+    const imgElement = domImages[imagesToRenderIndices[0]];
+    if (imgElement && imgElement.naturalWidth > 0) {
       isLandscape = imgElement.naturalWidth > imgElement.naturalHeight;
     }
   }
 
-  // Ajoute une classe spéciale si c'est une seule image paysage en mode double
   if (mode === "double" && isSingleImageSpread && isLandscape) {
     viewer.classList.add("single-landscape-spread");
   }
 
-  // Applique max-width au conteneur UNIQUEMENT si nécessaire
   if (fit === "custom") {
     viewer.style.maxWidth = limitWidth ? `${customMaxWidth}px` : "none";
   } else {
-    viewer.style.maxWidth = ""; // On retire le style en ligne pour laisser le CSS gérer
+    viewer.style.maxWidth = "";
   }
 
-  let imagesToRender = [];
-  if (mode === "webtoon") {
-    imagesToRender = domImages.filter(Boolean);
-  } else {
-    const currentSpread = state.spreads[state.currentSpreadIndex] || [];
-    imagesToRender = currentSpread
-      .map((pageIndex) => domImages[pageIndex])
-      .filter(Boolean);
-  }
+  imagesToRenderIndices.forEach((pageIndex) => {
+    const img = domImages[pageIndex];
 
-  imagesToRender.forEach((img) => {
-    const imgClone = img.cloneNode(true);
-    // Applique les styles en ligne QUE si le mode est "Personnalisé"
-    if (fit === "custom") {
-      imgClone.style.maxHeight = limitHeight ? `${customMaxHeight}px` : "none";
-    }
-    if (mode === "double" && imagesToRender.length === 1) {
-      const isLandscape = imgClone.naturalWidth > imgClone.naturalHeight;
-      if (!isLandscape) {
-        imgClone.classList.add("single-page-spread");
+    // Si l'image n'est pas encore chargée (pas de .src), on crée un placeholder.
+    if (!img.src) {
+      const placeholder = document.createElement("div");
+      placeholder.className = "image-placeholder";
+      placeholder.style.aspectRatio = "2 / 3"; // Ratio standard manga
+      placeholder.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
+      viewer.appendChild(placeholder);
+    } else {
+      const imgClone = img.cloneNode(true);
+      if (fit === "custom") {
+        imgClone.style.maxHeight = limitHeight
+          ? `${customMaxHeight}px`
+          : "none";
       }
+      if (mode === "double" && imagesToRenderIndices.length === 1) {
+        const isImgLandscape = imgClone.naturalWidth > imgClone.naturalHeight;
+        if (!isImgLandscape) {
+          imgClone.classList.add("single-page-spread");
+        }
+      }
+      viewer.appendChild(imgClone);
     }
-    viewer.appendChild(imgClone);
   });
 
   dom.viewerContainer.innerHTML = "";
   dom.viewerContainer.appendChild(viewer);
 }
+// - Fin modification
 
 /**
  * Gère les clics sur la visionneuse pour la navigation.

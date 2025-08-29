@@ -21,77 +21,81 @@ export async function handleRouteChange(seriesData) {
     seriesData.slug = slugify(seriesData.title);
   }
 
-  // Affiche un état de chargement
-  main.innerHTML = '<p class="loading-message">Chargement de la vue...</p>';
-
   const path = window.location.pathname;
   console.log(`[Router] Gestion de la route : ${path}`);
 
-  // Détermine la vue à charger en fonction de l'URL
-  const isAnimeView = path.includes("/episodes");
+  // --- NOUVELLE LOGIQUE D'ANIMATION ---
+  // 1. Démarrer l'animation de fondu de sortie
+  main.classList.add("is-fading-out");
 
-  try {
-    // 1. Charger le template HTML de base (commun aux deux vues)
-    const response = await fetch("/templates/MangaList.html"); // On réutilise ce template car il est très similaire
-    if (!response.ok)
-      throw new Error(
-        "Impossible de charger le template de la page de détail."
-      );
-    const templateHtml = await response.text();
-    main.innerHTML = templateHtml;
+  // 2. Attendre la fin de l'animation avant de changer le contenu
+  setTimeout(async () => {
+    try {
+      // Afficher un état de chargement pendant le fetch (sera invisible au début)
+      main.innerHTML = '<p class="loading-message">Chargement de la vue...</p>';
 
-    // 2. Appeler le module de rendu approprié
-    if (isAnimeView) {
-      console.log(
-        "[Router] Détection de la vue Anime. Chargement de AnimeView.js..."
-      );
-      const { render: renderAnimeView } = await import("./AnimeView.js");
-      await renderAnimeView(main, seriesData);
-    } else {
-      console.log(
-        "[Router] Détection de la vue Manga. Chargement de MangaView.js..."
-      );
-      const { render: renderMangaView } = await import("./MangaView.js");
-      await renderMangaView(main, seriesData);
-    }
+      const isAnimeView = path.includes("/episodes");
 
-    // 3. Gérer l'affichage des onglets Manga/Épisodes
-    const chaptersTab = main.querySelector(
-      '.chapter-tab-btn[data-tab="chapters"]'
-    );
-    const episodesTab = main.querySelector(
-      '.chapter-tab-btn[data-tab="episodes"]'
-    );
+      // 3. Charger le template HTML de base
+      const response = await fetch("/templates/MangaList.html");
+      if (!response.ok)
+        throw new Error(
+          "Impossible de charger le template de la page de détail."
+        );
+      const templateHtml = await response.text();
+      main.innerHTML = templateHtml;
 
-    if (chaptersTab && episodesTab) {
-      const hasAnime = seriesData.episodes && seriesData.episodes.length > 0;
-
-      // N'afficher l'onglet Épisodes que si l'anime existe
-      episodesTab.style.display = hasAnime ? "flex" : "none";
-
-      // Activer le bon onglet
-      chaptersTab.classList.toggle("active", !isAnimeView);
-      episodesTab.classList.toggle("active", isAnimeView);
-
-      // Ajouter les liens de navigation
-      chaptersTab.href = `/${seriesData.slug}`;
-      episodesTab.href = `/${seriesData.slug}/episodes`;
-
-      // Changer le libellé du tri si on est sur la vue anime
-      const sortBtn = main.querySelector(".sort-chapter-btn");
-      if (sortBtn && isAnimeView) {
-        sortBtn.parentElement.previousElementSibling.querySelector(
-          "input"
-        ).placeholder = "Rechercher un épisode...";
+      // 4. Appeler le module de rendu approprié pour remplir le template
+      if (isAnimeView) {
+        console.log("[Router] Rendu de la vue Anime.");
+        const { render: renderAnimeView } = await import("./AnimeView.js");
+        await renderAnimeView(main, seriesData);
+      } else {
+        console.log("[Router] Rendu de la vue Manga.");
+        const { render: renderMangaView } = await import("./MangaView.js");
+        await renderMangaView(main, seriesData);
       }
-    }
 
-    // 4. Envoyer un événement pour que le header mette à jour sa navigation contextuelle
-    document.body.dispatchEvent(
-      new CustomEvent("routeChanged", { detail: { path } })
-    );
-  } catch (error) {
-    console.error("[Router] Erreur critique lors du rendu de la vue :", error);
-    main.innerHTML = `<p class="loading-message">Erreur lors du chargement de la page : ${error.message}</p>`;
-  }
+      // 5. Gérer l'état des onglets
+      const chaptersTab = main.querySelector(
+        '.chapter-tab-btn[data-tab="chapters"]'
+      );
+      const episodesTab = main.querySelector(
+        '.chapter-tab-btn[data-tab="episodes"]'
+      );
+
+      if (chaptersTab && episodesTab) {
+        const hasAnime = seriesData.episodes && seriesData.episodes.length > 0;
+        episodesTab.style.display = hasAnime ? "flex" : "none";
+
+        chaptersTab.classList.toggle("active", !isAnimeView);
+        episodesTab.classList.toggle("active", isAnimeView);
+
+        chaptersTab.href = `/${seriesData.slug}`;
+        episodesTab.href = `/${seriesData.slug}/episodes`;
+
+        const sortBtn = main.querySelector(".sort-chapter-btn");
+        if (sortBtn && isAnimeView) {
+          sortBtn.parentElement.previousElementSibling.querySelector(
+            "input"
+          ).placeholder = "Rechercher un épisode...";
+        }
+      }
+
+      // 6. Démarrer l'animation de fondu d'entrée
+      main.classList.remove("is-fading-out");
+
+      // 7. Envoyer un événement pour que le header mette à jour sa navigation
+      document.body.dispatchEvent(
+        new CustomEvent("routeChanged", { detail: { path } })
+      );
+    } catch (error) {
+      console.error(
+        "[Router] Erreur critique lors du rendu de la vue :",
+        error
+      );
+      main.innerHTML = `<p class="loading-message">Erreur : ${error.message}</p>`;
+      main.classList.remove("is-fading-out");
+    }
+  }, 250); // Doit correspondre à la durée de la transition CSS
 }

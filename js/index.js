@@ -79,53 +79,50 @@ function getSeriesData() {
 }
 
 /**
- * Gère la navigation interne pour la SPA (Single Page Application) sur la page de détail.
+ * Gère la navigation interne pour la SPA sur la page de détail.
  * @param {Event} event - L'événement de clic.
  * @param {object} seriesData - Les données de la série.
  */
 function handleInternalNavigation(event, seriesData) {
-  // Ignore les clics sur les boutons de like pour ne pas interférer
   if (event.target.closest(".chapter-card-list-likes")) {
     return;
   }
 
-  const link = event.target.closest("a");
+  const link = event.target.closest("a, .chapter-tab-btn"); // On inclut les boutons d'onglet
+  if (!link) return;
 
-  // Si le lien n'existe pas, on arrête
-  if (!link) {
-    return;
-  }
-
-  // ***** CORRECTION ICI *****
-  // Si le lien est une carte de chapitre OU un bouton d'action ("Continuer", "Dernier"),
-  // on laisse le navigateur faire un rechargement complet.
-  if (
+  const isReaderLink =
     link.classList.contains("chapter-card-list-item") ||
-    link.classList.contains("detail-action-btn")
-  ) {
+    link.classList.contains("detail-action-btn");
+  if (isReaderLink) {
     console.log(
-      "[Index] Clic sur un lien de lecture, on laisse le navigateur gérer le rechargement."
+      "[Index] Clic sur un lien de lecture, rechargement de page autorisé."
     );
     return;
   }
 
-  // Vérifie si c'est un lien de navigation SPA (les onglets Manga/Episodes)
-  const isSpaLink =
-    link.href.startsWith(window.location.origin) &&
-    !link.hasAttribute("target") &&
-    !link.getAttribute("href")?.startsWith("#") &&
-    link.href.includes(seriesData.slug);
-
-  if (isSpaLink) {
+  if (link.classList.contains("chapter-tab-btn")) {
     event.preventDefault();
-    if (link.href !== window.location.href) {
+    if (!link.classList.contains("active")) {
       history.pushState({}, "", link.href);
       console.log("[Index] Navigation SPA (onglet) vers :", link.href);
+      import("./pages/series-detail/router.js").then(
+        ({ handleRouteChange }) => {
+          handleRouteChange(seriesData);
+        }
+      );
     }
+    return;
+  }
 
-    import("./pages/series-detail/router.js").then(({ handleRouteChange }) => {
-      handleRouteChange(seriesData);
-    });
+  const isInternal =
+    link.href.startsWith(window.location.origin) &&
+    !link.hasAttribute("target");
+  if (isInternal) {
+    console.log(
+      "[Index] Clic sur un autre lien interne, rechargement autorisé:",
+      link.href
+    );
   }
 }
 

@@ -20,22 +20,18 @@ export function initListControls(viewContainer, onUpdate) {
     return;
   }
 
-  // Réinitialiser l'état au cas où
   currentSort = { type: "number", order: "desc" };
   currentSearch = "";
   searchInput.value = "";
-  updateSortButtonText(sortBtn);
+  updateSortButtonUI(sortBtn);
 
-  // Écouteur pour la recherche
   searchInput.addEventListener("input", (e) => {
     currentSearch = e.target.value;
     console.log(`[ListControls] Recherche mise à jour : "${currentSearch}"`);
     onUpdate({ sort: currentSort, search: currentSearch });
   });
 
-  // Écouteur pour le tri
   sortBtn.addEventListener("click", () => {
-    // Cycle de tri: num desc -> num asc -> date desc -> date asc -> ...
     if (currentSort.type === "number" && currentSort.order === "desc") {
       currentSort = { type: "number", order: "asc" };
     } else if (currentSort.type === "number" && currentSort.order === "asc") {
@@ -46,21 +42,45 @@ export function initListControls(viewContainer, onUpdate) {
       currentSort = { type: "number", order: "desc" };
     }
 
-    updateSortButtonText(sortBtn);
+    updateSortButtonUI(sortBtn);
     console.log("[ListControls] Tri mis à jour :", currentSort);
     onUpdate({ sort: currentSort, search: currentSearch });
   });
 }
 
-function updateSortButtonText(btn) {
-  let txt = "";
+/**
+ * Met à jour l'icône et le texte du bouton de tri en fonction de l'état actuel.
+ * @param {HTMLElement} btn - L'élément du bouton de tri.
+ */
+function updateSortButtonUI(btn) {
+  let iconClass = "fas fa-sort";
+  let text = "Trier";
+  let title = "Trier par";
+
   if (currentSort.type === "date") {
-    txt = currentSort.order === "desc" ? "Date (récent)" : "Date (ancien)";
+    if (currentSort.order === "desc") {
+      iconClass = "fas fa-calendar-day";
+      text = "Date (récent)";
+      title = "Trié par date de sortie (plus récent en premier)";
+    } else {
+      iconClass = "fas fa-calendar-day"; // On pourrait utiliser une icône `fa-arrow-up` mais simple c'est bien aussi
+      text = "Date (ancien)";
+      title = "Trié par date de sortie (plus ancien en premier)";
+    }
   } else {
-    txt =
-      currentSort.order === "desc"
-        ? "Numéro (décroissant)"
-        : "Numéro (croissant)";
+    // type 'number'
+    if (currentSort.order === "desc") {
+      iconClass = "fas fa-sort-numeric-down";
+      text = "Numéro (décroissant)";
+      title = "Trié par numéro (décroissant)";
+    } else {
+      iconClass = "fas fa-sort-numeric-up";
+      text = "Numéro (croissant)";
+      title = "Trié par numéro (croissant)";
+    }
   }
-  btn.innerHTML = `<i class="fas fa-sort"></i> ${txt}`;
+
+  // On met à jour le contenu HTML et le titre pour l'accessibilité
+  btn.innerHTML = `<i class="${iconClass}"></i><span class="sort-btn-text"> ${text}</span>`;
+  btn.title = title;
 }

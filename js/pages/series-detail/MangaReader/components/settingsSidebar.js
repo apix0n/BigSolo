@@ -4,6 +4,8 @@ import { qs, qsa } from "../../../../utils/domUtils.js";
 import { state, dom } from "../state.js";
 import { saveSettings, settingsConfig } from "../settings.js";
 import { calculateSpreads } from "../data.js";
+import { goToSpread } from "../navigation.js";
+// On importe statiquement renderViewer pour l'utiliser partout.
 import { render as renderViewer } from "./viewer.js";
 
 /**
@@ -74,18 +76,50 @@ function attachEventListeners() {
     btn.addEventListener("click", () => {
       const settingName = btn.dataset.setting;
       const config = settingsConfig[settingName];
+
+      const currentSpread = state.spreads[state.currentSpreadIndex];
+      if (!currentSpread || currentSpread.length === 0) return;
+      const anchorPageIndex = currentSpread[0];
+
       const currentValue = state.settings[settingName];
       const currentIndex = config.options.findIndex(
         (opt) => opt.value === currentValue
       );
       const nextIndex = (currentIndex + 1) % config.options.length;
-      state.settings[settingName] = config.options[nextIndex].value;
+      const newModeValue = config.options[nextIndex].value;
+
+      state.settings[settingName] = newModeValue;
 
       if (settingName === "mode") {
+        console.log(
+          `[Mode Change] Ancre: page ${
+            anchorPageIndex + 1
+          }. Nouveau mode: ${newModeValue}`
+        );
+
         calculateSpreads();
+
+        // --- LA CORRECTION EST ICI ---
+        // On force le re-rendu de la visionneuse AVANT de tenter de scroller.
+        // C'est crucial pour que le mode webtoon ait la bonne structure DOM.
+        renderViewer();
+
+        const newSpreadIndex = state.pageToSpreadMap[anchorPageIndex];
+        console.log(
+          `[Mode Change] Nouvel index de planche trouvé: ${newSpreadIndex}`
+        );
+
+        if (newSpreadIndex !== undefined) {
+          // On passe 'true' pour un scroll/positionnement instantané, c'est plus propre visuellement.
+          goToSpread(newSpreadIndex, true);
+        }
+
         document.dispatchEvent(new CustomEvent("readerModeChanged"));
+      } else {
+        // Pour les autres paramètres (comme 'fit'), un simple re-rendu suffit
+        renderViewer();
       }
-      renderViewer();
+
       saveSettings();
       updateAllUI();
     });
@@ -147,7 +181,6 @@ function attachEventListeners() {
   const closeBtn = qs(".close-sidebar-btn", dom.settingsSidebar);
   if (closeBtn) {
     closeBtn.addEventListener("click", () => {
-      // Logique de fermeture gérée dans reader.js pour centralisation
       const event = new CustomEvent("close-sidebars");
       document.dispatchEvent(event);
     });
@@ -240,7 +273,6 @@ export function moveChaptersForMobile() {
   );
 
   if (chaptersGroup && settingsWrapper) {
-    // On déplace le bloc entier des chapitres au début du wrapper des paramètres
     settingsWrapper.prepend(chaptersGroup);
     console.log(
       "[SettingsSidebar] Le bloc chapitres a été déplacé pour la vue mobile."

@@ -128,7 +128,7 @@ section {
   }
 
   main {
-    padding: 0 15px 15px 15px;
+    padding: calc(60px + 15px) 15px 15px 15px;
   }
 
   section {

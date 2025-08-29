@@ -16,6 +16,8 @@ import {
   preloadAllImgChestViewsOnce,
   updateAllVisibleChapterViews,
 } from "./shared/statsManager.js";
+import { initAccordion } from "./shared/accordion.js";
+import { renderItemNumber } from "./shared/itemNumberRenderer.js";
 
 let currentSeriesData = null;
 let currentSeriesStats = null;
@@ -50,6 +52,12 @@ export async function render(mainContainer, seriesData) {
     "manga"
   );
   initListControls(viewContainer, handleFilterOrSortChange);
+
+  initAccordion({
+    buttonSelector: ".series-see-more-btn",
+    contentSelector: ".series-more-infos",
+    context: viewContainer,
+  });
 
   displayChapterList({
     sort: { type: "number", order: "desc" },
@@ -123,6 +131,19 @@ function displayChapterList({ sort, search }) {
  */
 function renderChapterItem(chapterData) {
   const seriesSlug = currentSeriesData.slug;
+  const isLicensed =
+    chapterData.licencied && Array.isArray(chapterData.licencied);
+  const cardClasses = ["chapter-card-list-item"];
+  if (isLicensed) {
+    cardClasses.push("licensed-chapter");
+  }
+  const tooltipText = isLicensed
+    ? `Licencié, sortie le ${chapterData.licencied[1]}`
+    : "";
+  const href = isLicensed
+    ? `href="#"`
+    : `href="/${seriesSlug}/${chapterData.id}"`;
+
   const interactionKey = `interactions_${seriesSlug}_${chapterData.id}`;
   const localState = getLocalInteractionState(interactionKey);
   const isLiked = !!localState.liked;
@@ -145,46 +166,47 @@ function renderChapterItem(chapterData) {
 
   const viewsHtml = imgchestId
     ? `<span class="chapter-card-list-views detail-chapter-views" data-imgchest-id="${imgchestId}">
-         <i class="fas fa-eye"></i> ...
-       </span>`
+           <i class="fas fa-eye"></i> ...
+         </span>`
     : `<span class="chapter-card-list-views">
-         <i class="fas fa-eye-slash" title="Vues non disponibles"></i>
-       </span>`;
+           <i class="fas fa-eye-slash" title="Vues non disponibles"></i>
+         </span>`;
+
+  // Utilisation de la nouvelle fonction partagée
+  const chapterNumberHtml = renderItemNumber(chapterData);
 
   return `
-    <a href="/${seriesSlug}/${
+      <a ${href} class="${cardClasses.join(" ")}" data-chapter-id="${
     chapterData.id
-  }" class="chapter-card-list-item" data-chapter-id="${chapterData.id}">
-      <div class="chapter-card-list-top">
-        <div class="chapter-card-list-left">
-          <span class="chapter-card-list-number">Chapitre ${
-            chapterData.id
-          }</span>
+  }" title="${tooltipText}">
+        <div class="chapter-card-list-top">
+          <div class="chapter-card-list-left">
+            <span class="chapter-card-list-number">${chapterNumberHtml}</span>
+          </div>
+          <div class="chapter-card-list-right">
+            ${viewsHtml}
+          </div>
         </div>
-        <div class="chapter-card-list-right">
-          ${viewsHtml}
+        <div class="chapter-card-list-bottom">
+          <div class="chapter-card-list-left">
+            <span class="chapter-card-list-title">${
+              chapterData.title || ""
+            }</span>
+          </div>
+          <div class="chapter-card-list-right">
+            <span class="chapter-card-list-likes${
+              isLiked ? " liked" : ""
+            }" data-base-likes="${chapterStats.likes || 0}">
+              <i class="fas fa-heart"></i>
+              <span class="likes-count">${displayLikes}</span>
+            </span>
+            <span class="chapter-card-list-comments">
+              <i class="fas fa-comment"></i> ${displayComments}
+            </span>
+          </div>
         </div>
-      </div>
-      <div class="chapter-card-list-bottom">
-        <div class="chapter-card-list-left">
-          <span class="chapter-card-list-title">${
-            chapterData.title || ""
-          }</span>
-        </div>
-        <div class="chapter-card-list-right">
-          <span class="chapter-card-list-likes${
-            isLiked ? " liked" : ""
-          }" data-base-likes="${chapterStats.likes || 0}">
-            <i class="fas fa-heart"></i>
-            <span class="likes-count">${displayLikes}</span>
-          </span>
-          <span class="chapter-card-list-comments">
-            <i class="fas fa-comment"></i> ${displayComments}
-          </span>
-        </div>
-      </div>
-    </a>
-  `;
+      </a>
+    `;
 }
 
 /**
@@ -246,10 +268,10 @@ function handleLikeToggle(seriesSlug, chapterId, likeButton) {
 function setupResponsiveLayout(container) {
   // 1. Identifier tous les éléments à déplacer et leurs parents/cibles
   const elementsToMove = {
-    metadata: {
-      element: qs(".series-metadata-container", container),
-      desktopParent: qs(".hero-info-top", container),
-      mobileTarget: qs("#mobile-tags-target", container), // Les tags et le statut iront ici
+    tags: {
+      element: qs(".detail-tags", container),
+      desktopParent: qs(".series-metadata-container", container), // Son parent d'origine
+      mobileTarget: qs("#mobile-tags-target", container), // Sa cible mobile
     },
     actions: {
       element: qs("#reading-actions-container", container),
