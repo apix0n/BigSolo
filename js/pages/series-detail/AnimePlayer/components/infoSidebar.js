@@ -11,25 +11,30 @@ export function attachAccordionListeners() {
 
   sidebar.addEventListener("click", (event) => {
     const header = event.target.closest(".group-title.collapsible");
-    if (!header) return;
+    if (header) {
+      const allHeaders = qsa(".group-title.collapsible", sidebar);
+      const contentWrapper = header.nextElementSibling;
+      const isAlreadyOpen = header.classList.contains("is-open");
 
-    const allHeaders = qsa(".group-title.collapsible", sidebar);
-    const contentWrapper = header.nextElementSibling;
-    const isAlreadyOpen = header.classList.contains("is-open");
+      allHeaders.forEach((otherHeader) => {
+        if (otherHeader !== header) {
+          otherHeader.classList.remove("is-open");
+          otherHeader.nextElementSibling.style.maxHeight = null;
+        }
+      });
 
-    allHeaders.forEach((otherHeader) => {
-      if (otherHeader !== header) {
-        otherHeader.classList.remove("is-open");
-        otherHeader.nextElementSibling.style.maxHeight = null;
+      if (isAlreadyOpen) {
+        header.classList.remove("is-open");
+        contentWrapper.style.maxHeight = null;
+      } else {
+        header.classList.add("is-open");
+        contentWrapper.style.maxHeight = contentWrapper.scrollHeight + "px";
       }
-    });
+    }
 
-    if (isAlreadyOpen) {
-      header.classList.remove("is-open");
-      contentWrapper.style.maxHeight = null;
-    } else {
-      header.classList.add("is-open");
-      contentWrapper.style.maxHeight = contentWrapper.scrollHeight + "px";
+    // Ajout de l'écouteur pour le bouton de fermeture
+    if (event.target.closest(".close-sidebar-btn")) {
+      document.dispatchEvent(new CustomEvent("close-sidebars"));
     }
   });
 }
@@ -74,7 +79,6 @@ export function updateEpisodeList() {
         (a, b) => b.indice_ep - a.indice_ep
       );
 
-      // - Debut modification
       return `
             <div class="control-group">
                 <h4 class="group-title collapsible">Saison ${seasonNum} <i class="fas fa-chevron-down volume-arrow"></i></h4>
@@ -93,29 +97,10 @@ export function updateEpisodeList() {
                 </div>
             </div>
         `;
-      // - Fin modification
     })
     .join("");
 
-  const activeEpisode = state.currentEpisode;
-  if (!activeEpisode) return;
-
-  const activeLink = qs(
-    `a[data-episode-id="${activeEpisode.absolute_index}"]`,
-    seasonsContainer
-  );
-  if (activeLink) {
-    const activeSeasonGroup = activeLink.closest(".control-group");
-    const header = qs(".group-title", activeSeasonGroup);
-
-    if (header && !header.classList.contains("is-open")) {
-      header.click();
-    }
-
-    setTimeout(() => {
-      activeLink.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 400);
-  }
+  updateActiveEpisodeInList(state.currentEpisode.absolute_index, true);
 }
 
 function renderEpisodeItem(ep, isActive) {
@@ -126,10 +111,8 @@ function renderEpisodeItem(ep, isActive) {
 
   const episodeStats = state.seriesStats[episodeId] || { likes: 0 };
   let displayLikes = episodeStats.likes || 0;
-
   if (isLiked) {
-    const serverLikes = (state.seriesStats[episodeId] || { likes: 0 }).likes;
-    displayLikes = serverLikes + 1;
+    displayLikes = (state.seriesStats[episodeId] || { likes: 0 }).likes + 1;
   }
 
   const statsHtml = isActive
@@ -165,7 +148,10 @@ function renderEpisodeItem(ep, isActive) {
     `;
 }
 
-export function updateActiveEpisodeInList(newAbsoluteIndex) {
+export function updateActiveEpisodeInList(
+  newAbsoluteIndex,
+  isInitialLoad = false
+) {
   const sidebar = qs("#info-sidebar");
   if (!sidebar) return;
 
@@ -180,9 +166,25 @@ export function updateActiveEpisodeInList(newAbsoluteIndex) {
   const newActive = qs(`a[data-episode-id="${newAbsoluteIndex}"]`, sidebar);
   if (newActive) {
     const newEpisode = state.allEpisodes.find(
-      (ep) => String(ep.absolute_index) === newAbsoluteIndex
+      (ep) => String(ep.absolute_index) === String(newAbsoluteIndex)
     );
     if (newEpisode) newActive.outerHTML = renderEpisodeItem(newEpisode, true);
+  }
+
+  if (isInitialLoad) {
+    const activeSeasonGroup = qs(`#info-sidebar .control-group:has(a.active)`);
+    if (activeSeasonGroup) {
+      const header = qs(".group-title", activeSeasonGroup);
+      if (header && !header.classList.contains("is-open")) {
+        header.click();
+      } else {
+        const activeLink = qs("a.active", activeSeasonGroup);
+        if (activeLink)
+          setTimeout(() => {
+            activeLink.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 400);
+      }
+    }
   }
 }
 
@@ -201,6 +203,9 @@ export function updateStatsInList() {
 
   const episodeStats = state.seriesStats[episodeId] || { likes: 0 };
   let displayLikes = episodeStats.likes;
+  if (isLiked) {
+    displayLikes = (state.seriesStats[episodeId] || { likes: 0 }).likes + 1;
+  }
 
   likesSpan.classList.toggle("liked", isLiked);
   likesCount.textContent = displayLikes;

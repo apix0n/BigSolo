@@ -11,32 +11,8 @@ import {
   setLocalInteractionState,
 } from "../../../utils/interactions.js";
 
-function enrichEpisodesWithAbsoluteIndex(episodes) {
-  if (!episodes) return [];
-  const episodesBySeason = episodes.reduce((acc, ep) => {
-    const season = ep.saison_ep || 1;
-    if (!acc[season]) acc[season] = [];
-    acc[season].push(ep);
-    return acc;
-  }, {});
-
-  const sortedSeasons = Object.keys(episodesBySeason).sort(
-    (a, b) => parseInt(a) - parseInt(b)
-  );
-  let absoluteIndexCounter = 1;
-  let enrichedEpisodes = [];
-
-  sortedSeasons.forEach((seasonNum) => {
-    const seasonEpisodes = episodesBySeason[seasonNum].sort(
-      (a, b) => a.indice_ep - b.indice_ep
-    );
-    seasonEpisodes.forEach((ep) => {
-      enrichedEpisodes.push({ ...ep, absolute_index: absoluteIndexCounter });
-      absoluteIndexCounter++;
-    });
-  });
-  return enrichedEpisodes;
-}
+let isMobileView = false;
+let savedScrollY = 0;
 
 export async function initAnimePlayer() {
   const dataPlaceholder = qs("#player-data-placeholder");
@@ -68,7 +44,8 @@ export async function initAnimePlayer() {
 
     state.seriesStats = await fetchSeriesStats(state.seriesData.slug);
 
-    // Initialisation et premier rendu complet
+    isMobileView = window.innerWidth <= 768;
+
     setupBaseLayout();
     initializeGlobalEvents();
     infoSidebar.render();
@@ -92,16 +69,18 @@ function updatePlayerState(absoluteEpisodeIndex, isFirstLoad = false) {
     : "";
   document.title = `${state.seriesData.title} - ${seasonText} ÉP.${state.currentEpisode.indice_ep} | BigSolo`;
 
-  playerFrame.render();
-
   if (isFirstLoad) {
-    infoSidebar.updateEpisodeList(); // Redessine la liste complète la première fois
+    infoSidebar.updateEpisodeList();
   } else {
-    // Ne fait qu'une mise à jour ciblée (change les classes .active)
     infoSidebar.updateActiveEpisodeInList(absoluteEpisodeIndex);
   }
 
+  playerFrame.render();
   updateAllLikeButtons();
+
+  if (isMobileView) {
+    updateMobileControlsUI();
+  }
 }
 
 function handleGlobalLike() {
@@ -119,7 +98,6 @@ function handleGlobalLike() {
     chapter: episodeId,
   });
 
-  // On met à jour l'état local des stats pour un affichage instantané
   const episodeStats = state.seriesStats[episodeId] || { likes: 0 };
   if (!isLiked) {
     episodeStats.likes = (episodeStats.likes || 0) + 1;
@@ -140,30 +118,152 @@ function updateAllLikeButtons() {
   if (dom.toggleLikeBtn) {
     dom.toggleLikeBtn.classList.toggle("liked", isLiked);
   }
-  // Met à jour UNIQUEMENT les compteurs de likes, sans recharger la liste
+  if (dom.mobileLikeStat) {
+    dom.mobileLikeStat.classList.toggle("liked", isLiked);
+    const likesCount = dom.mobileLikeStat.querySelector(".mrc-likes-count");
+    if (likesCount) {
+      const stats = state.seriesStats[episodeId] || { likes: 0 };
+      likesCount.textContent = stats.likes || 0;
+    }
+  }
   infoSidebar.updateStatsInList();
 }
 
 function setupBaseLayout() {
   dom.root = qs("#anime-player-root");
-  dom.root.innerHTML = `
-    <div id="global-reader-controls">
-        <button id="toggle-info-sidebar-btn" title="Liste des épisodes"><i class="fas fa-info-circle"></i></button>
-        <button id="toggle-episode-like" title="J'aime cet épisode"><i class="fas fa-heart"></i></button>
-    </div>
-    <div class="reader-layout-container">
-        <aside id="info-sidebar" class="reader-sidebar"></aside>
-        <div class="reader-container"></div>
-    </div>
-  `;
+
+  if (isMobileView) {
+    document.body.insertAdjacentHTML(
+      "afterbegin",
+      `
+        <div id="reader-bars-wrapper" class="mobile-only">
+          <div id="mobile-reader-controls"></div>
+        </div>
+        <div class="mobile-sidebar-overlay mobile-only"></div>
+    `
+    );
+    const header = qs("body > #main-header");
+    if (header) qs("#reader-bars-wrapper").prepend(header);
+
+    dom.root.innerHTML = `
+      <div class="reader-layout-container">
+          <aside id="info-sidebar" class="reader-sidebar"></aside>
+          <div class="reader-container"></div>
+      </div>
+    `;
+  } else {
+    dom.root.innerHTML = `
+      <div id="global-reader-controls">
+          <button id="toggle-info-sidebar-btn" title="Liste des épisodes"><i class="fas fa-info-circle"></i></button>
+          <button id="toggle-episode-like" title="J'aime cet épisode"><i class="fas fa-heart"></i></button>
+      </div>
+      <div class="reader-layout-container">
+          <aside id="info-sidebar" class="reader-sidebar"></aside>
+          <div class="reader-container"></div>
+      </div>
+    `;
+  }
+
   Object.assign(dom, {
-    toggleInfoBtn: qs("#toggle-info-sidebar-btn"),
-    toggleLikeBtn: qs("#toggle-episode-like"),
     infoSidebar: qs("#info-sidebar"),
   });
 }
 
+function initializeGlobalEvents() {
+  if (isMobileView) {
+    initializeMobileEvents();
+  } else {
+    initializeDesktopEvents();
+  }
+}
+
+function initializeDesktopEvents() {
+  Object.assign(dom, {
+    toggleInfoBtn: qs("#toggle-info-sidebar-btn"),
+    toggleLikeBtn: qs("#toggle-episode-like"),
+  });
+  dom.toggleInfoBtn.addEventListener("click", () => {
+    state.infoSidebarOpen = !state.infoSidebarOpen;
+    dom.toggleInfoBtn.classList.toggle("active", state.infoSidebarOpen);
+    updateLayout();
+  });
+  dom.toggleLikeBtn.addEventListener("click", handleGlobalLike);
+  updateLayout();
+}
+
+function initializeMobileEvents() {
+  renderMobileControls();
+  Object.assign(dom, {
+    mobileSidebarOverlay: qs(".mobile-sidebar-overlay"),
+  });
+
+  dom.mobileToggleSidebarBtn.addEventListener("click", () =>
+    toggleSidebar(dom.infoSidebar)
+  );
+  dom.mobileLikeStat.addEventListener("click", handleGlobalLike);
+  dom.mobileSidebarOverlay.addEventListener("click", closeAllSidebars);
+  document.addEventListener("close-sidebars", closeAllSidebars);
+}
+
+function renderMobileControls() {
+  const container = qs("#mobile-reader-controls");
+  if (!container) return;
+
+  container.innerHTML = `
+      <button id="mobile-toggle-sidebar-btn" title="Liste des épisodes">
+          <i class="fas fa-bars"></i>
+      </button>
+      <div class="mrc-info-wrapper">
+          <div class="mrc-top-row">
+              <span class="mrc-series-title"></span>
+              <span class="mrc-page-counter"></span>
+          </div>
+          <div class="mrc-bottom-row">
+              <div class="mrc-chapter-details">
+                  <span class="mrc-chapter-number"></span>
+                  <span class="mrc-chapter-title"></span>
+              </div>
+              <div class="mrc-stats-group">
+                  <span id="mobile-like-stat" class="mrc-stat-item" title="J'aime cet épisode">
+                      <i class="fas fa-heart"></i>
+                      <span class="mrc-likes-count">0</span>
+                  </span>
+              </div>
+          </div>
+      </div>
+    `;
+
+  Object.assign(dom, {
+    mobileToggleSidebarBtn: qs("#mobile-toggle-sidebar-btn"),
+    mobileLikeStat: qs("#mobile-like-stat"),
+  });
+}
+
+function updateMobileControlsUI() {
+  qs(".mrc-series-title").textContent = state.seriesData.title;
+  qs(".mrc-page-counter").textContent = `Saison ${
+    state.currentEpisode.saison_ep || 1
+  }`;
+  qs(".mrc-chapter-number").textContent = state.currentEpisode.indice_ep;
+  qs(".mrc-chapter-title").textContent = state.currentEpisode.title_ep;
+}
+
+function toggleSidebar(sidebarToOpen) {
+  const isAlreadyOpen = sidebarToOpen.classList.contains("is-open");
+  sidebarToOpen.classList.toggle("is-open", !isAlreadyOpen);
+  dom.mobileSidebarOverlay.classList.toggle("is-visible", !isAlreadyOpen);
+  document.body.classList.toggle("sidebar-is-open", !isAlreadyOpen);
+}
+
+function closeAllSidebars() {
+  if (dom.infoSidebar) dom.infoSidebar.classList.remove("is-open");
+  if (dom.mobileSidebarOverlay)
+    dom.mobileSidebarOverlay.classList.remove("is-visible");
+  document.body.classList.remove("sidebar-is-open");
+}
+
 function updateLayout() {
+  if (isMobileView) return;
   let infoWidth = 0;
   const rootStyle = getComputedStyle(document.documentElement);
   const infoWidthRem = parseFloat(
@@ -189,26 +289,14 @@ function handleEpisodeNavigation(event) {
   if (link && link.dataset.episodeId) {
     event.preventDefault();
     if (link.classList.contains("active")) {
-      console.log("Clic sur l'épisode déjà actif, aucune action.");
       return;
     }
 
     const absoluteEpisodeIndex = link.dataset.episodeId;
     history.pushState({ episodeNumber: absoluteEpisodeIndex }, "", link.href);
     updatePlayerState(absoluteEpisodeIndex);
+    closeAllSidebars();
   }
-}
-
-function initializeGlobalEvents() {
-  dom.toggleInfoBtn.addEventListener("click", () => {
-    state.infoSidebarOpen = !state.infoSidebarOpen;
-    dom.toggleInfoBtn.classList.toggle("active", state.infoSidebarOpen);
-    updateLayout();
-  });
-
-  dom.toggleLikeBtn.addEventListener("click", handleGlobalLike);
-  dom.infoSidebar.addEventListener("click", handleEpisodeNavigation);
-  updateLayout();
 }
 
 function handleError(message) {
@@ -217,4 +305,37 @@ function handleError(message) {
   if (root) {
     root.innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--clr-text-sub);">${message}</p>`;
   }
+}
+
+function enrichEpisodesWithAbsoluteIndex(episodes) {
+  if (!episodes) return [];
+
+  const episodesWithSeason = episodes.map((ep) => ({
+    ...ep,
+    saison_ep: ep.saison_ep || 1,
+  }));
+
+  const episodesBySeason = episodesWithSeason.reduce((acc, ep) => {
+    const season = ep.saison_ep;
+    if (!acc[season]) acc[season] = [];
+    acc[season].push(ep);
+    return acc;
+  }, {});
+
+  const sortedSeasons = Object.keys(episodesBySeason).sort(
+    (a, b) => parseInt(a) - parseInt(b)
+  );
+  let absoluteIndexCounter = 1;
+  let enrichedEpisodes = [];
+
+  sortedSeasons.forEach((seasonNum) => {
+    const seasonEpisodes = episodesBySeason[seasonNum].sort(
+      (a, b) => a.indice_ep - b.indice_ep
+    );
+    seasonEpisodes.forEach((ep) => {
+      enrichedEpisodes.push({ ...ep, absolute_index: absoluteIndexCounter });
+      absoluteIndexCounter++;
+    });
+  });
+  return enrichedEpisodes;
 }

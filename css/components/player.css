@@ -19,7 +19,7 @@
 .video-player-wrapper {
   position: relative;
   width: 100%;
-  padding-top: 56.25%; /* Ratio 16:9 pour la vidéo */
+  padding-top: 56.25%; /* Ratio 16:9 */
   background-color: #000;
   border-radius: 8px;
   overflow: hidden;
@@ -35,35 +35,29 @@
 }
 
 /* --- Styles de la Sidebar (copiés et scopés depuis reader.css) --- */
-
 #playerpage #info-sidebar .group-title.collapsible {
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
 }
-
 #playerpage #info-sidebar .group-title .volume-arrow {
   transition: transform 0.3s ease;
 }
-
 #playerpage #info-sidebar .group-title.is-open .volume-arrow {
   transform: rotate(180deg);
 }
-
 #playerpage #info-sidebar .chapter-list-wrapper {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.4s ease-out;
 }
-
 #playerpage #info-sidebar .chapter-list {
   list-style: none;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
-
 #playerpage #info-sidebar .chapter-list a {
   background: var(--clr-bg-card);
   border-radius: 4px;
@@ -76,30 +70,25 @@
   overflow: hidden;
   cursor: pointer;
 }
-
 #playerpage #info-sidebar .chapter-list a:hover {
   background: var(--clr-bg-reader-invert);
 }
-
 #playerpage #info-sidebar .chapter-list a:hover .chapter-number,
 #playerpage #info-sidebar .chapter-list a:hover .chapter-title {
   color: var(--clr-text-invert);
 }
-
 #playerpage #info-sidebar .chapter-info-main {
   display: flex;
   width: 100%;
   justify-content: flex-start;
   align-items: center;
 }
-
 #playerpage #info-sidebar .chapter-number {
   font-weight: 700;
   color: var(--clr-text-fifth);
   min-width: 30px;
   transition: color 0.2s ease;
 }
-
 #playerpage #info-sidebar .chapter-title {
   font-size: 0.85rem;
   font-weight: 500;
@@ -111,7 +100,6 @@
   color: var(--clr-text);
   transition: color 0.2s ease;
 }
-
 #playerpage #info-sidebar .chapter-stats-details {
   font-size: 0.75rem;
   margin-top: 0.4rem;
@@ -122,13 +110,11 @@
   justify-content: space-between;
   color: var(--clr-text-sub);
 }
-
 #playerpage #info-sidebar .chapter-stats-details span {
   display: flex;
   align-items: center;
   gap: 0.4em;
 }
-
 #playerpage #info-sidebar .chapter-stats-details .detail-chapter-likes.liked,
 #playerpage #info-sidebar .chapter-stats-details .detail-chapter-likes.liked i,
 #playerpage
@@ -138,20 +124,16 @@
   .likes-count {
   color: var(--clr-accent);
 }
-
 #playerpage #info-sidebar .chapter-list a.active {
   background: var(--clr-bg-reader-invert);
 }
-
 #playerpage #info-sidebar .chapter-list a.active .chapter-number,
 #playerpage #info-sidebar .chapter-list a.active .chapter-title {
   color: var(--clr-text-invert);
 }
-
 #playerpage #info-sidebar .chapter-list a.active .chapter-stats-details {
   color: var(--clr-bg-reader);
 }
-
 #playerpage #info-sidebar .chapter-list a.active .chapter-stats-details i {
   color: var(--clr-bg-reader);
 }
@@ -161,5 +143,193 @@
   .player-main-content {
     padding: 1rem;
     gap: 1rem;
+    /* On retire le padding-top qui est géré par la structure globale */
+  }
+
+  /* On s'assure que le reader-container prend la hauteur nécessaire */
+  #playerpage .reader-container {
+    padding-top: var(--global-controls-height-mobile);
+  }
+
+  /* --- Barre de contrôles Mobile --- */
+  #reader-bars-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+  }
+  #mobile-reader-controls {
+    min-height: var(--global-controls-height-mobile);
+    width: 100%;
+    padding: 0.4rem 0.8rem;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    background-color: var(--clr-bg-card);
+  }
+  .mrc-info-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .mrc-top-row,
+  .mrc-bottom-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+  .mrc-series-title {
+    color: var(--clr-text);
+    font-size: 1rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mrc-chapter-details {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mrc-chapter-number {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--clr-text);
+  }
+  .mrc-chapter-title {
+    font-size: 0.85rem;
+    color: var(--clr-text-fifth);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #mobile-reader-controls button {
+    background: none;
+    border: none;
+    color: var(--clr-text);
+    padding: 0.25rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+  #mobile-toggle-sidebar-btn {
+    font-size: 1.5rem;
+  }
+  .mrc-page-counter {
+    color: var(--clr-text-sub);
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+  .mrc-stats-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .mrc-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--clr-text-sub);
+    cursor: pointer;
+  }
+  .mrc-stat-item.liked {
+    color: var(--clr-accent);
+  }
+
+  /* --- Sidebar Coulissante --- */
+  #playerpage .reader-sidebar {
+    position: fixed;
+    top: var(--global-controls-height-mobile + 60px);
+    bottom: 0;
+    left: 0;
+    max-width: 350px;
+    background-color: var(--clr-bg-card);
+    z-index: 2000;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+  #playerpage .reader-sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  /* Le contenu de la sidebar devient scrollable */
+  #playerpage .sidebar-content-wrapper {
+    padding: 1rem;
+    overflow-y: auto;
+    flex-grow: 1;
+  }
+
+  /* Overlay */
+  .mobile-sidebar-overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1999;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .mobile-sidebar-overlay.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Classe pour bloquer le scroll du body quand la sidebar est ouverte */
+  body.sidebar-is-open {
+    overflow: hidden;
+  }
+
+  #playerpage #info-sidebar #info-series-link-group {
+    display: none;
+  }
+
+  /* --- Styles pour la navigation d'épisode mobile --- */
+  .episode-navigation {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .episode-nav-button {
+    flex: 1; /* Les boutons se partagent l'espace */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    padding: 0.6rem;
+    border: 1.5px solid rgba(var(--clr-text-rgb), 0.15);
+    border-radius: 6px;
+    background-color: var(--clr-bg-card);
+    color: var(--clr-text);
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .episode-nav-button:hover {
+    background-color: rgba(var(--clr-text-rgb), 0.05);
+  }
+
+  .episode-nav-button.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+    cursor: not-allowed;
   }
 }
