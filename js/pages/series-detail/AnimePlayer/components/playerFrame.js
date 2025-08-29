@@ -10,10 +10,13 @@ export function render() {
   const { seriesData, currentEpisode, allEpisodes } = state;
   const seriesSlug = slugify(seriesData.title);
 
+  // - Debut modification (Utilisation de la nouvelle URL d'intégration)
   let embedUrl = "";
   if (currentEpisode.type === "gdrive" && currentEpisode.id) {
-    embedUrl = `https://drive.google.com/file/d/${currentEpisode.id}/preview`;
+    // On utilise la nouvelle URL "embeddedplayer" qui est plus robuste pour le plein écran
+    embedUrl = `https://drive.google.com/embeddedplayer/v1/embed?id=${currentEpisode.id}`;
   }
+  // - Fin modification
 
   const currentIndex = allEpisodes.findIndex(
     (ep) => ep.absolute_index === currentEpisode.absolute_index
@@ -36,7 +39,7 @@ export function render() {
     </div>
   `;
 
-  // La balise iframe est simplifiée pour une meilleure compatibilité
+  // La balise iframe est conservée, seule sa source change.
   container.innerHTML = `
     <div class="player-main-content">
       <div class="video-player-wrapper">
