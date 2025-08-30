@@ -10,7 +10,7 @@
   "tags": [
     "Comédie",
     "Drame",
-    "Ecole",
+    "École",
     "Romance",
     "Tranche de vie"
   ],
@@ -1510,7 +1510,7 @@
     },
     "142": {
       "title": "La chambre de Kaoruko",
-      "volume": "",
+      "volume": "19",
       "last_updated": "1741564800",
       "groups": {
         "Big_herooooo": "/proxy/api/imgchest/chapter/n87wd3wnx4x"
@@ -1518,7 +1518,7 @@
     },
     "143": {
       "title": "Réunion parents-profs",
-      "volume": "",
+      "volume": "19",
       "last_updated": "1742169600",
       "groups": {
         "Big_herooooo": "/proxy/api/imgchest/chapter/xny8vdb627b"
@@ -1526,7 +1526,7 @@
     },
     "144": {
       "title": "L'été de Rintaro",
-      "volume": "",
+      "volume": "19",
       "last_updated": "1742688000",
       "groups": {
         "Big_herooooo": "/proxy/api/imgchest/chapter/o24aqrz6d7l"
@@ -1534,7 +1534,7 @@
     },
     "145": {
       "title": "Le futur de Rintaro",
-      "volume": "",
+      "volume": "19",
       "last_updated": "1743379200",
       "groups": {
         "Big_herooooo": "/proxy/api/imgchest/chapter/a846wjvozyx"
@@ -1542,7 +1542,7 @@
     },
     "146": {
       "title": "Décompression",
-      "volume": "",
+      "volume": "19",
       "last_updated": "1744243200",
       "groups": {
         "Big_herooooo": "/proxy/api/imgchest/chapter/agyvqkmnb48"
@@ -1550,7 +1550,7 @@
     },
     "147": {
       "title": "Le Futur de Natsusawa",
-      "volume": "",
+      "volume": "19",
       "last_updated": "1744848000",
       "groups": {
         "Big_herooooo": "/proxy/api/imgchest/chapter/m9yxrwznpyq"
@@ -1558,7 +1558,7 @@
     },
     "148": {
       "title": "Premier Anniversaire",
-      "volume": "",
+      "volume": "19",
       "last_updated": "1745452800",
       "groups": {
         "Big_herooooo": "/proxy/api/imgchest/chapter/9249wrokbyn"
@@ -1566,7 +1566,7 @@
     },
     "149": {
       "title": "Entretien D'embauche",
-      "volume": "",
+      "volume": "19",
       "last_updated": "1746144000",
       "groups": {
         "Big_herooooo": "/proxy/api/imgchest/chapter/9p4nw95zb4n"
@@ -2001,5 +2001,6 @@
         "Big_herooooo": "/proxy/api/imgchest/chapter/agyvrewak78"
       }
     }
-  }
+  },
+  "os": false
 }
