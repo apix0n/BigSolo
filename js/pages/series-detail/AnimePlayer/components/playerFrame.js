@@ -10,11 +10,15 @@ export function render() {
   const { seriesData, currentEpisode, allEpisodes } = state;
   const seriesSlug = slugify(seriesData.title);
 
-  // - Debut modification (Utilisation de la nouvelle URL d'intégration)
+  // - Debut modification (Correction de l'URL d'intégration Sibnet)
   let embedUrl = "";
-  if (currentEpisode.type === "gdrive" && currentEpisode.id) {
-    // On utilise la nouvelle URL "embeddedplayer" qui est plus robuste pour le plein écran
-    embedUrl = `https://drive.google.com/embeddedplayer/v1/embed?id=${currentEpisode.id}`;
+  if (currentEpisode.type === "sibnet" && currentEpisode.id) {
+    // On construit l'URL correcte avec shell.php
+    embedUrl = `https://video.sibnet.ru/shell.php?videoid=${currentEpisode.id}`;
+  }
+  // On garde la logique pour Google Drive en fallback
+  else if (currentEpisode.type === "gdrive" && currentEpisode.id) {
+    embedUrl = `https://drive.google.com/file/d/${currentEpisode.id}/preview`;
   }
   // - Fin modification
 
@@ -39,15 +43,21 @@ export function render() {
     </div>
   `;
 
-  // La balise iframe est conservée, seule sa source change.
+  const iframeHtml = embedUrl
+    ? `
+    <iframe 
+      src="${embedUrl}" 
+      frameborder="0" 
+      allowfullscreen="true" 
+      allow="autoplay; fullscreen; picture-in-picture"
+    ></iframe>
+  `
+    : "<p>Source vidéo non disponible.</p>";
+
   container.innerHTML = `
     <div class="player-main-content">
       <div class="video-player-wrapper">
-        ${
-          embedUrl
-            ? `<iframe src="${embedUrl}" frameborder="0" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>`
-            : "<p>Source vidéo non disponible.</p>"
-        }
+        ${iframeHtml}
       </div>
       ${mobileNavHtml}
     </div>
