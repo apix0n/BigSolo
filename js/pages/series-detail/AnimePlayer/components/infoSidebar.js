@@ -47,7 +47,7 @@ export function render() {
   sidebar.innerHTML = `
     <div class="sidebar-content-wrapper">
         <div id="info-series-link-group" class="control-group">
-            <a id="info-series-link" href="/${state.seriesData.slug}">
+            <a id="info-series-link" href="/${state.seriesData.slug}/episodes">
                 <i class="fas fa-arrow-left"></i> ${state.seriesData.title}
             </a>
         </div>
@@ -55,7 +55,7 @@ export function render() {
             <p>Chargement des saisons...</p>
         </div>
     </div>
-  `;
+    `;
 }
 
 export function updateEpisodeList() {

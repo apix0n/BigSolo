@@ -3,6 +3,44 @@
 import { qs } from "../../../utils/domUtils.js";
 
 /**
+ * Ajoute un index absolu à chaque épisode pour la navigation.
+ * @param {Array} episodes - La liste des épisodes de la série.
+ * @returns {Array} La liste des épisodes enrichie avec un `absolute_index`.
+ */
+function enrichEpisodesWithAbsoluteIndex(episodes) {
+  if (!episodes) return [];
+
+  const episodesWithSeason = episodes.map((ep) => ({
+    ...ep,
+    saison_ep: ep.saison_ep || 1,
+  }));
+
+  const episodesBySeason = episodesWithSeason.reduce((acc, ep) => {
+    const season = ep.saison_ep;
+    if (!acc[season]) acc[season] = [];
+    acc[season].push(ep);
+    return acc;
+  }, {});
+
+  const sortedSeasons = Object.keys(episodesBySeason).sort(
+    (a, b) => parseInt(a) - parseInt(b)
+  );
+  let absoluteIndexCounter = 1;
+  let enrichedEpisodes = [];
+
+  sortedSeasons.forEach((seasonNum) => {
+    const seasonEpisodes = episodesBySeason[seasonNum].sort(
+      (a, b) => a.indice_ep - b.indice_ep
+    );
+    seasonEpisodes.forEach((ep) => {
+      enrichedEpisodes.push({ ...ep, absolute_index: absoluteIndexCounter });
+      absoluteIndexCounter++;
+    });
+  });
+  return enrichedEpisodes;
+}
+
+/**
  * Affiche les boutons d'action de lecture/visionnage.
  * @param {HTMLElement} viewContainer - Le conteneur principal de la vue.
  * @param {object} seriesData - Les données de la série.
@@ -18,7 +56,6 @@ export function renderActionButtons(viewContainer, seriesData, viewType) {
     return;
   }
 
-  // Nettoie les anciens boutons (sauf le conteneur de notation)
   Array.from(actionsDiv.children).forEach((child) => {
     if (child.id !== "series-rating-container") {
       child.remove();
@@ -26,26 +63,11 @@ export function renderActionButtons(viewContainer, seriesData, viewType) {
   });
 
   const seriesSlug = seriesData.slug;
-  const localKey = `reading-progress-${seriesSlug}`;
+  const localKey =
+    viewType === "manga"
+      ? `reading-progress-${seriesSlug}`
+      : `watching-progress-${seriesSlug}`;
   const savedProgress = localStorage.getItem(localKey);
-
-  const items =
-    viewType === "manga" ? seriesData.chapters : seriesData.episodes;
-  const itemKeys = Object.keys(items || {});
-  if (itemKeys.length === 0) {
-    console.log(
-      "[ActionButtons] Aucun chapitre/épisode à afficher, pas de boutons."
-    );
-    return;
-  }
-
-  // Trier pour trouver le dernier
-  itemKeys.sort((a, b) => {
-    const numA = viewType === "manga" ? parseFloat(a) : items[a].indice_ep;
-    const numB = viewType === "manga" ? parseFloat(b) : items[b].indice_ep;
-    return numB - numA;
-  });
-  const lastItemKey = itemKeys[0];
 
   const labels = {
     manga: { singular: "chapitre", plural: "chapitres", prefix: "Ch." },
@@ -54,43 +76,74 @@ export function renderActionButtons(viewContainer, seriesData, viewType) {
   const currentLabels = labels[viewType];
   const urlPath = viewType === "manga" ? "" : "/episodes";
 
-  const lastItemLabel = `${currentLabels.prefix} ${lastItemKey}`;
+  let lastItemKey = null;
+  let itemsExist = false;
+  let lastItemLabel = "";
+  let continueItemLabel = "";
+
+  if (viewType === "manga") {
+    const chapterKeys = Object.keys(seriesData.chapters || {});
+    if (chapterKeys.length > 0) {
+      itemsExist = true;
+      chapterKeys.sort((a, b) => parseFloat(b) - parseFloat(a));
+      lastItemKey = chapterKeys[0];
+      lastItemLabel = `${currentLabels.prefix} ${lastItemKey}`;
+      if (savedProgress) {
+        continueItemLabel = `${currentLabels.prefix} ${savedProgress}`;
+      }
+    }
+  } else {
+    const enrichedEpisodes = enrichEpisodesWithAbsoluteIndex(
+      seriesData.episodes
+    );
+    if (enrichedEpisodes.length > 0) {
+      itemsExist = true;
+      const lastEpisode = enrichedEpisodes[enrichedEpisodes.length - 1];
+      lastItemKey = lastEpisode.absolute_index;
+      lastItemLabel = `S${lastEpisode.saison_ep} ${currentLabels.prefix} ${lastEpisode.indice_ep}`;
+
+      if (savedProgress) {
+        const continueEpisode = enrichedEpisodes.find(
+          (e) => e.absolute_index.toString() === savedProgress
+        );
+        if (continueEpisode) {
+          continueItemLabel = `S${continueEpisode.saison_ep} ${currentLabels.prefix} ${continueEpisode.indice_ep}`;
+        }
+      }
+    }
+  }
+
+  if (!itemsExist) {
+    console.log(
+      `[ActionButtons] Aucun ${currentLabels.plural} à afficher, pas de boutons.`
+    );
+    return;
+  }
 
   if (!savedProgress) {
-    // Cas 1: Jamais lu
     const lastBtn = createButton(
       `Dernier ${currentLabels.singular} (${lastItemLabel})`,
       `/${seriesSlug}${urlPath}/${lastItemKey}`
     );
     actionsDiv.appendChild(lastBtn);
-    console.log(`[ActionButtons] Affichage: Dernier ${currentLabels.singular}`);
   } else {
-    // Cas 2: A déjà une progression
     const isUpToDate = savedProgress.toString() === lastItemKey.toString();
     if (isUpToDate) {
-      // Cas 2a: À jour
       const upToDateBtn = createDisabledButton("À jour");
       actionsDiv.appendChild(upToDateBtn);
-      console.log("[ActionButtons] Affichage: À jour");
     } else {
-      // Cas 2b: Pas à jour
-      // ***** CORRECTION ICI : L'ORDRE EST INVERSÉ *****
       const lastBtn = createButton(
         `Dernier ${currentLabels.singular} (${lastItemLabel})`,
         `/${seriesSlug}${urlPath}/${lastItemKey}`
       );
-      const continueLabel = `${currentLabels.prefix} ${savedProgress}`;
       const continueBtn = createButton(
-        `Continuer (${continueLabel})`,
+        `Continuer (${continueItemLabel})`,
         `/${seriesSlug}${urlPath}/${savedProgress}`,
         true
       );
 
-      actionsDiv.appendChild(lastBtn); // Dernier chapitre en premier
-      actionsDiv.appendChild(continueBtn); // Continuer en second
-      console.log(
-        `[ActionButtons] Affichage: Dernier ${currentLabels.singular} + Continuer`
-      );
+      actionsDiv.appendChild(lastBtn);
+      actionsDiv.appendChild(continueBtn);
     }
   }
 }

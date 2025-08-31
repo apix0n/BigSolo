@@ -14,6 +14,21 @@ import {
 let isMobileView = false;
 let savedScrollY = 0;
 
+function saveWatchingProgress() {
+  const seriesSlug = state.seriesData.slug;
+  const episodeIndex = state.currentEpisode.absolute_index;
+  if (seriesSlug && episodeIndex) {
+    try {
+      localStorage.setItem(`watching-progress-${seriesSlug}`, episodeIndex);
+    } catch (e) {
+      console.warn(
+        "[AnimePlayer] Erreur lors de la sauvegarde de la progression:",
+        e
+      );
+    }
+  }
+}
+
 export async function initAnimePlayer() {
   const dataPlaceholder = qs("#player-data-placeholder");
   if (
@@ -64,6 +79,8 @@ function updatePlayerState(absoluteEpisodeIndex, isFirstLoad = false) {
   );
   if (!state.currentEpisode) return;
 
+  saveWatchingProgress();
+
   const seasonText = state.currentEpisode.saison_ep
     ? `S${state.currentEpisode.saison_ep}`
     : "";
@@ -98,14 +115,6 @@ function handleGlobalLike() {
     chapter: episodeId,
   });
 
-  const episodeStats = state.seriesStats[episodeId] || { likes: 0 };
-  if (!isLiked) {
-    episodeStats.likes = (episodeStats.likes || 0) + 1;
-  } else {
-    episodeStats.likes = Math.max(0, (episodeStats.likes || 0) - 1);
-  }
-  state.seriesStats[episodeId] = episodeStats;
-
   updateAllLikeButtons();
 }
 
@@ -123,7 +132,8 @@ function updateAllLikeButtons() {
     const likesCount = dom.mobileLikeStat.querySelector(".mrc-likes-count");
     if (likesCount) {
       const stats = state.seriesStats[episodeId] || { likes: 0 };
-      likesCount.textContent = stats.likes || 0;
+      // Le nombre affiché est le nombre de base + 1 si liké localement.
+      likesCount.textContent = (stats.likes || 0) + (isLiked ? 1 : 0);
     }
   }
   infoSidebar.updateStatsInList();
@@ -136,32 +146,32 @@ function setupBaseLayout() {
     document.body.insertAdjacentHTML(
       "afterbegin",
       `
-        <div id="reader-bars-wrapper" class="mobile-only">
-          <div id="mobile-reader-controls"></div>
-        </div>
-        <div class="mobile-sidebar-overlay mobile-only"></div>
-    `
+            <div id="reader-bars-wrapper" class="mobile-only">
+              <div id="mobile-reader-controls"></div>
+            </div>
+            <div class="mobile-sidebar-overlay mobile-only"></div>
+        `
     );
     const header = qs("body > #main-header");
     if (header) qs("#reader-bars-wrapper").prepend(header);
 
     dom.root.innerHTML = `
-      <div class="reader-layout-container">
-          <aside id="info-sidebar" class="reader-sidebar"></aside>
-          <div class="reader-container"></div>
-      </div>
-    `;
+          <div class="reader-layout-container">
+              <aside id="info-sidebar" class="reader-sidebar"></aside>
+              <div class="reader-container"></div>
+          </div>
+        `;
   } else {
     dom.root.innerHTML = `
-      <div id="global-reader-controls">
-          <button id="toggle-info-sidebar-btn" title="Liste des épisodes"><i class="fas fa-info-circle"></i></button>
-          <button id="toggle-episode-like" title="J'aime cet épisode"><i class="fas fa-heart"></i></button>
-      </div>
-      <div class="reader-layout-container">
-          <aside id="info-sidebar" class="reader-sidebar"></aside>
-          <div class="reader-container"></div>
-      </div>
-    `;
+          <div id="global-reader-controls">
+              <button id="toggle-info-sidebar-btn" title="Liste des épisodes"><i class="fas fa-info-circle"></i></button>
+              <button id="toggle-episode-like" title="J'aime cet épisode"><i class="fas fa-heart"></i></button>
+          </div>
+          <div class="reader-layout-container">
+              <aside id="info-sidebar" class="reader-sidebar"></aside>
+              <div class="reader-container"></div>
+          </div>
+        `;
   }
 
   Object.assign(dom, {
@@ -281,21 +291,6 @@ function updateLayout() {
   const readerContainer = qs(".reader-container");
   if (readerContainer) {
     readerContainer.style.marginLeft = `${infoWidth}px`;
-  }
-}
-
-function handleEpisodeNavigation(event) {
-  const link = event.target.closest("a");
-  if (link && link.dataset.episodeId) {
-    event.preventDefault();
-    if (link.classList.contains("active")) {
-      return;
-    }
-
-    const absoluteEpisodeIndex = link.dataset.episodeId;
-    history.pushState({ episodeNumber: absoluteEpisodeIndex }, "", link.href);
-    updatePlayerState(absoluteEpisodeIndex);
-    closeAllSidebars();
   }
 }
 
