@@ -221,7 +221,7 @@ function renderMobileControls() {
 
   container.innerHTML = `
       <button id="mobile-toggle-sidebar-btn" title="Liste des épisodes">
-          <i class="fas fa-bars"></i>
+          <i class="fas fa-cog"></i>
       </button>
       <div class="mrc-info-wrapper">
           <div class="mrc-top-row">

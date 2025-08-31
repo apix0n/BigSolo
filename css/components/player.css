@@ -260,8 +260,10 @@
     flex-direction: column;
     padding: 0;
   }
+
   #playerpage .reader-sidebar.is-open {
     transform: translateX(0);
+    background: var(--clr-bg-reader);
   }
 
   /* Le contenu de la sidebar devient scrollable */

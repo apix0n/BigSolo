@@ -556,7 +556,7 @@
 
 .chapters-list-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1rem;
 }
 
@@ -712,7 +712,7 @@ a.chapter-card-list-item {
   background: var(--clr-bg-card);
   border-radius: 4px;
   min-width: 0;
-  flex: 1 1 260px;
+  flex: 1 1 240px;
   max-width: 330px;
   padding: 1.1rem;
   display: flex;
