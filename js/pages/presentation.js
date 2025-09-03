@@ -110,7 +110,31 @@ function displayQAItems(qaData) {
   container.appendChild(column1);
   container.appendChild(column2);
 }
-/* --- FIN MODIFICATION --- */
+
+function randomlyOpenFaqItems() {
+  // 1. Sélectionner tous les items de la FAQ
+  const allFaqItems = document.querySelectorAll(".faq-item");
+  if (allFaqItems.length === 0) {
+    return; // Pas d'items à ouvrir
+  }
+
+  console.log(
+    `[FAQ] Tentative d'ouverture aléatoire pour ${allFaqItems.length} items.`
+  );
+
+  // 2. Itérer sur chaque item
+  allFaqItems.forEach((item, index) => {
+    // 3. Pour chaque item, 50% de chance de l'ouvrir
+    if (Math.random() >= 0.5) {
+      // 4. Trouver le bouton de la question et simuler un clic
+      const questionButton = item.querySelector(".faq-question");
+      if (questionButton) {
+        console.log(`[FAQ] Ouverture de l'item #${index + 1}`);
+        questionButton.click();
+      }
+    }
+  });
+}
 
 export async function initPresentationPage() {
   console.log("Initializing Presentation Page with new FAQ design...");
@@ -120,6 +144,12 @@ export async function initPresentationPage() {
   if (qaData && qaData.length > 0) {
     displayQAItems(qaData);
     initFaqAccordion();
+
+    setTimeout(() => {
+      /* --- DEBUT MODIFICATION --- */
+      randomlyOpenFaqItems(); // On appelle la nouvelle fonction qui gère plusieurs items
+      /* --- FIN MODIFICATION --- */
+    }, 100);
   } else {
     if (container) {
       container.innerHTML =

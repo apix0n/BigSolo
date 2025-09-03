@@ -1,9 +1,33 @@
 /* --- Header de la page (style original restauré) --- */
+.presentation-section {
+  position: relative; /* Nécessaire pour positionner la bannière derrière */
+  z-index: 1;
+}
+
+.presentation-section::before {
+  content: "";
+  position: absolute;
+  top: calc(-60px - 2rem);
+  left: 0;
+  right: 0;
+  height: 560px;
+  background-image: url("/img/bannierepresentation.jpg");
+  background-size: cover;
+  background-position: center;
+  filter: blur(4px) brightness(0.3);
+  mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+  z-index: -1;
+}
+
 .presentation-page-header {
   display: flex;
   align-items: center;
   gap: 2rem;
-  margin: 2rem 0 4rem 0;
+  /* --- DEBUT MODIFICATION --- */
+  margin: 2rem 0 4rem 0; /* On retire la marge du haut */
+  position: relative; /* Assure qu'il reste au-dessus de la bannière */
+  z-index: 2;
+  /* --- FIN MODIFICATION --- */
 }
 
 .profile-pic.page-header-profile-pic {
@@ -21,7 +45,7 @@
 .page-main-title {
   font-size: 2.8rem;
   font-weight: 800;
-  color: var(--clr-text);
+  color: var(--iclr-text-dark);
   margin-bottom: 0.5rem;
   line-height: 1.2;
 }
@@ -32,7 +56,7 @@
 
 .page-subtitle {
   font-size: 1.1rem;
-  color: var(--clr-text-sub);
+  color: var(--iclr-text-sub-dark);
   line-height: 1.6;
 }
 
