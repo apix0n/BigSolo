@@ -88,7 +88,7 @@ function renderSocialLinks(links, type) {
   for (const [platform, url] of Object.entries(links)) {
     if (url && socialPlatforms[platform]) {
       const { icon, name } = socialPlatforms[platform];
-      const linkText = type === "colo" ? ` ${name}` : ""; // N'ajoute le texte que pour les sources de la colo
+      const linkText = type === "colo" ? ` ${name}` : "";
       html += `
         <a href="${url}" class="social-link" target="_blank" rel="noopener noreferrer" title="${name}">
           <i class="${icon}"></i>${linkText}
@@ -128,7 +128,6 @@ function displayLightboxInfo(colo, author) {
     };
     const coloSocialsHtml = renderSocialLinks(coloLinks, "colo");
 
-    // Nouvelle structure pour les détails
     const coloDetailsHtml = `
       <div class="colo-details">
         <div class="detail-line">
@@ -440,7 +439,13 @@ export async function initGaleriePage() {
     if (lightboxModal && lightboxCloseBtn) {
       lightboxCloseBtn.addEventListener("click", closeLightbox);
       lightboxModal.addEventListener("click", (e) => {
-        if (e.target === lightboxModal) closeLightbox();
+        // La nouvelle structure HTML a un backdrop, donc on vérifie si le clic est sur le backdrop
+        if (
+          e.target.classList.contains("lightbox-backdrop") ||
+          e.target === lightboxModal
+        ) {
+          closeLightbox();
+        }
       });
     }
 
