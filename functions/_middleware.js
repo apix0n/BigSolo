@@ -269,22 +269,6 @@ export async function onRequest(context) {
       }
     }
 
-    if (pathSegments.length > 1 && pathSegments[1] === "cover") {
-      const metaData = {
-        title: `Couvertures de ${seriesData.title} - BigSolo`,
-        description: `Découvrez toutes les couvertures de la série ${seriesData.title} !`,
-        image: ogImageUrl,
-      };
-      const assetUrl = new URL("/series-covers.html", url.origin);
-      let html = await env.ASSETS.fetch(assetUrl).then((res) => res.text());
-
-      const tags = generateMetaTags({ ...metaData, url: url.href });
-      html = html.replace("<!-- DYNAMIC_OG_TAGS_PLACEHOLDER -->", tags);
-      return new Response(html, {
-        headers: { "Content-Type": "text/html;charset=UTF-8" },
-      });
-    }
-
     if (pathSegments.length === 1) {
       const metaData = {
         title: `${seriesData.title} - BigSolo`,

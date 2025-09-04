@@ -124,11 +124,6 @@ function getSubNavLinksForPage(pageId) {
               id: "series-info",
             },
             {
-              text: "Galerie des Couvertures",
-              href: `/${seriesSlug}/cover`,
-              id: "series-covers-gallery",
-            },
-            {
               text: "Chapitres",
               href: `#chapters-list-section`,
               id: "series-chapters",

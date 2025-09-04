@@ -111,7 +111,6 @@ function displayLightboxInfo(colo, author) {
     const occurrenceCount = allColosData.filter(
       (c) => String(c.author_id) === String(colo.author_id)
     ).length;
-
     const artistLinks = {
       twitter: author.twitter,
       instagram: author.instagram,
@@ -119,7 +118,6 @@ function displayLightboxInfo(colo, author) {
       reddit: author.reddit,
     };
     const artistSocialsHtml = renderSocialLinks(artistLinks, "artist");
-
     const coloLinks = {
       twitter: colo.twitter,
       instagram: colo.instagram,
@@ -127,7 +125,6 @@ function displayLightboxInfo(colo, author) {
       reddit: colo.reddit,
     };
     const coloSocialsHtml = renderSocialLinks(coloLinks, "colo");
-
     const coloDetailsHtml = `
       <div class="colo-details">
         <div class="detail-line">
@@ -165,9 +162,7 @@ function displayLightboxInfo(colo, author) {
             : ""
         }
       </div>
-
       <hr class="info-separator">
-
       <div class="info-colo-section">
         ${coloDetailsHtml}
         ${
@@ -175,8 +170,7 @@ function displayLightboxInfo(colo, author) {
             ? `<div class="source-links">${coloSocialsHtml}</div>`
             : ""
         }
-      </div>
-    `;
+      </div>`;
   }
 
   desktopPanel.innerHTML = panelContent;
@@ -193,6 +187,7 @@ function openLightboxForId(coloId) {
     displayLightboxInfo(selectedColo, author);
     lightboxModal.style.display = "flex";
     document.body.style.overflow = "hidden";
+    document.body.classList.add("lightbox-is-open"); // Active le fond opaque
     history.replaceState({ coloId: coloId }, "", `/galerie/${coloId}`);
   }
 }
@@ -201,6 +196,7 @@ function closeLightbox() {
   if (lightboxModal) lightboxModal.style.display = "none";
   if (lightboxImg) lightboxImg.src = "";
   document.body.style.overflow = "auto";
+  document.body.classList.remove("lightbox-is-open"); // Désactive le fond opaque
   if (
     window.location.pathname !== "/galerie" &&
     window.location.pathname !== "/galerie/"
@@ -273,15 +269,12 @@ function displayColos() {
       galleryGridContainer.innerHTML = "<p>Aucune colorisation à afficher.</p>";
     return;
   }
-
   let colosToDisplay = [...allColosData];
-
   if (selectedArtistIds.size > 0) {
     colosToDisplay = colosToDisplay.filter((c) =>
       selectedArtistIds.has(String(c.author_id))
     );
   }
-
   switch (currentSortMode) {
     case "date-desc":
       colosToDisplay.sort(
@@ -304,16 +297,13 @@ function displayColos() {
       );
       break;
   }
-
   galleryGridContainer.innerHTML = colosToDisplay
     .map((colo) => {
       const author = authorsInfoData[colo.author_id];
       return renderColoCard(colo, author);
     })
     .join("");
-
   galleryGridContainer.classList.remove("is-ready");
-
   qsa(".colo-card", galleryGridContainer).forEach((card) => {
     if (!card.dataset.lightboxListenerAttached) {
       card.addEventListener("click", () =>
@@ -322,7 +312,6 @@ function displayColos() {
       card.dataset.lightboxListenerAttached = "true";
     }
   });
-
   const masonry = new Masonry(galleryGridContainer, {
     itemSelector: ".colo-card",
     columnWidth: ".colo-card",
@@ -330,9 +319,7 @@ function displayColos() {
     gutter: 8,
     transitionDuration: 0,
   });
-
   initLazyLoadObserver("img.lazy-load-gallery", masonry);
-
   setTimeout(() => {
     galleryGridContainer.classList.add("is-ready");
   }, 100);
@@ -363,7 +350,6 @@ function updateSortMode(newMode) {
 }
 
 // --- FONCTION D'INITIALISATION ---
-
 export async function initGaleriePage() {
   if (!galleryGridContainer) {
     console.warn(
@@ -371,23 +357,17 @@ export async function initGaleriePage() {
     );
     return;
   }
-
   try {
     const [colos, authors] = await Promise.all([
       fetchData("/data/colos/colos.json", { noCache: true }),
       fetchData("/data/colos/author_info.json", { noCache: true }),
     ]);
-
     if (!colos || !authors)
       throw new Error("Données de colos ou d'auteurs manquantes.");
-
     allColosData = colos;
     authorsInfoData = authors;
-
     setRandomBannerImage(allColosData);
-
     if (totalCountSpan) totalCountSpan.textContent = `(${allColosData.length})`;
-
     const sortFilter = qs("#custom-sort-filter");
     const sortToggleBtn = sortFilter
       ? qs(".custom-dropdown-toggle", sortFilter)
@@ -395,7 +375,6 @@ export async function initGaleriePage() {
     const sortMenu = sortFilter
       ? qs(".custom-dropdown-menu", sortFilter)
       : null;
-
     if (sortToggleBtn && sortMenu) {
       sortToggleBtn.addEventListener("click", () => {
         const isExpanded =
@@ -417,10 +396,8 @@ export async function initGaleriePage() {
         }
       });
     }
-
     updateSortMode(currentSortMode);
     populateCustomArtistFilter();
-
     if (filterToggleBtn && filterMenu) {
       filterToggleBtn.addEventListener("click", () => {
         const isExpanded =
@@ -435,29 +412,22 @@ export async function initGaleriePage() {
         }
       });
     }
-
     if (lightboxModal && lightboxCloseBtn) {
       lightboxCloseBtn.addEventListener("click", closeLightbox);
+      // On attache l'événement de fermeture au clic sur le modal lui-même (qui est maintenant le fond transparent)
       lightboxModal.addEventListener("click", (e) => {
-        // La nouvelle structure HTML a un backdrop, donc on vérifie si le clic est sur le backdrop
-        if (
-          e.target.classList.contains("lightbox-backdrop") ||
-          e.target === lightboxModal
-        ) {
+        if (e.target === lightboxModal) {
           closeLightbox();
         }
       });
     }
-
     window.addEventListener("popstate", () => {
       const path = window.location.pathname;
       const galleryPathMatch = path.match(/^\/galerie\/(\d+)\/?$/);
       if (galleryPathMatch) openLightboxForId(galleryPathMatch[1]);
       else closeLightbox();
     });
-
     displayColos();
-
     const galleryPathMatch = window.location.pathname.match(
       /^\/galerie\/(\d+)\/?$/
     );
